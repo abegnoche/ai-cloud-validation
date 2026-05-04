@@ -13,6 +13,7 @@ from __future__ import annotations
 import logging
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, ClassVar
 
 from isvtest.core.logger import setup_logger
@@ -25,6 +26,34 @@ _logger = logging.getLogger(__name__)
 
 # Cache of discovered validation classes
 _validation_class_cache: dict[str, type[BaseValidation]] | None = None
+
+
+def requirement_ids[T: type[BaseValidation]](*ids: str) -> Callable[[T], T]:
+    """Tag a validation class with one or more spec requirement test IDs.
+
+    The IDs (e.g. ``"SEC02-01"``) are attached as the ``requirement_ids``
+    ClassVar and surfaced in ``execute()`` return dicts and catalog
+    entries, so downstream reporters can map a validation result back to
+    the requirement it satisfies without grepping prose docstrings.
+
+    Example::
+
+        @requirement_ids("SEC02-01")
+        class ShortLivedCredentialsCheck(BaseValidation):
+            ...
+
+    Multiple IDs are passed positionally::
+
+        @requirement_ids("SEC09-04", "SEC09-05")
+        class CustomerManagedKeyCheck(BaseValidation):
+            ...
+    """
+
+    def decorator(cls: T) -> T:
+        cls.requirement_ids = list(ids)
+        return cls
+
+    return decorator
 
 
 def check_required_tests(
@@ -65,6 +94,11 @@ class BaseValidation(ABC):
     timeout: ClassVar[int] = 60
     markers: ClassVar[list[str]] = []
     catalog_exclude: ClassVar[bool] = False
+    # Spec requirement test IDs (e.g. "SEC02-01") this validation covers.
+    # Populated via the @requirement_ids(...) decorator; surfaced in
+    # execute() return dicts and the catalog so downstream reporters can
+    # map a result back to the requirement it satisfies.
+    requirement_ids: ClassVar[list[str]] = []
 
     def __init__(self, runner: Runner | None = None, config: dict[str, Any] | None = None):
         self.config = config or {}
@@ -242,6 +276,7 @@ class BaseValidation(ABC):
             "error": self._error,
             "duration": duration,
             "description": self.description,
+            "requirement_ids": list(self.requirement_ids),
             "subtests": self._subtest_results,
         }
 

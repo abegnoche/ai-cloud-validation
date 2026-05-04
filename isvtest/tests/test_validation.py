@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from isvtest.core.runners import CommandResult
-from isvtest.core.validation import BaseValidation
+from isvtest.core.validation import BaseValidation, requirement_ids
 from isvtest.tests.test_validations import (
     _validation_results,
     clear_validation_results,
@@ -1664,3 +1664,89 @@ class TestK8sApiServerMetricsCheck:
         assert result["passed"] is False
         assert "expected_metrics" in result["error"]
         mock_runner.run.assert_not_called()
+
+
+class TestRequirementIdsDecorator:
+    """Tests for the @requirement_ids class decorator."""
+
+    def test_default_is_empty_list_on_base_validation(self) -> None:
+        """Undecorated subclasses keep BaseValidation's empty-list default."""
+
+        class Plain(BaseValidation):
+            """Undecorated probe."""
+
+            def run(self) -> None:
+                """No-op."""
+                self.set_passed()
+
+        assert Plain.requirement_ids == []
+
+    def test_decorator_attaches_single_id(self) -> None:
+        """A single positional ID lands on the class and survives instantiation."""
+
+        @requirement_ids("SEC02-01")
+        class Tagged(BaseValidation):
+            """Single-tag probe."""
+
+            def run(self) -> None:
+                """No-op."""
+                self.set_passed()
+
+        assert Tagged.requirement_ids == ["SEC02-01"]
+        assert Tagged().requirement_ids == ["SEC02-01"]
+
+    def test_decorator_accepts_multiple_ids(self) -> None:
+        """A check covering multiple spec items records them in order."""
+
+        @requirement_ids("SEC09-04", "SEC09-05")
+        class MultiTagged(BaseValidation):
+            """Multi-tag probe."""
+
+            def run(self) -> None:
+                """No-op."""
+                self.set_passed()
+
+        assert MultiTagged.requirement_ids == ["SEC09-04", "SEC09-05"]
+
+    def test_decorator_does_not_leak_to_sibling_classes(self) -> None:
+        """Tagging one subclass must not mutate BaseValidation or other subclasses."""
+
+        @requirement_ids("X-1")
+        class TaggedA(BaseValidation):
+            """First tagged probe."""
+
+            def run(self) -> None:
+                """No-op."""
+                self.set_passed()
+
+        class UntaggedB(BaseValidation):
+            """Untagged sibling."""
+
+            def run(self) -> None:
+                """No-op."""
+                self.set_passed()
+
+        assert TaggedA.requirement_ids == ["X-1"]
+        assert UntaggedB.requirement_ids == []
+        assert BaseValidation.requirement_ids == []
+
+    def test_execute_surfaces_requirement_ids(self) -> None:
+        """execute() exposes requirement_ids so reporters can pick them up without imports."""
+
+        @requirement_ids("SEC02-01")
+        class Probed(BaseValidation):
+            """Probe that always passes."""
+
+            def run(self) -> None:
+                """No-op."""
+                self.set_passed("ok")
+
+        result = Probed().execute()
+        assert result["requirement_ids"] == ["SEC02-01"]
+
+
+def test_short_lived_credentials_check_is_decorated_with_sec02_01() -> None:
+    """ShortLivedCredentialsCheck is the canonical SEC02-01 validation."""
+    from isvtest.validations.security import ShortLivedCredentialsCheck
+
+    assert ShortLivedCredentialsCheck.requirement_ids == ["SEC02-01"]

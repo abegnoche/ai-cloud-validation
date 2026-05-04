@@ -19,7 +19,7 @@ from typing import ClassVar
 
 import pytest
 
-from isvtest.core.validation import BaseValidation, check_required_tests
+from isvtest.core.validation import BaseValidation, check_required_tests, requirement_ids
 
 
 class BmcManagementNetworkCheck(BaseValidation):
@@ -405,6 +405,7 @@ class OidcUserAuthCheck(BaseValidation):
         self.set_passed(f"OIDC user auth verified (issuer={issuer}, target={target_url})")
 
 
+@requirement_ids("SEC02-01")
 class ShortLivedCredentialsCheck(BaseValidation):
     """Validate workloads and nodes receive short-lived credentials/tokens.
 

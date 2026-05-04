@@ -153,6 +153,8 @@ def build_catalog(*, released_only: bool = True) -> list[dict[str, Any]]:
             - markers: List of marker strings (e.g. ["kubernetes", "gpu"])
             - module: Fully qualified module path
             - platforms: List of platform strings (e.g. ["KUBERNETES"])
+            - requirement_ids: Spec test IDs the validation covers
+              (e.g. ["SEC02-01"]); empty list if undecorated.
     """
     platform_map = _build_platform_map()
 
@@ -168,6 +170,7 @@ def build_catalog(*, released_only: bool = True) -> list[dict[str, Any]]:
             "description": getattr(cls, "description", "") or "",
             "markers": markers,
             "module": cls.__module__,
+            "requirement_ids": list(getattr(cls, "requirement_ids", [])),
         }
         # Infer platforms from markers only for checks not already covered by
         # canonical configs. Some markers (for example "security") are useful
@@ -192,6 +195,7 @@ def build_catalog(*, released_only: bool = True) -> list[dict[str, Any]]:
                 "markers": meta["markers"],
                 "module": meta["module"],
                 "platforms": sorted(platform_map.get(name, [])),
+                "requirement_ids": meta["requirement_ids"],
             }
         )
 
@@ -215,6 +219,7 @@ def build_catalog(*, released_only: bool = True) -> list[dict[str, Any]]:
                 "markers": meta.get("markers", []),
                 "module": meta.get("module", ""),
                 "platforms": sorted(platforms),
+                "requirement_ids": list(meta.get("requirement_ids", [])),
             }
         )
 

@@ -34,6 +34,7 @@ class TestBuildCatalog:
             assert "description" in entry
             assert "markers" in entry
             assert "module" in entry
+            assert "requirement_ids" in entry
 
     def test_entries_have_correct_types(self) -> None:
         """Test that entry values have the correct types."""
@@ -43,6 +44,22 @@ class TestBuildCatalog:
             assert isinstance(entry["description"], str)
             assert isinstance(entry["markers"], list)
             assert isinstance(entry["module"], str)
+            assert isinstance(entry["requirement_ids"], list)
+            for rid in entry["requirement_ids"]:
+                assert isinstance(rid, str)
+
+    def test_requirement_ids_surfaced_for_decorated_check(self) -> None:
+        """Decorated validations expose their spec IDs in the catalog entry.
+
+        Uses ``released_only=False`` so this stays valid while a freshly
+        decorated check is still pre-release in ``released_tests.json``.
+        """
+        catalog = build_catalog(released_only=False)
+        by_name = {entry["name"]: entry for entry in catalog}
+
+        assert by_name["ShortLivedCredentialsCheck"]["requirement_ids"] == ["SEC02-01"]
+        # Undecorated siblings keep an empty list (no false-positive coverage claims).
+        assert by_name["ServiceAccountCredentialCheck"]["requirement_ids"] == []
 
     def test_no_duplicate_names(self) -> None:
         """Test that there are no duplicate test names in the catalog."""
