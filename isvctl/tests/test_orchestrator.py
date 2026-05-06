@@ -18,6 +18,7 @@ import pytest
 from isvctl.config.schema import CommandConfig, CommandOutput, RunConfig
 from isvctl.orchestrator.commands import CommandExecutor
 from isvctl.orchestrator.context import Context
+from isvctl.orchestrator.step_executor import filter_unconfigured_step_entries
 
 
 def _write_script(tmp_path: Path, name: str, content: str) -> str:
@@ -518,3 +519,148 @@ class TestContext:
         assert len(messages) == 1
         assert "step 'setup' has no output" in messages[0]
         assert not any("create_test_node_pool" in m for m in messages)
+
+
+class TestFilterUnconfiguredStepEntries:
+    """Tests for filter_unconfigured_step_entries.
+
+    Covers the two formats accepted by isvtest._normalize_validation_configs
+    (list-form and group-defaults dict-form) plus the no-step-ref pass-through
+    case. The k8s suite uses list-form for k8s_node_pools, so that case is
+    the actual production driver - the others are guards against shape drift.
+    """
+
+    def test_drops_listform_entry_with_unconfigured_step(self, caplog: pytest.LogCaptureFixture) -> None:
+        """List-form entry with step:<missing> is dropped and logged once."""
+        validations = {
+            "k8s_node_pools": [
+                {"K8sNodePoolCheck": {"step": "create_test_node_pool", "expected_replicas": 1}},
+                {"K8sNodePoolCheck": {"step": "update_test_node_pool", "expected_replicas": 2}},
+            ],
+        }
+
+        with caplog.at_level(logging.INFO, logger="isvctl.orchestrator.step_executor"):
+            result = filter_unconfigured_step_entries(validations, configured_steps={"setup", "teardown"})
+
+        assert result == {}
+        messages = [r.message for r in caplog.records]
+        assert len(messages) == 2
+        assert all("K8sNodePoolCheck" in m for m in messages)
+        assert any("create_test_node_pool" in m for m in messages)
+        assert any("update_test_node_pool" in m for m in messages)
+
+    def test_keeps_listform_entry_with_configured_step(self) -> None:
+        """List-form entry whose step is configured is left intact."""
+        validations = {
+            "k8s_node_pools": [
+                {"K8sNodePoolCheck": {"step": "create_test_node_pool", "expected_replicas": 1}},
+            ],
+        }
+
+        result = filter_unconfigured_step_entries(validations, configured_steps={"create_test_node_pool"})
+
+        assert result == validations
+
+    def test_keeps_listform_entry_without_step_ref(self) -> None:
+        """List-form entry with no ``step:`` field is never dropped."""
+        validations = {
+            "kubernetes": [
+                {"K8sNodeCountCheck": {"count": 4}},
+            ],
+        }
+
+        result = filter_unconfigured_step_entries(validations, configured_steps=set())
+
+        assert result == validations
+
+    def test_drops_dict_of_checks_entry_with_unconfigured_step(self) -> None:
+        """Group-defaults dict-of-checks: per-check step gating drops only that check."""
+        validations = {
+            "kubernetes": {
+                "checks": {
+                    "K8sNodeCountCheck": {"count": 4},
+                    "K8sNodePoolCheck": {"step": "create_test_node_pool"},
+                },
+            },
+        }
+
+        result = filter_unconfigured_step_entries(validations, configured_steps={"setup"})
+
+        assert result == {"kubernetes": {"checks": {"K8sNodeCountCheck": {"count": 4}}}}
+
+    def test_drops_whole_category_when_group_step_unconfigured(self, caplog: pytest.LogCaptureFixture) -> None:
+        """Group-level ``step:`` referencing a missing step drops the entire category."""
+        validations = {
+            "setup_state": {
+                "step": "launch_instance",
+                "checks": {
+                    "InstanceStateCheck": {},
+                    "InstanceCreatedCheck": {},
+                },
+            },
+        }
+
+        with caplog.at_level(logging.INFO, logger="isvctl.orchestrator.step_executor"):
+            result = filter_unconfigured_step_entries(validations, configured_steps={"setup"})
+
+        assert result == {}
+        messages = [r.message for r in caplog.records]
+        assert len(messages) == 1
+        assert "launch_instance" in messages[0]
+        assert "[setup_state]" in messages[0]
+
+    def test_per_check_step_overrides_group_step(self) -> None:
+        """A per-check ``step:`` overrides the group default for filtering decisions."""
+        validations = {
+            "setup_state": {
+                "step": "launch_instance",
+                "checks": {
+                    "InstanceStateCheck": {"step": "describe_instance"},  # overridden
+                    "InstanceCreatedCheck": {},  # inherits group step
+                },
+            },
+        }
+
+        result = filter_unconfigured_step_entries(
+            validations,
+            configured_steps={"launch_instance"},  # describe_instance is missing
+        )
+
+        assert result == {
+            "setup_state": {
+                "step": "launch_instance",
+                "checks": {"InstanceCreatedCheck": {}},
+            },
+        }
+
+    def test_groupdefaults_listform_checks(self) -> None:
+        """Group-defaults with list-of-checks (instead of dict-of-checks) also filters per check."""
+        validations = {
+            "k8s_node_pools": {
+                "step": "create_test_node_pool",
+                "checks": [
+                    {"K8sNodePoolCheck": {"expected_replicas": 1}},
+                ],
+            },
+        }
+
+        result = filter_unconfigured_step_entries(validations, configured_steps={"setup"})
+
+        assert result == {}
+
+    def test_does_not_mutate_input(self) -> None:
+        """Filtering must not mutate the caller's validations dict."""
+        validations = {
+            "k8s_node_pools": [
+                {"K8sNodePoolCheck": {"step": "create_test_node_pool"}},
+            ],
+        }
+        snapshot = {
+            "k8s_node_pools": [
+                {"K8sNodePoolCheck": {"step": "create_test_node_pool"}},
+            ],
+        }
+
+        filter_unconfigured_step_entries(validations, configured_steps=set())
+
+        assert validations == snapshot

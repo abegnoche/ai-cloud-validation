@@ -161,6 +161,76 @@ def _deselected_validation_class_names(
     return excluded
 
 
+def filter_unconfigured_step_entries(
+    all_validations: dict[str, Any],
+    configured_steps: set[str],
+) -> dict[str, Any]:
+    """Drop validation entries whose ``step:`` references a step not in ``configured_steps``.
+
+    Without this, dead entries reach Jinja rendering and emit "step has no
+    output" warnings before isvtest re-skips them. Mirrors the two formats
+    accepted by ``isvtest._normalize_validation_configs`` (list-form and
+    group-defaults dict-form). Per-check ``step`` overrides the group default;
+    a missing group ``step`` drops the whole category. Returns a new dict;
+    input is not mutated.
+    """
+
+    def _drop(name: str, params: Any, category: str, group_step: str | None) -> bool:
+        if not isinstance(params, dict):
+            return False
+        step_name = params.get("step", group_step)
+        if step_name and step_name not in configured_steps:
+            logger.info(f"Dropping validation '{name}' in [{category}]: step '{step_name}' is not configured")
+            return True
+        return False
+
+    filtered: dict[str, Any] = {}
+    for category, category_config in all_validations.items():
+        if isinstance(category_config, list):
+            kept_list: list[Any] = []
+            for item in category_config:
+                if isinstance(item, dict) and len(item) == 1:
+                    name, params = next(iter(item.items()))
+                    if _drop(name, params, category, group_step=None):
+                        continue
+                kept_list.append(item)
+            if kept_list:
+                filtered[category] = kept_list
+            continue
+
+        if isinstance(category_config, dict) and "checks" in category_config:
+            group_step = category_config.get("step")
+            if group_step and group_step not in configured_steps:
+                logger.info(f"Dropping all validations in [{category}]: group step '{group_step}' is not configured")
+                continue
+            checks = category_config["checks"]
+            if isinstance(checks, list):
+                kept_checks_list: list[Any] = []
+                for item in checks:
+                    if isinstance(item, dict) and len(item) == 1:
+                        name, params = next(iter(item.items()))
+                        if _drop(name, params, category, group_step):
+                            continue
+                    kept_checks_list.append(item)
+                if kept_checks_list:
+                    filtered[category] = {**category_config, "checks": kept_checks_list}
+            elif isinstance(checks, dict):
+                kept_checks_dict: dict[str, Any] = {}
+                for name, params in checks.items():
+                    if _drop(name, params, category, group_step):
+                        continue
+                    kept_checks_dict[name] = params
+                if kept_checks_dict:
+                    filtered[category] = {**category_config, "checks": kept_checks_dict}
+            else:
+                filtered[category] = category_config
+            continue
+
+        filtered[category] = category_config
+
+    return filtered
+
+
 @dataclass
 class StepResult:
     """Result of executing a single step.

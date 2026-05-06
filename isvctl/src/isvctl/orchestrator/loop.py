@@ -27,7 +27,7 @@ from typing import Any
 from isvctl.config.schema import RunConfig
 from isvctl.orchestrator.commands import CommandExecutor
 from isvctl.orchestrator.context import Context
-from isvctl.orchestrator.step_executor import StepExecutor, StepResults
+from isvctl.orchestrator.step_executor import StepExecutor, StepResults, filter_unconfigured_step_entries
 from isvctl.redaction import redact_dict, redact_junit_xml_tree
 
 logger = logging.getLogger(__name__)
@@ -263,9 +263,14 @@ class Orchestrator:
             self.context.set_step_phase(step.name, step_phase)
 
         # Get all validations from config
-        all_validations = {}
+        all_validations: dict[str, Any] = {}
         if self.config.tests and self.config.tests.validations:
             all_validations = self.config.tests.validations
+
+        # Drop entries whose step: is not in the run's configured steps, so
+        # their dead Jinja templates never render. See filter_unconfigured_step_entries.
+        configured_steps = set(self.context.get_all_step_phases().keys())
+        all_validations = filter_unconfigured_step_entries(all_validations, configured_steps)
 
         # Get exclude config for filtering validations
         exclude_markers: list[str] = []
