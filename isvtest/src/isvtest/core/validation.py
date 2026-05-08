@@ -204,8 +204,10 @@ class BaseValidation(ABC):
 
         # Report via subtests fixture if available
         if self._subtests is not None:
-            # Use skipped=skipped parameter to avoid pytest.skip() adding markers to parent
-            with self._subtests.test(msg=name, duration=duration, skipped=skipped):
+            # Use skipped=skipped parameter to avoid pytest.skip() adding markers to parent.
+            # message= surfaces in the report's <skipped> body when skipped=True;
+            # the failure path uses pytest.fail(message) below.
+            with self._subtests.test(msg=name, duration=duration, skipped=skipped, message=message or None):
                 if not skipped and not passed:
                     pytest.fail(message or f"Subtest {name} failed")
                 # If passed or skipped, just exit the context successfully
@@ -226,11 +228,15 @@ class BaseValidation(ABC):
                 - description: Validation description from class metadata
                 - subtests: List of subtest results (if any)
         """
+        from isvtest.core.resolution import ErrorReason
+
         start_time = time.time()
+        error_reason: str | None = None
         try:
             self.run()
         except Exception as e:
             self.set_failed(f"Validation raised exception: {e}")
+            error_reason = ErrorReason.RUNTIME_EXCEPTION.value
             self.log.exception("Validation execution failed")
 
         duration = time.time() - start_time
@@ -243,6 +249,7 @@ class BaseValidation(ABC):
             "duration": duration,
             "description": self.description,
             "subtests": self._subtest_results,
+            "error_reason": error_reason,
         }
 
     @property
