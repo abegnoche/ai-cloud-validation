@@ -1,0 +1,15 @@
+=== RUN   TestDemoPass
+--- PASS: TestDemoPass (0.01s)
+=== RUN   TestDemoFail
+    demo_test.go:40: intentional failure: expected 42, got 41
+--- FAIL: TestDemoFail (0.00s)
+=== RUN   TestDemoSkip
+    demo_test.go:44: intentional skip: this scenario isn't applicable in the demo
+--- SKIP: TestDemoSkip (0.00s)
+=== RUN   TestDemoSubtests
+=== RUN   TestDemoSubtests/subtest_one
+=== RUN   TestDemoSubtests/subtest_two
+--- PASS: TestDemoSubtests (0.01s)
+    --- PASS: TestDemoSubtests/subtest_one (0.01s)
+    --- PASS: TestDemoSubtests/subtest_two (0.01s)
+FAIL
