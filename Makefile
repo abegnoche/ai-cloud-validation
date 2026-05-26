@@ -184,3 +184,7 @@ plan: ## Render docs/test-plan.yaml to AsciiDoc
 	@echo "Rendering test plan..."
 	@uv run python scripts/test_plan_yaml_to_adoc.py
 	@echo "✅ Test plan rendered!"
+
+.PHONY: changelog-fill
+changelog-fill: ## Fill CHANGELOG.md gaps via an LLM CLI (CLI=auto|cursor|codex|claude)
+	@scripts/changelog-fill.sh $(CLI)
