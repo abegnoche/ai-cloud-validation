@@ -217,6 +217,69 @@ isvctl test run -f config.yaml -v -- -s --tb=long
 
 ---
 
+## Wrapping an external Go test binary (K8sPlatformValidator)
+
+If you already have a container whose entrypoint is a Go test binary (built with
+`go test -c`), you don't need to rewrite it as Python validations. The built-in
+`K8sPlatformValidator*` workloads run that image as a Kubernetes Job, tail the
+pod logs, parse Go's standard test output (`--- PASS:`, `--- FAIL:`, `--- SKIP:`,
+`panic:`), and report **each top-level Go test as a pytest subtest** - so your Go
+tests show up in the pytest summary and JUnit XML alongside everything else.
+
+Three convenience workloads select a `TEST_SUITE` the container branches on:
+`K8sPlatformValidatorFunctional`, `K8sPlatformValidatorPerformance` (3 h default
+timeout), and `K8sPlatformValidatorNvstorage`.
+
+These are **unreleased**, so a normal run skips them; set
+`ISVTEST_INCLUDE_UNRELEASED=1` to exercise them.
+
+### Build the example image (no internal access needed)
+
+The repo ships a tiny, self-contained Go test binary you can point the workload
+at:
+
+```bash
+docker build -t go-test-demo:latest isvtest/examples/go-test-demo
+# push go-test-demo:latest to a registry your cluster can pull from
+```
+
+See [`isvtest/examples/go-test-demo/README.md`](../../isvtest/examples/go-test-demo/README.md)
+for the full demo (it emits one of every verdict to exercise the parser).
+
+### Minimal standalone config
+
+```yaml
+version: "1.0"
+
+tests:
+  platform: kubernetes
+  cluster_name: "my-cluster"
+  validations:
+    go_tests:
+      checks:
+        K8sPlatformValidatorFunctional:
+          image: registry.example.com/go-test-demo:latest   # required
+          cloud_provider: aws                                # required: aws|gcp|azure
+          skip_infrastructure_check: true                    # demo image needs no namespace/SA/PVC
+```
+
+```bash
+ISVTEST_INCLUDE_UNRELEASED=1 uv run isvctl test run -f config.yaml
+```
+
+Drop `skip_infrastructure_check` (the default) when targeting the real validator
+image, which expects a `dgxc-validation` namespace, ServiceAccount, and a pull
+secret installed once per cluster via the upstream Helm chart. These workloads
+are also pre-wired into [`isvctl/configs/suites/k8s.yaml`](../../isvctl/configs/suites/k8s.yaml)
+under `k8s_workloads` (defaulting to the internal NVIDIA image), so a full K8s
+suite run picks them up once they're released.
+
+Other knobs: `test_suite`, `timeout`, `namespace`, `service_account`,
+`pull_secret`, `cleanup`, `run_tests` (Go `-test.run` regex), and `skip_tests`
+(Go `-test.skip` regex).
+
+---
+
 ## Best Practices
 
 1. **Always output valid JSON** - Even on failure: `{"success": false, "error": "..."}`

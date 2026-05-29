@@ -268,6 +268,33 @@ tests:
           timeout: 1800
           genai_perf_requests: 200
           genai_perf_concurrency: 8
+        # K8s Platform Validator: runs the dgxcloud k8s-platform-validator Go
+        # test binaries as a K8s Job and reports each Go test as a pytest
+        # subtest. Unreleased - skipped unless ISVTEST_INCLUDE_UNRELEASED=1 is
+        # set (see released_tests.json). Cluster prerequisites (once, by the
+        # operator):
+        #   - helm install k8s-platform-validator from
+        #     gitlab-master.nvidia.com/dgxcloud/mk8s/k8s-platform-validator
+        #     (creates namespace dgxc-validation + ServiceAccount + RBAC + PVC)
+        #   - kubectl create secret docker-registry nvidia-ngcuser-pull-secret
+        #     --docker-server=nvcr.io --docker-username='$oauthtoken'
+        #     --docker-password=$NGC_API_KEY -n dgxc-validation
+        # `image` defaults to the internal NGC validator image; open-source
+        # users can build isvtest/examples/go-test-demo/, point `image` at it,
+        # and set skip_infrastructure_check: true. `cloud_provider` is passed to
+        # the container so the Go suite picks the right cloud helpers.
+        K8sPlatformValidatorFunctional:
+          image: "{{ steps.setup.kubernetes.platform_validator_image | default('nvcr.io/nv-ngc-devops/k8s-platform-validator:latest') }}"
+          cloud_provider: "{{ steps.setup.kubernetes.cloud_provider | default('aws') }}"
+          timeout: 3600
+        K8sPlatformValidatorNvstorage:
+          image: "{{ steps.setup.kubernetes.platform_validator_image | default('nvcr.io/nv-ngc-devops/k8s-platform-validator:latest') }}"
+          cloud_provider: "{{ steps.setup.kubernetes.cloud_provider | default('aws') }}"
+          timeout: 3600
+        K8sPlatformValidatorPerformance:
+          image: "{{ steps.setup.kubernetes.platform_validator_image | default('nvcr.io/nv-ngc-devops/k8s-platform-validator:latest') }}"
+          cloud_provider: "{{ steps.setup.kubernetes.cloud_provider | default('aws') }}"
+          timeout: 10800
 
     k8s_observability:
       checks:
