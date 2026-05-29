@@ -367,6 +367,7 @@ def run(
             print_warning("Failed to upload test results")
 
     # Display results
+    show_skipped = bool(config.tests.settings.get("show_skipped_tests", True)) if config.tests else True
     typer.echo("\n" + "=" * 60)
     typer.echo("ORCHESTRATION RESULTS")
     typer.echo("=" * 60)
@@ -428,6 +429,8 @@ def run(
                         vr_status = typer.style("ERROR", fg=typer.colors.RED)
                         reason = vr.get("error_reason")
                     elif vr.get("skipped"):
+                        if not show_skipped:
+                            continue
                         vr_status = typer.style("SKIPPED", fg=typer.colors.YELLOW)
                         reason = vr.get("skip_reason")
                     elif vr.get("passed", False):

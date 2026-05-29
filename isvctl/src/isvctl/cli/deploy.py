@@ -409,7 +409,15 @@ def run(
 
         # Handle NGC API key securely - use shlex.quote to prevent shell injection
         ngc_api_key = os.environ.get("NGC_API_KEY", "") or os.environ.get("NGC_NIM_API_KEY", "")
-        env_vars = f"NGC_API_KEY={shlex.quote(ngc_api_key)}" if ngc_api_key else ""
+        env_parts = []
+        if ngc_api_key:
+            env_parts.append(f"NGC_API_KEY={shlex.quote(ngc_api_key)}")
+        # Forward the unreleased-tests gate so remote runs can exercise validations
+        # not yet in released_tests.json (local-only env var otherwise stops at SSH).
+        include_unreleased = os.environ.get("ISVTEST_INCLUDE_UNRELEASED", "")
+        if include_unreleased:
+            env_parts.append(f"ISVTEST_INCLUDE_UNRELEASED={shlex.quote(include_unreleased)}")
+        env_vars = " ".join(env_parts)
 
         # Note: Variables like $PATH and $TEST_RESULT expand on the remote shell
         remote_script = f"""
