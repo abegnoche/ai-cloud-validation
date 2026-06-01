@@ -50,8 +50,6 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PLAN_PATH = REPO_ROOT / "docs" / "test-plan.yaml"
 
-MIN_REQ_LABEL = "min_req"
-
 
 def load_plan(path: Path = PLAN_PATH) -> dict[str, dict[str, Any]]:
     """Return a mapping of ``test_id`` to its test-plan entry.
@@ -120,20 +118,13 @@ def build_coverage(
     def is_released(name: str) -> bool:
         return name in released or name.split("-")[0] in released
 
-    min_req_ids = {tid for tid, e in plan_entries.items() if MIN_REQ_LABEL in (e.get("labels") or [])}
-
-    def covered(tid: str, *, released_only: bool) -> bool:
-        classes = test_id_to_classes.get(tid, [])
-        return any(is_released(c) for c in classes) if released_only else bool(classes)
-
-    covered_min_req = sorted(t for t in min_req_ids if covered(t, released_only=True))
-    uncovered_min_req = sorted(t for t in min_req_ids if not covered(t, released_only=True))
+    covered = {t for t in plan_entries if test_id_to_classes.get(t)}
+    covered_released = {t for t in plan_entries if any(is_released(c) for c in test_id_to_classes.get(t, []))}
 
     return {
         "plan_test_ids": len(plan_entries),
-        "min_req_test_ids": len(min_req_ids),
-        "min_req_covered_by_released_class": len(covered_min_req),
-        "min_req_uncovered": uncovered_min_req,
+        "plan_test_ids_covered": len(covered),
+        "plan_test_ids_covered_by_released_class": len(covered_released),
         "classes_with_test_ids": len(class_map),
         "test_id_to_classes": {t: sorted(c) for t, c in sorted(test_id_to_classes.items())},
     }
@@ -145,20 +136,19 @@ def render_markdown(coverage: dict[str, Any], plan_entries: dict[str, dict[str, 
         "# Test-plan coverage (via class `test_ids`)",
         "",
         f"- Test-plan items: **{coverage['plan_test_ids']}**",
-        f"- `min_req` items: **{coverage['min_req_test_ids']}**",
-        f"- `min_req` covered by a released class: **{coverage['min_req_covered_by_released_class']}**",
+        f"- Covered by \u22651 class: **{coverage['plan_test_ids_covered']}**",
+        f"- Covered by a released class: **{coverage['plan_test_ids_covered_by_released_class']}**",
         f"- Validation classes declaring `test_ids`: **{coverage['classes_with_test_ids']}**",
         "",
         "## Covered test IDs",
         "",
-        "| Test ID | Req | min_req | Implementing class(es) |",
-        "|---|---|---|---|",
+        "| Test ID | Req | Implementing class(es) |",
+        "|---|---|---|",
     ]
     for tid, classes in coverage["test_id_to_classes"].items():
         entry = plan_entries.get(tid, {})
         req = entry.get("req_id", "")
-        mr = "yes" if MIN_REQ_LABEL in (entry.get("labels") or []) else ""
-        lines.append(f"| `{tid}` | {req} | {mr} | {', '.join(f'`{c}`' for c in classes)} |")
+        lines.append(f"| `{tid}` | {req} | {', '.join(f'`{c}`' for c in classes)} |")
     return "\n".join(lines) + "\n"
 
 
@@ -199,8 +189,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Wrote {args.markdown}")
 
     print(f"Test-plan items:                     {coverage['plan_test_ids']}")
-    print(f"min_req items:                       {coverage['min_req_test_ids']}")
-    print(f"min_req covered by released class:    {coverage['min_req_covered_by_released_class']}")
+    print(f"Covered by >=1 class:                 {coverage['plan_test_ids_covered']}")
+    print(f"Covered by a released class:          {coverage['plan_test_ids_covered_by_released_class']}")
     print(f"Classes declaring test_ids:          {coverage['classes_with_test_ids']}")
     return 0
 

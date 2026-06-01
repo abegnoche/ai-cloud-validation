@@ -44,19 +44,19 @@ def test_integrity_errors_empty_when_all_known() -> None:
     assert test_plan_coverage.integrity_errors({"A-1", "B-2"}, {"C": ["A-1"], "D": ["B-2"]}) == []
 
 
-def test_build_coverage_counts_min_req_covered_by_released() -> None:
-    """min_req coverage only counts test IDs implemented by a released class."""
+def test_build_coverage_counts_covered_and_released() -> None:
+    """Coverage counts plan items implemented by any class vs a released class."""
     plan = {
-        "SEC01-01": {"req_id": "SEC01", "labels": ["min_req"]},
-        "SEC02-01": {"req_id": "SEC02", "labels": ["min_req"]},
-        "AUX-01": {"req_id": "AUX", "labels": []},
+        "SEC01-01": {"req_id": "SEC01"},
+        "SEC02-01": {"req_id": "SEC02"},
+        "AUX-01": {"req_id": "AUX"},
     }
     class_map = {"ReleasedCheck": ["SEC01-01"], "UnreleasedCheck": ["SEC02-01"]}
     coverage = test_plan_coverage.build_coverage(plan, class_map, released={"ReleasedCheck"})
 
-    assert coverage["min_req_test_ids"] == 2
-    assert coverage["min_req_covered_by_released_class"] == 1
-    assert coverage["min_req_uncovered"] == ["SEC02-01"]
+    assert coverage["plan_test_ids"] == 3
+    assert coverage["plan_test_ids_covered"] == 2
+    assert coverage["plan_test_ids_covered_by_released_class"] == 1
 
 
 def test_repo_class_metadata_references_only_known_test_ids() -> None:
