@@ -295,6 +295,27 @@ tests:
           image: "{{ steps.setup.kubernetes.platform_validator_image | default('nvcr.io/nv-ngc-devops/k8s-platform-validator:latest') }}"
           cloud_provider: "{{ steps.setup.kubernetes.cloud_provider | default('aws') }}"
           timeout: 10800
+        # DEMO (temporary - comment out or delete when done): exercises the
+        # K8sPlatformValidator workflow end-to-end with the self-contained
+        # isvtest/examples/go-test-demo image - no NGC image or chart prereqs.
+        # Prep (microk8s):
+        #   microk8s enable registry
+        #   docker build -t localhost:32000/go-test-demo:latest isvtest/examples/go-test-demo
+        #   docker push localhost:32000/go-test-demo:latest
+        # Run:
+        #   ISVTEST_INCLUDE_UNRELEASED=1 uv run isvctl test run \
+        #     -f isvctl/configs/providers/microk8s.yaml -- -k K8sPlatformValidatorFunctional-demo
+        # TestDemoFail fails on purpose (proves the parser reports failures);
+        # uncomment skip_tests below for an all-green run.
+        K8sPlatformValidatorFunctional-demo:
+          image: "localhost:32000/go-test-demo:latest"
+          cloud_provider: "aws"
+          skip_infrastructure_check: true
+          timeout: 300
+          # TestDemoFail exits the binary non-zero, which fails the K8s Job and
+          # skips subtest parsing. Skip it so the Job completes and the
+          # Go-test->pytest-subtest reporting path is exercised.
+          skip_tests: "TestDemoFail"
 
     k8s_observability:
       checks:

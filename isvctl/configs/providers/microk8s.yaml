@@ -41,9 +41,6 @@ commands:
 tests:
   description: "MicroK8s local validation"
 
-  settings:
-    show_skipped_tests: true
-
   validations:
     # Host-level GPU checks (not in k8s.yaml)
     bare_metal:
