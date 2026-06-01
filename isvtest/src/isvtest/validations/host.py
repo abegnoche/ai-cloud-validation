@@ -1200,7 +1200,7 @@ class GpuStressCheck(BaseValidation):
     description: ClassVar[str] = "GPU stress test via SSH"
     timeout: ClassVar[int] = 900
     labels: ClassVar[tuple[str, ...]] = ("ssh", "gpu", "workload", "bare_metal")
-    test_ids: ClassVar[tuple[str, ...]] = ("BMAAS-XX-09", "VMAAS-XX-11")
+    test_ids: ClassVar[tuple[str, ...]] = ("BMAAS-XX-09",)
 
     def run(self) -> None:
         try:
@@ -1321,7 +1321,7 @@ class NcclCheck(BaseValidation):
     description: ClassVar[str] = "NCCL AllReduce test via SSH"
     timeout: ClassVar[int] = 900
     labels: ClassVar[tuple[str, ...]] = ("ssh", "gpu", "workload", "bare_metal")
-    test_ids: ClassVar[tuple[str, ...]] = ("BMAAS-XX-11", "VMAAS-XX-13")
+    test_ids: ClassVar[tuple[str, ...]] = ("BMAAS-XX-11",)
 
     _DEFAULT_IMAGE = "nvcr.io/nvidia/hpc-benchmarks:25.04"
 
@@ -1619,7 +1619,7 @@ class NvlinkCheck(BaseValidation):
     description: ClassVar[str] = "NVLink topology and status via SSH"
     timeout: ClassVar[int] = 120
     labels: ClassVar[tuple[str, ...]] = ("ssh", "gpu", "network", "bare_metal")
-    test_ids: ClassVar[tuple[str, ...]] = ("BMAAS-XX-06", "VMAAS-XX-14")
+    test_ids: ClassVar[tuple[str, ...]] = ("BMAAS-XX-06",)
 
     def run(self) -> None:
         try:
@@ -1716,7 +1716,7 @@ class InfiniBandCheck(BaseValidation):
     description: ClassVar[str] = "InfiniBand interface status via SSH"
     timeout: ClassVar[int] = 120
     labels: ClassVar[tuple[str, ...]] = ("ssh", "network", "bare_metal")
-    test_ids: ClassVar[tuple[str, ...]] = ("BMAAS-XX-06", "VMAAS-XX-14")
+    test_ids: ClassVar[tuple[str, ...]] = ("BMAAS-XX-06",)
 
     def run(self) -> None:
         try:
@@ -1815,7 +1815,7 @@ class EthernetCheck(BaseValidation):
     description: ClassVar[str] = "Ethernet interfaces and connectivity via SSH"
     timeout: ClassVar[int] = 120
     labels: ClassVar[tuple[str, ...]] = ("ssh", "network", "bare_metal")
-    test_ids: ClassVar[tuple[str, ...]] = ("BMAAS-XX-06", "VMAAS-XX-14")
+    test_ids: ClassVar[tuple[str, ...]] = ("BMAAS-XX-06",)
 
     def run(self) -> None:
         try:
