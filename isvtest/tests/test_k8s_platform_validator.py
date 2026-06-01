@@ -1,12 +1,17 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
-
-# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
-# property and proprietary rights in and to this material, related
-# documentation and any modifications thereto. Any use, reproduction,
-# disclosure or distribution of this material and related documentation
-# without an express license agreement from NVIDIA CORPORATION or
-# its affiliates is strictly prohibited.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """Unit tests for K8sPlatformValidatorBase."""
 
@@ -219,6 +224,36 @@ main.badFunction()
         assert workload._passed is False
         assert "PANICKED" in workload._error
 
+    def test_job_incomplete_with_failure_reports_breakdown(self) -> None:
+        """A failed Job whose logs contain a failing test reports it normally."""
+        workload = K8sPlatformValidatorBase(config={"cloud_provider": "aws", "image": "img:1"})
+        logs = """
+=== RUN   TestGPU_Smi_AllNodes
+--- PASS: TestGPU_Smi_AllNodes (15.23s)
+=== RUN   TestPod_Creation
+--- FAIL: TestPod_Creation (5.12s)
+    pod_test.go:45: expected pod to be running
+FAIL
+"""
+        workload._report_results(logs, "functional", job_completed=False)
+        assert workload._passed is False
+        assert "1 failed" in workload._error
+        assert "TestPod_Creation" in workload._error
+
+    def test_job_incomplete_without_failure_still_failed(self) -> None:
+        """A Job that exited non-zero stays failed even when no test failed."""
+        workload = K8sPlatformValidatorBase(config={"cloud_provider": "aws", "image": "img:1"})
+        logs = """
+=== RUN   TestGPU_Smi_AllNodes
+--- PASS: TestGPU_Smi_AllNodes (15.23s)
+PASS
+"""
+        workload._report_results(logs, "functional", job_completed=False)
+        assert workload._passed is False
+        assert "did not complete" in workload._error
+        # The breakdown is still surfaced rather than a bare status line.
+        assert "1 passed" in workload._error
+
 
 class TestRealGoOutputFixture:
     """Pipe captured `go test -v` output from isvtest/examples/go-test-demo through the parser.
@@ -352,6 +387,42 @@ class TestValidation:
 
     def test_default_test_suite_constant(self) -> None:
         assert DEFAULT_TEST_SUITE in VALID_TEST_SUITES
+
+    @patch("isvtest.workloads.k8s_platform_validator.delete_job")
+    @patch("isvtest.workloads.k8s_platform_validator.wait_for_job_completion")
+    def test_failed_job_with_logs_reports_subtests(self, mock_wait: MagicMock, _mock_delete: MagicMock) -> None:
+        """A failed Job with parseable logs surfaces the failing test, not a raw dump."""
+        mock_wait.return_value = (True, "Failed")
+        logs = "=== RUN   TestPod_Creation\n--- FAIL: TestPod_Creation (1.0s)\nFAIL\n"
+        workload = K8sPlatformValidatorBase(
+            config={"cloud_provider": "aws", "image": "img:1", "skip_infrastructure_check": True}
+        )
+        with (
+            patch.object(workload, "_create_job", return_value=True),
+            patch.object(workload, "_collect_logs", return_value=logs),
+        ):
+            workload.run()
+
+        assert workload._passed is False
+        assert "TestPod_Creation" in workload._error
+        assert "Job failed with status" not in workload._error
+
+    @patch("isvtest.workloads.k8s_platform_validator.delete_job")
+    @patch("isvtest.workloads.k8s_platform_validator.wait_for_job_completion")
+    def test_failed_job_without_logs_reports_status(self, mock_wait: MagicMock, _mock_delete: MagicMock) -> None:
+        """A failed Job with no parseable output falls back to the raw status."""
+        mock_wait.return_value = (True, "Failed")
+        workload = K8sPlatformValidatorBase(
+            config={"cloud_provider": "aws", "image": "img:1", "skip_infrastructure_check": True}
+        )
+        with (
+            patch.object(workload, "_create_job", return_value=True),
+            patch.object(workload, "_collect_logs", return_value=""),
+        ):
+            workload.run()
+
+        assert workload._passed is False
+        assert "Job failed with status: Failed" in workload._error
 
 
 class TestCheckInfrastructure:

@@ -1,12 +1,17 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
-
-# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
-# property and proprietary rights in and to this material, related
-# documentation and any modifications thereto. Any use, reproduction,
-# disclosure or distribution of this material and related documentation
-# without an express license agreement from NVIDIA CORPORATION or
-# its affiliates is strictly prohibited.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """K8s Platform Validator workload for running Go-based e2e tests.
 
@@ -207,8 +212,17 @@ class K8sPlatformValidatorBase(BaseWorkloadCheck):
 
         if status == "Complete":
             self._report_results(logs, test_suite)
+        elif self._parse_go_test_results(logs):
+            # The Job failed (e.g. a failing Go test exits the binary non-zero),
+            # but the logs still carry per-test output. Report through the normal
+            # path so the failing test is pinpointed as a subtest and listed in
+            # the breakdown, consistent with a completed run - rather than a raw
+            # log dump.
+            self._report_results(logs, test_suite, job_completed=False)
         else:
-            self.set_failed(f"Job failed with status: {status}\nLogs:\n{logs}")
+            # No parseable test output: genuine infrastructure failure (image
+            # pull error, OOM, no logs). Report the job status directly.
+            self.set_failed(f"Job failed with status: {status}\nLogs:\n{logs or 'No logs available'}")
 
     def _check_infrastructure(self, namespace: str, service_account: str, pull_secret: str) -> bool:
         """Check that required infrastructure exists.
@@ -338,8 +352,13 @@ class K8sPlatformValidatorBase(BaseWorkloadCheck):
 
         return results
 
-    def _report_results(self, logs: str, test_suite: str) -> None:
-        """Parse and report test results from pod logs."""
+    def _report_results(self, logs: str, test_suite: str, *, job_completed: bool = True) -> None:
+        """Parse and report test results from pod logs.
+
+        ``job_completed`` is ``False`` when the K8s Job itself failed (e.g. a
+        failing Go test exited the binary non-zero). The per-test subtests and
+        breakdown are still reported, but the overall verdict stays a failure.
+        """
         go_test_results = self._parse_go_test_results(logs)
 
         pass_count = sum(1 for r in go_test_results if r.passed)
@@ -410,6 +429,11 @@ class K8sPlatformValidatorBase(BaseWorkloadCheck):
             self.set_failed(f"Platform validator ({test_suite}) FAILED\n{details_str}")
         elif fail_count > 0:
             self.set_failed(f"Platform validator ({test_suite}) FAILED\n{details_str}")
+        elif not job_completed:
+            # Job exited non-zero without a recognizable test failure in the
+            # output (e.g. crash after tests reported). Keep it a failure but
+            # surface the breakdown we did parse.
+            self.set_failed(f"Platform validator ({test_suite}) FAILED (job did not complete)\n{details_str}")
         elif overall_passed:
             self.set_passed(f"Platform validator ({test_suite}) PASSED\n{details_str}")
         elif pass_count > 0 and fail_count == 0:
