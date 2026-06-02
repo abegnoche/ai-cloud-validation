@@ -51,14 +51,18 @@ tests:
     setup_checks:
       step: create_user
       checks:
+        # IAM-XX-01: create a user (and log in as that user).
         FieldExistsCheck:
+          test_id: "IAM-XX-01"
           fields: ["username", "access_key_id"]
         StepSuccessCheck: {}
 
     credentials:
       step: test_credentials
       checks:
+        # IAM-XX-03: a created user can access the API and authorized resources.
         FieldExistsCheck:
+          test_id: "IAM-XX-03"
           field: "account_id"
         StepSuccessCheck: {}
 

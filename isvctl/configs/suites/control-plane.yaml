@@ -59,7 +59,12 @@ tests:
       checks:
         FieldExistsCheck:
           fields: ["account_id", "tests"]
+        # DATASVC-XX-01 (S3-compatible API w/ authenticated endpoints):
+        # authenticated-endpoint half - a successful authenticated check_api
+        # response. The data-path half is the CrudOperationsCheck in the
+        # "s3_object_lifecycle" section, which declares the same test_id.
         FieldValueCheck:
+          test_id: "DATASVC-XX-01"
           field: "success"
           expected: true
 
@@ -96,10 +101,13 @@ tests:
     s3_object_lifecycle:
       step: s3_object_lifecycle
       checks:
+        # Data-path half of DATASVC-XX-01 (object put/get/delete); the
+        # authenticated-endpoint half is the FieldValueCheck in "api_health".
         StepSuccessCheck: {}
         FieldExistsCheck:
           fields: ["bucket_name", "object_key", "operations"]
         CrudOperationsCheck:
+          test_id: "DATASVC-XX-01"
           operations: ["put", "get", "delete"]
 
     teardown_checks:
