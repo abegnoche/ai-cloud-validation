@@ -63,29 +63,34 @@ tests:
     specified_key:
       step: launch_instance
       checks:
-        InstanceSpecifiedKeyCheck: {}
+        InstanceSpecifiedKeyCheck:
+          test_id: "AUTH-XX-02"
 
     instance_created:
       step: launch_instance
       checks:
-        InstanceCreatedCheck: {}
+        InstanceCreatedCheck:
+          test_id: "CNP01-09"
 
     list_instances:
       step: list_instances
       checks:
         InstanceListCheck:
+          test_id: "CNP01-11"
           min_count: 1
 
     tag_checks:
       step: verify_tags
       checks:
         InstanceTagCheck:
+          test_id: "CNP05-02"
           required_keys: ["Name", "CreatedBy"]
 
     serial_console:
       step: serial_console
       checks:
-        SerialConsoleCheck: {}
+        SerialConsoleCheck:
+          test_id: "CNP06-03"
 
     console_rbac:
       step: console_rbac
@@ -163,13 +168,16 @@ tests:
     stop_checks:
       step: stop_instance
       checks:
-        InstanceStopCheck: {}
+        InstanceStopCheck:
+          test_id: "CNP01-14"
 
     start_checks:
       step: start_instance
       checks:
-        InstanceStartCheck: {}
+        InstanceStartCheck:
+          test_id: "CNP01-15"
         StableIdentifierCheck:
+          test_id: "CNP08-03"
           reference_id: "{{steps.launch_instance.instance_id}}"
 
     start_ssh:
