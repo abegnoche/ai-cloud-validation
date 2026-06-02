@@ -21,13 +21,16 @@ which validation class", replacing brittle git/PR archaeology. It relies on each
 ``BaseValidation`` subclass declaring the test-plan IDs it implements via the
 ``test_ids`` ClassVar (surfaced through the catalog).
 
-``--check`` runs three CI guardrails:
+``--check`` runs two CI guardrails:
 
-1. Integrity   - a class must not declare a ``test_ids`` value absent from the plan.
-2. Completeness - every class must declare ``test_ids``; an empty tuple is an
-   error (catches "we forgot one"). Use ``(UNMAPPED,)`` for an intentional gap.
-3. Consistency - a class's labels must match the domain its ``test_ids`` imply
+1. Integrity   - a declared ``test_id`` must exist in the plan (catches typos/stale ids).
+2. Consistency - a check's labels must match the domain its ``test_id`` implies
    (e.g. a ``K8S*`` id requires a ``kubernetes`` label) - catches mis-assignments.
+
+There is intentionally no completeness guardrail: a check with no ``test_id``
+is allowed (it simply contributes nothing to coverage). This trades away the
+"someone forgot to map a new check" tripwire; reintroduce it later by exempting
+a known generic set and requiring a ``test_id`` on everything else.
 
 Correctness beyond these heuristics needs a human: ``--review`` emits a
 class -> test_id -> plan-summary table for eyeballing.
@@ -52,11 +55,15 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from isvtest.core.validation import UNMAPPED
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PLAN_PATH = REPO_ROOT / "docs" / "test-plan.yaml"
 SUITES_DIR = REPO_ROOT / "isvctl" / "configs" / "suites"
+
+# YAML sentinel: a wired check that intentionally maps to no plan item declares
+# ``test_id: "N/A"``. It is stripped from coverage so it counts as "no mapping"
+# without being mistaken for a real plan id (which would fail the integrity check).
+UNMAPPED = "N/A"
 
 # Requirement family (the alpha prefix of a test_id, e.g. "K8S22-01" -> "K8S",
 # "SEC14-01" -> "SEC") -> a label the implementing class must carry. Only
@@ -215,28 +222,6 @@ def integrity_errors(plan_ids: set[str], class_map: dict[str, list[str]]) -> lis
     return errors
 
 
-def completeness_errors(entries: list[dict[str, Any]]) -> list[str]:
-    """Errors for classes that declare no ``test_ids`` at all.
-
-    Every validation must make an explicit choice: link it to a plan id, or
-    declare ``(UNMAPPED,)`` for an intentional gap (generic check / no plan
-    entry). An empty ``test_ids`` means "not yet linked" and is an error, so a
-    new check can never silently slip through.
-    """
-    errors: list[str] = []
-    seen: set[str] = set()
-    for entry in entries:
-        base = entry["name"].split("-")[0]
-        if base in seen or entry.get("test_ids"):
-            continue
-        seen.add(base)
-        errors.append(
-            f"{entry['name']}: declares no test_ids - link it to a test-plan id, "
-            "or set (UNMAPPED,) for an intentional gap"
-        )
-    return sorted(errors)
-
-
 def _req_family(test_id: str) -> str:
     """Return the alpha requirement family of a test_id ("K8S22-01" -> "K8S")."""
     return re.sub(r"\d+$", "", test_id.split("-")[0])
@@ -343,7 +328,6 @@ def main(argv: list[str] | None = None) -> int:
 
     checks = {
         "integrity": integrity_errors(plan_ids, class_map),
-        "completeness": completeness_errors(entries),
         "consistency": consistency_errors(entries),
     }
     all_errors = [f"[{kind}] {msg}" for kind, msgs in checks.items() for msg in msgs]
@@ -352,7 +336,7 @@ def main(argv: list[str] | None = None) -> int:
         if all_errors:
             sys.stderr.write("test-plan coverage check failed:\n  " + "\n  ".join(all_errors) + "\n")
             return 1
-        print(f"OK: {len(class_map)} mapped classes pass integrity, completeness, and consistency.")
+        print(f"OK: {len(class_map)} mapped classes pass integrity and consistency.")
         return 0
 
     if all_errors:

@@ -17,13 +17,12 @@ import shlex
 from typing import ClassVar
 
 from isvtest.core.k8s import get_kubectl_base_shell, kubectl_items_or_fail
-from isvtest.core.validation import UNMAPPED, BaseValidation
+from isvtest.core.validation import BaseValidation
 
 
 class K8sGpuLabelsCheck(BaseValidation):
     description = "Verify GPU nodes have proper NVIDIA labels."
     labels: ClassVar[tuple[str, ...]] = ("kubernetes", "gpu")
-    test_ids: ClassVar[tuple[str, ...]] = (UNMAPPED,)
 
     def run(self) -> None:
         label_selector = self.config.get("label_selector", "nvidia.com/gpu.present=true")
@@ -57,7 +56,6 @@ class K8sGpuCapacityCheck(BaseValidation):
 
     description = "Verify node GPU capacity matches expected counts."
     labels: ClassVar[tuple[str, ...]] = ("kubernetes", "gpu")
-    test_ids: ClassVar[tuple[str, ...]] = (UNMAPPED,)
 
     def run(self) -> None:
         resource_name = self.config.get("resource_name", "nvidia.com/gpu")

@@ -21,7 +21,7 @@ schema validation, and common success/failure patterns.
 
 from typing import Any, ClassVar
 
-from isvtest.core.validation import UNMAPPED, BaseValidation
+from isvtest.core.validation import BaseValidation
 
 
 class FieldExistsCheck(BaseValidation):
@@ -34,7 +34,6 @@ class FieldExistsCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check required fields exist in output"
-    test_ids: ClassVar[tuple[str, ...]] = (UNMAPPED,)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -84,7 +83,6 @@ class FieldValueCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check field has expected value"
-    test_ids: ClassVar[tuple[str, ...]] = (UNMAPPED,)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -171,7 +169,6 @@ class SchemaValidation(BaseValidation):
     """
 
     description: ClassVar[str] = "Validate output matches JSON schema"
-    test_ids: ClassVar[tuple[str, ...]] = (UNMAPPED,)
     catalog_exclude: ClassVar[bool] = True
 
     def run(self) -> None:
@@ -210,7 +207,6 @@ class StepSuccessCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check step completed successfully"
-    test_ids: ClassVar[tuple[str, ...]] = (UNMAPPED,)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -282,7 +278,6 @@ class CrudOperationsCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check all CRUD operations passed"
-    test_ids: ClassVar[tuple[str, ...]] = (UNMAPPED,)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
