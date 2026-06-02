@@ -55,7 +55,9 @@ tests:
       step: upload_image
       checks:
         StepSuccessCheck: {}
+        # BOOT01-01: upload a custom OS image (remote URL).
         FieldExistsCheck:
+          test_id: "BOOT01-01"
           fields: ["image_id", "storage_bucket", "disk_ids"]
 
     # --- Image CRUD ---
@@ -65,14 +67,18 @@ tests:
         StepSuccessCheck: {}
         FieldExistsCheck:
           fields: ["image_id", "operations"]
+        # BOOT03-02: CRUD (get/list/create/delete) custom OS images for fast boot.
         CrudOperationsCheck:
+          test_id: "BOOT03-02"
           operations: ["get", "list", "create", "delete"]
 
     # --- VM Launch from Image ---
     vm_from_image:
       step: launch_instance
       checks:
-        StepSuccessCheck: {}
+        # BOOT01-05: a VM image can be installed onto a VMaaS system.
+        StepSuccessCheck:
+          test_id: "BOOT01-05"
         FieldExistsCheck:
           fields: ["instance_id", "public_ip", "key_path"]
         InstanceStateCheck:
@@ -90,14 +96,18 @@ tests:
       step: crud_install_config
       checks:
         StepSuccessCheck: {}
+        # BOOT01-02: CRUD an OS install configuration (e.g. iPXE/Carbide).
         FieldExistsCheck:
+          test_id: "BOOT01-02"
           fields: ["config_id", "config_name", "operations"]
 
     # --- OS Image on BMaaS ---
     bm_from_image:
       step: install_image_bm
       checks:
-        StepSuccessCheck: {}
+        # BOOT01-03: an OS image can be installed on a BMaaS system.
+        StepSuccessCheck:
+          test_id: "BOOT01-03"
         FieldExistsCheck:
           fields: ["instance_id", "image_id", "instance_state"]
         InstanceStateCheck:
@@ -107,7 +117,9 @@ tests:
     bm_from_config:
       step: install_config_bm
       checks:
-        StepSuccessCheck: {}
+        # BOOT01-04: an OS install configuration can be installed on a BMaaS system.
+        StepSuccessCheck:
+          test_id: "BOOT01-04"
         FieldExistsCheck:
           fields: ["instance_id", "config_id", "instance_state"]
         InstanceStateCheck:

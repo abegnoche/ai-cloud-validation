@@ -368,7 +368,11 @@ tests:
     sanitization:
       step: verify_teardown
       checks:
-        StepSuccessCheck: {}
+        # SEC21-03: dedicated security-labelled check (subclass of StepSuccessCheck)
+        # so the SEC* consistency guardrail is satisfied without labelling the
+        # generic StepSuccessCheck used by other teardown guards.
+        SanitizationCheck:
+          test_id: "SEC21-03"
 
     # Hardware ingestion: expected-machine manifest vs discovered machines.
     # Only runs for providers that implement the verify_ingestion step.

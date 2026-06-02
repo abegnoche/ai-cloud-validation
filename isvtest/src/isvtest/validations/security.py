@@ -25,6 +25,7 @@ from typing import ClassVar
 import pytest
 
 from isvtest.core.validation import BaseValidation, check_required_tests
+from isvtest.validations.generic import StepSuccessCheck
 
 
 class BmcManagementNetworkCheck(BaseValidation):
@@ -978,3 +979,16 @@ class AuditLogRetentionCheck(BaseValidation):
             return
 
         self.set_passed("Audit log retention verified")
+
+
+class SanitizationCheck(StepSuccessCheck):
+    """Validate tenant data sanitization on teardown succeeded.
+
+    Reuses StepSuccessCheck's success/status inspection of the sanitization
+    (verify_teardown) step, but carries the ``security`` label so it can
+    implement the SEC21-03 data-sanitization plan item without overloading the
+    generic StepSuccessCheck used elsewhere.
+    """
+
+    description: ClassVar[str] = "Check tenant data sanitization on teardown succeeded"
+    labels: ClassVar[tuple[str, ...]] = ("security",)

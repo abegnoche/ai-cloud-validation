@@ -114,18 +114,29 @@ tests:
 
     kubernetes:
       checks:
+        # K8sNodeReadyCheck carries K8S05-01 (Create a K8s Instance): all nodes
+        # reaching Ready is the canonical proof the cluster was created and is
+        # operational. The remaining cluster-health and GPU-functional sanity
+        # checks below carry test_id "N/A" - they add depth but map to no
+        # additional plan item.
         K8sNodeCountCheck:
+          test_id: "N/A"
           count: "{{ steps.setup.kubernetes.node_count | default(4, true) }}"
         K8sExpectedNodesCheck:
+          test_id: "N/A"
           names: []
         K8sNodeReadyCheck:
+          test_id: "K8S05-01"
           require_all_ready: true
         K8sNvidiaSmiCheck:
+          test_id: "N/A"
           runtime_class: "{{ steps.setup.kubernetes.runtime_class | default('nvidia') }}"
         K8sDriverVersionCheck:
+          test_id: "N/A"
           driver_version: "{{ steps.setup.kubernetes.driver_version | default('580.82.07') }}"
           runtime_class: "{{ steps.setup.kubernetes.runtime_class | default('nvidia') }}"
         K8sGpuPodAccessCheck:
+          test_id: "N/A"
           # Note: This check runs nvidia-smi in a pod that requests 1 GPU,
           # so it can only verify 1 GPU is visible per node (K8s isolation).
           # Use gpu_node_count here (not total_gpus) since each pod only sees its allocated GPU.
@@ -133,6 +144,7 @@ tests:
           total_gpu_count: "{{ steps.setup.kubernetes.gpu_node_count | default(4, true) }}"
           runtime_class: "{{ steps.setup.kubernetes.runtime_class | default('nvidia') }}"
         K8sGpuCapacityCheck:
+          test_id: "N/A"
           # This queries node capacity directly - shows real GPU count
           resource_name: "{{ steps.setup.kubernetes.gpu_resource_name | default('nvidia.com/gpu') }}"
           expected_per_node: "{{ steps.setup.kubernetes.gpu_per_node | default(4, true) }}"
@@ -144,13 +156,18 @@ tests:
           test_id: "K8S25-01"
           namespace: "{{ steps.setup.kubernetes.gpu_operator_namespace | default('nvidia-gpu-operator') }}"
         K8sGpuLabelsCheck:
+          test_id: "N/A"
           label_selector: "nvidia.com/gpu.present=true"
         K8sPodHealthCheck:
+          test_id: "N/A"
           ignore_phases: ["Pending"]
-        K8sNoPendingPodsCheck: {}
+        K8sNoPendingPodsCheck:
+          test_id: "N/A"
         K8sNoErrorPodsCheck:
+          test_id: "N/A"
           error_states: ["Error", "CrashLoopBackOff"]
         K8sMigConfigCheck:
+          test_id: "N/A"
           require_mig: false
           expected_labels:
             "nvidia.com/mig.capable": "true"
@@ -267,6 +284,7 @@ tests:
           timeout: 600
           use_compute_domain: auto
         K8sGpuStressWorkload:
+          test_id: "N/A"
           memory_gb: 1
           runtime: 30
           timeout: 300

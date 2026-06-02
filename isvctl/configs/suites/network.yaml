@@ -49,7 +49,9 @@ tests:
     setup_checks:
       step: create_network
       checks:
+        # Setup provisioning gate; VPC create lifecycle maps to SDN01-01 (VpcCrudCheck-create).
         NetworkProvisionedCheck:
+          test_id: "N/A"
           require_subnets: true
           min_subnets: 2
 
@@ -73,7 +75,10 @@ tests:
           test_id: "SDN01-04"
           step: vpc_crud
           operations: ["delete_vpc"]
+        # No plan item for subnet count / multi-AZ layout (SDN04-01 covers
+        # exclusive-subnet isolation, not subnet topology).
         SubnetConfigCheck:
+          test_id: "N/A"
           step: subnet_config
           min_subnets: 4
           require_multi_az: true
@@ -98,11 +103,16 @@ tests:
           test_id: "SDN02-04"
           step: sg_crud
           operations: ["delete_sg", "verify_deleted"]
+        # SG/NACL enforcement + connectivity/traffic behavior have no dedicated
+        # plan item (SG CRUD is SDN02-01..04; VPC isolation is SDN04-02).
         SecurityBlockingCheck:
+          test_id: "N/A"
           step: security_blocking
         NetworkConnectivityCheck:
+          test_id: "N/A"
           step: connectivity_test
         TrafficFlowCheck:
+          test_id: "N/A"
           step: traffic_validation
         VpcIpConfigCheck:
           test_id: "CP-XX-02"
