@@ -90,7 +90,15 @@ class VpcCrudCheck(BaseValidation):
             self.set_failed("No 'tests' in step output")
             return
 
-        required_tests = ["create_vpc", "read_vpc", "update_tags", "update_dns", "delete_vpc"]
+        # Operations to assert; defaults to the full CRUD set. Callers can pass
+        # a subset (e.g. ["create_vpc"]) to scope one wiring to a single plan id.
+        required_tests = self.config.get("operations") or [
+            "create_vpc",
+            "read_vpc",
+            "update_tags",
+            "update_dns",
+            "delete_vpc",
+        ]
         passed_tests = []
         failed_tests = []
 
@@ -229,7 +237,9 @@ class SgCrudCheck(BaseValidation):
             self.set_failed("No 'tests' in step output")
             return
 
-        required_tests = [
+        # Operations to assert; defaults to the full SG CRUD set. Callers can
+        # pass a subset to scope one wiring to a single plan id.
+        required_tests = self.config.get("operations") or [
             "create_vpc",
             "create_sg",
             "read_sg",

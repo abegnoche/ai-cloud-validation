@@ -55,16 +55,49 @@ tests:
 
     network:
       checks:
-        VpcCrudCheck:
+        # VPC CRUD is split per operation so each maps to one plan id; all four
+        # bind to the same vpc_crud step and assert their slice of its output.
+        VpcCrudCheck-create:
+          test_id: "SDN01-01"
           step: vpc_crud
+          operations: ["create_vpc"]
+        VpcCrudCheck-read:
+          test_id: "SDN01-02"
+          step: vpc_crud
+          operations: ["read_vpc"]
+        VpcCrudCheck-update:
+          test_id: "SDN01-03"
+          step: vpc_crud
+          operations: ["update_tags", "update_dns"]
+        VpcCrudCheck-delete:
+          test_id: "SDN01-04"
+          step: vpc_crud
+          operations: ["delete_vpc"]
         SubnetConfigCheck:
           step: subnet_config
           min_subnets: 4
           require_multi_az: true
         VpcIsolationCheck:
+          # SDN04-03 (E/W isolation) is exercised by the same check but is not
+          # separately attributable under a single test_id.
+          test_id: "SDN04-02"
           step: vpc_isolation
-        SgCrudCheck:
+        SgCrudCheck-create:
+          test_id: "SDN02-01"
           step: sg_crud
+          operations: ["create_vpc", "create_sg"]
+        SgCrudCheck-read:
+          test_id: "SDN02-02"
+          step: sg_crud
+          operations: ["read_sg"]
+        SgCrudCheck-update:
+          test_id: "SDN02-03"
+          step: sg_crud
+          operations: ["update_sg_add_rule", "update_sg_modify_rule", "update_sg_remove_rule"]
+        SgCrudCheck-delete:
+          test_id: "SDN02-04"
+          step: sg_crud
+          operations: ["delete_sg", "verify_deleted"]
         SecurityBlockingCheck:
           step: security_blocking
         NetworkConnectivityCheck:
