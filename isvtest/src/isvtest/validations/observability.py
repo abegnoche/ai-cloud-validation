@@ -113,7 +113,6 @@ class VpcFlowLogsCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check VPC Flow Logs capture all ingress and egress traffic"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         """Validate required VPC Flow Log results and evidence."""
@@ -158,7 +157,6 @@ class HostSyslogCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check host syslogs are available"
-    labels: ClassVar[tuple[str, ...]] = ("bare_metal",)
 
     def run(self) -> None:
         """Validate host syslog results and evidence."""
@@ -197,7 +195,6 @@ class BmcSelLogsCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check BMC SEL logs are queryable"
-    labels: ClassVar[tuple[str, ...]] = ("security",)
 
     def run(self) -> None:
         """Validate BMC SEL log results and evidence."""
@@ -242,7 +239,6 @@ class BmcGpuTelemetryCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check BMC or Redfish GPU telemetry is available"
-    labels: ClassVar[tuple[str, ...]] = ("security", "gpu")
 
     def run(self) -> None:
         """Validate BMC GPU telemetry results and evidence."""

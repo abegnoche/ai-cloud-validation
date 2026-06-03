@@ -134,7 +134,7 @@ tests:
       checks:
         ServiceAccountCredentialCheck:
           test_id: "SEC03-01"
-          labels: ["security"]
+          labels: ["security", "iam"]
           step: sa_credential_test
 
     user_auth_oidc:
