@@ -138,7 +138,6 @@ class ConnectivityCheck(BaseValidation):
 
     description: ClassVar[str] = "Validates SSH connectivity"
     timeout: ClassVar[int] = 120
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "bare_metal", "vm")
 
     def run(self) -> None:
         try:
@@ -220,7 +219,6 @@ class OsCheck(BaseValidation):
 
     description: ClassVar[str] = "Validates OS via SSH"
     timeout: ClassVar[int] = 120
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "bare_metal", "vm")
 
     def run(self) -> None:
         try:
@@ -286,7 +284,6 @@ class CpuInfoCheck(BaseValidation):
 
     description: ClassVar[str] = "Validates CPU, NUMA topology, and PCI configuration"
     timeout: ClassVar[int] = 120
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "bare_metal", "vm")
 
     def run(self) -> None:
         try:
@@ -371,7 +368,6 @@ class VcpuPinningCheck(BaseValidation):
 
     description: ClassVar[str] = "Validates vCPU pinning and NUMA affinity"
     timeout: ClassVar[int] = 120
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "vm")
 
     def run(self) -> None:
         ssh_cfg = get_ssh_config(self.config, self.config.get("inventory", {}))
@@ -543,7 +539,6 @@ class PciBusCheck(BaseValidation):
 
     description: ClassVar[str] = "Validates PCI bus configuration for GPU devices"
     timeout: ClassVar[int] = 120
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "gpu", "vm")
 
     def run(self) -> None:
         try:
@@ -727,7 +722,6 @@ class HostSoftwareCheck(BaseValidation):
 
     description: ClassVar[str] = "Validates kernel, libvirt, SBIOS, and NVIDIA drivers"
     timeout: ClassVar[int] = 120
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "bare_metal", "vm")
 
     def run(self) -> None:
         try:
@@ -1019,7 +1013,6 @@ class GpuCheck(BaseValidation):
 
     description: ClassVar[str] = "Validates GPU via SSH"
     timeout: ClassVar[int] = 300
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "gpu", "bare_metal", "vm")
 
     def run(self) -> None:
         try:
@@ -1106,7 +1099,6 @@ class DriverCheck(BaseValidation):
 
     description: ClassVar[str] = "Validates kernel and NVIDIA drivers"
     timeout: ClassVar[int] = 120
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "gpu", "bare_metal", "vm")
 
     def run(self) -> None:
         try:
@@ -1223,7 +1215,6 @@ class GpuStressCheck(BaseValidation):
 
     description: ClassVar[str] = "GPU stress test via SSH"
     timeout: ClassVar[int] = 900
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "gpu", "workload", "bare_metal")
 
     def run(self) -> None:
         try:
@@ -1343,8 +1334,6 @@ class NcclCheck(BaseValidation):
 
     description: ClassVar[str] = "NCCL AllReduce test via SSH"
     timeout: ClassVar[int] = 900
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "gpu", "workload", "bare_metal")
-
     _DEFAULT_IMAGE = "nvcr.io/nvidia/hpc-benchmarks:25.04"
 
     def run(self) -> None:
@@ -1485,7 +1474,6 @@ class TrainingCheck(BaseValidation):
 
     description: ClassVar[str] = "DDP training workload via SSH"
     timeout: ClassVar[int] = 900
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "gpu", "workload", "bare_metal")
 
     def run(self) -> None:
         try:
@@ -1639,7 +1627,6 @@ class NvlinkCheck(BaseValidation):
 
     description: ClassVar[str] = "NVLink topology and status via SSH"
     timeout: ClassVar[int] = 120
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "gpu", "network", "bare_metal")
 
     def run(self) -> None:
         try:
@@ -1735,7 +1722,6 @@ class InfiniBandCheck(BaseValidation):
 
     description: ClassVar[str] = "InfiniBand interface status via SSH"
     timeout: ClassVar[int] = 120
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "network", "bare_metal")
 
     def run(self) -> None:
         try:
@@ -1833,7 +1819,6 @@ class EthernetCheck(BaseValidation):
 
     description: ClassVar[str] = "Ethernet interfaces and connectivity via SSH"
     timeout: ClassVar[int] = 120
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "network", "bare_metal")
 
     def run(self) -> None:
         try:
@@ -1935,7 +1920,6 @@ class ContainerRuntimeCheck(BaseValidation):
 
     description: ClassVar[str] = "Tests container runtime and NVIDIA Docker support"
     timeout: ClassVar[int] = 300
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "gpu", "workload", "slow", "bare_metal", "vm")
 
     def run(self) -> None:
         try:
@@ -2020,7 +2004,6 @@ class CloudInitCheck(BaseValidation):
 
     description: ClassVar[str] = "Validates cloud-init completed and metadata service is reachable"
     timeout: ClassVar[int] = 120
-    labels: ClassVar[tuple[str, ...]] = ("ssh", "vm", "bare_metal")
 
     def run(self) -> None:
         try:

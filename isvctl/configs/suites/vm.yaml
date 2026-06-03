@@ -122,7 +122,7 @@ tests:
       checks:
         CloudInitCheck:
           test_id: "BOOT02-02"
-          labels: ["vm"]
+          labels: ["vm", "ssh"]
 
     # ─── Host-level validations anchored to describe_instance ────────
     # describe_instance runs AFTER reboot, so these checks prove the
@@ -140,10 +140,10 @@ tests:
       checks:
         ConnectivityCheck:
           test_id: "VMAAS-XX-01"
-          labels: ["vm"]
+          labels: ["vm", "ssh"]
         OsCheck:
           test_id: "VMAAS-XX-05"
-          labels: ["vm"]
+          labels: ["vm", "ssh"]
           expected_os: "ubuntu"
 
     gpu:
@@ -151,7 +151,7 @@ tests:
       checks:
         GpuCheck:
           test_id: "VMAAS-XX-06"
-          labels: ["vm"]
+          labels: ["vm", "ssh", "gpu"]
           expected_gpus: 1
 
     host_os:
@@ -159,35 +159,35 @@ tests:
       checks:
         VcpuPinningCheck:
           test_id: "VMAAS-XX-09"
-          labels: ["vm"]
+          labels: ["vm", "ssh"]
         PciBusCheck:
           test_id: "VMAAS-XX-09"
-          labels: ["vm"]
+          labels: ["vm", "ssh", "gpu"]
           expected_gpus: 1
         HostSoftwareCheck:
           test_id: "VMAAS-XX-07"
-          labels: ["vm"]
+          labels: ["vm", "ssh"]
 
     driver_info:
       step: describe_instance
       checks:
         DriverCheck:
           test_id: "VMAAS-XX-07"
-          labels: ["vm"]
+          labels: ["vm", "ssh", "gpu"]
 
     cpu_info:
       step: describe_instance
       checks:
         CpuInfoCheck:
           test_id: "N/A"
-          labels: ["vm"]
+          labels: ["vm", "ssh"]
 
     container_runtime:
       step: describe_instance
       checks:
         ContainerRuntimeCheck:
           test_id: "N/A"
-          labels: ["vm"]
+          labels: ["vm", "ssh", "gpu", "workload", "slow"]
 
     # ─── Lifecycle validations ───────────────────────────────────────
     stop_checks:
@@ -213,9 +213,9 @@ tests:
       checks:
         # ConnectivityCheck -> VMAAS-XX-01, OsCheck -> VMAAS-XX-05 (declared in the "ssh" section)
         ConnectivityCheck:
-          labels: ["vm"]
+          labels: ["vm", "ssh"]
         OsCheck:
-          labels: ["vm"]
+          labels: ["vm", "ssh"]
           expected_os: "ubuntu"
 
     start_gpu:
@@ -223,7 +223,7 @@ tests:
       checks:
         # GpuCheck -> VMAAS-XX-06 (declared in the "gpu" section)
         GpuCheck:
-          labels: ["vm"]
+          labels: ["vm", "ssh", "gpu"]
           expected_gpus: 1
 
     reboot_checks:
@@ -251,9 +251,9 @@ tests:
       checks:
         # ConnectivityCheck -> VMAAS-XX-01, OsCheck -> VMAAS-XX-05 (declared in the "ssh" section)
         ConnectivityCheck:
-          labels: ["vm"]
+          labels: ["vm", "ssh"]
         OsCheck:
-          labels: ["vm"]
+          labels: ["vm", "ssh"]
           expected_os: "ubuntu"
 
     reboot_gpu:
@@ -261,7 +261,7 @@ tests:
       checks:
         # GpuCheck -> VMAAS-XX-06 (declared in the "gpu" section)
         GpuCheck:
-          labels: ["vm"]
+          labels: ["vm", "ssh", "gpu"]
           expected_gpus: 1
 
     # ─── NIM validations ─────────────────────────────────────────────

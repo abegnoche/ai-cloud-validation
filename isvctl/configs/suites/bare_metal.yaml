@@ -23,9 +23,9 @@
 # right fields, the validations pass regardless of which cloud you use.
 #
 # Every check in this suite carries at least the ``bare_metal`` label so the
-# whole suite is selectable with ``-m bare_metal``; checks that are also
-# domain-specific (ssh, gpu, network) inherit those trait labels from their
-# validation class.
+# whole suite is selectable with ``-m bare_metal``; host checks also carry
+# their trait labels (ssh, gpu, network, workload, slow) on the wiring so
+# those filters work without the labels living on the validation class.
 #
 # Quick start:
 #   1. Copy providers/my-isv/config/bare_metal.yaml to providers/<your-platform>/config/bare_metal.yaml
@@ -103,7 +103,7 @@ tests:
       checks:
         CloudInitCheck:
           test_id: "BOOT02-01"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
 
     instance_info:
       step: describe_instance
@@ -118,11 +118,11 @@ tests:
       checks:
         ConnectivityCheck:
           test_id: "BMAAS-XX-03"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
         OsCheck:
           # No BMaaS plan item for a host-OS image check (VMAAS-XX-05 is VM-only).
           test_id: "N/A"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
           expected_os: "ubuntu"
 
     gpu:
@@ -130,7 +130,7 @@ tests:
       checks:
         GpuCheck:
           test_id: "BMAAS-XX-08"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu"]
           expected_gpus: 8
 
     host_os:
@@ -140,14 +140,14 @@ tests:
         # the BMaaS plan has no equivalent, so these are intentional gaps here.
         VcpuPinningCheck:
           test_id: "N/A"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
         PciBusCheck:
           test_id: "N/A"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu"]
           expected_gpus: 8
         HostSoftwareCheck:
           test_id: "N/A"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
 
     # Per-host status log sampling: verify journalctl/dmesg
     # are emitting fresh entries within max_age_minutes. Pass if at least
@@ -167,7 +167,7 @@ tests:
       checks:
         GpuStressCheck:
           test_id: "BMAAS-XX-09"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu", "workload"]
           runtime: 30
           memory_gb: 16
 
@@ -177,7 +177,7 @@ tests:
       checks:
         NcclCheck:
           test_id: "BMAAS-XX-11"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu", "workload"]
 
     # DDP training workload - validates full training stack
     training:
@@ -185,7 +185,7 @@ tests:
       checks:
         TrainingCheck:
           test_id: "BMAAS-XX-12"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu", "workload"]
           steps: 50
 
     # Network / interconnect checks
@@ -194,21 +194,21 @@ tests:
       checks:
         NvlinkCheck:
           test_id: "BMAAS-XX-06"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu", "network"]
 
     infiniband:
       step: describe_instance
       checks:
         InfiniBandCheck:
           test_id: "BMAAS-XX-06"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "network"]
 
     ethernet:
       step: describe_instance
       checks:
         EthernetCheck:
           test_id: "BMAAS-XX-06"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "network"]
           ping_target: "8.8.8.8"
 
     driver_info:
@@ -217,21 +217,21 @@ tests:
         # No BMaaS plan item for a host driver/kernel check (VMAAS-XX-07 is VM-only).
         DriverCheck:
           test_id: "N/A"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu"]
 
     cpu_info:
       step: describe_instance
       checks:
         CpuInfoCheck:
           test_id: "N/A"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
 
     container_runtime:
       step: describe_instance
       checks:
         ContainerRuntimeCheck:
           test_id: "N/A"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu", "workload", "slow"]
 
     stop_checks:
       step: stop_instance
@@ -260,11 +260,11 @@ tests:
       checks:
         # ConnectivityCheck -> BMAAS-XX-03, OsCheck -> N/A (declared in the "ssh" section)
         ConnectivityCheck:
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
           host: "{{steps.describe_instance.public_ip}}"
           key_file: "{{steps.describe_instance.key_file}}"
         OsCheck:
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
           host: "{{steps.describe_instance.public_ip}}"
           key_file: "{{steps.describe_instance.key_file}}"
           expected_os: "ubuntu"
@@ -274,7 +274,7 @@ tests:
       checks:
         # GpuCheck -> BMAAS-XX-08 (declared in the "gpu" section)
         GpuCheck:
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu"]
           host: "{{steps.describe_instance.public_ip}}"
           key_file: "{{steps.describe_instance.key_file}}"
 
@@ -303,11 +303,11 @@ tests:
       checks:
         # ConnectivityCheck -> BMAAS-XX-03, OsCheck -> N/A (declared in the "ssh" section)
         ConnectivityCheck:
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
           host: "{{steps.describe_instance.public_ip}}"
           key_file: "{{steps.describe_instance.key_file}}"
         OsCheck:
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
           host: "{{steps.describe_instance.public_ip}}"
           key_file: "{{steps.describe_instance.key_file}}"
           expected_os: "ubuntu"
@@ -317,7 +317,7 @@ tests:
       checks:
         # GpuCheck -> BMAAS-XX-08 (declared in the "gpu" section)
         GpuCheck:
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu"]
           host: "{{steps.describe_instance.public_ip}}"
           key_file: "{{steps.describe_instance.key_file}}"
           expected_gpus: 8
@@ -347,9 +347,9 @@ tests:
       checks:
         # ConnectivityCheck -> BMAAS-XX-03, OsCheck -> N/A (declared in the "ssh" section)
         ConnectivityCheck:
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
         OsCheck:
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
           expected_os: "ubuntu"
 
     power_cycle_gpu:
@@ -357,7 +357,7 @@ tests:
       checks:
         # GpuCheck -> BMAAS-XX-08 (declared in the "gpu" section)
         GpuCheck:
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu"]
           expected_gpus: 8
 
     # Reinstall validations (skipped when reinstall_instance step is skipped)
@@ -376,9 +376,9 @@ tests:
       checks:
         # ConnectivityCheck -> BMAAS-XX-03, OsCheck -> N/A (declared in the "ssh" section)
         ConnectivityCheck:
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
         OsCheck:
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh"]
           expected_os: "ubuntu"
 
     reinstall_gpu:
@@ -386,7 +386,7 @@ tests:
       checks:
         # GpuCheck -> BMAAS-XX-08 (declared in the "gpu" section)
         GpuCheck:
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu"]
 
     nim_health:
       step: deploy_nim

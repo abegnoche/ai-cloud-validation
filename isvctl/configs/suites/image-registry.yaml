@@ -100,9 +100,9 @@ tests:
       step: launch_instance
       checks:
         ConnectivityCheck:
-          labels: ["image_registry"]
+          labels: ["image_registry", "ssh"]
         OsCheck:
-          labels: ["image_registry"]
+          labels: ["image_registry", "ssh"]
           expected_os: "ubuntu"
 
     # --- OS Install Config CRUD ---

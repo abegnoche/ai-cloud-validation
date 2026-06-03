@@ -95,6 +95,24 @@ class ResolvedEntry:
         return self.state is None and self.skip_reason is None and self.error_reason is None
 
 
+def _merge_labels(class_labels: tuple[str, ...], params_template: Any) -> tuple[str, ...]:
+    """Union a class's labels with per-wiring ``labels`` from the YAML config.
+
+    Labels are migrating from class ClassVars onto the (check, context) wiring,
+    so include/exclude-label filtering must honor labels declared on the wiring
+    in addition to any still on the class.
+    """
+    labels = list(class_labels)
+    cfg_labels = params_template.get("labels") if isinstance(params_template, dict) else None
+    if isinstance(cfg_labels, str):
+        cfg_labels = [cfg_labels]
+    if isinstance(cfg_labels, (list, tuple)):
+        for label in cfg_labels:
+            if isinstance(label, str) and label and label not in labels:
+                labels.append(label)
+    return tuple(labels)
+
+
 def parse_validations(raw_config: Mapping[str, Any]) -> list[ValidationEntry]:
     """Parse raw validation config into ordered validation entries.
 
@@ -130,7 +148,7 @@ def parse_validations(raw_config: Mapping[str, Any]) -> list[ValidationEntry]:
                 params_template = copy.deepcopy(params_template)
 
             base_name = _base_validation_name(name, metadata_by_name)
-            labels = metadata_by_name.get(base_name, ())
+            labels = _merge_labels(metadata_by_name.get(base_name, ()), params_template)
             entries.append(
                 ValidationEntry(
                     name=name,
