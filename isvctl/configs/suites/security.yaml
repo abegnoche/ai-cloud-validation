@@ -57,49 +57,49 @@ tests:
       checks:
         BmcManagementNetworkCheck:
           test_id: "SEC12-01"
-          labels: ["security"]
+          labels: ["security", "network"]
           step: bmc_management_network
 
     bmc_isolation:
       checks:
         BmcTenantIsolationCheck:
           test_id: "SEC12-02"
-          labels: ["security"]
+          labels: ["security", "network"]
           step: bmc_tenant_isolation
 
     bmc_protocol_security:
       checks:
         BmcProtocolSecurityCheck:
           test_id: "CNP10-01"
-          labels: ["security"]
+          labels: ["security", "network"]
           step: bmc_protocol_security
 
     bmc_bastion_access:
       checks:
         BmcBastionAccessCheck:
           test_id: "SEC12-03"
-          labels: ["security"]
+          labels: ["security", "network"]
           step: bmc_bastion_access
 
     api_security:
       checks:
         ApiEndpointIsolationCheck:
           test_id: "SEC14-01"
-          labels: ["security"]
+          labels: ["security", "network"]
           step: api_endpoint_isolation
 
     insecure_protocols:
       checks:
         InsecureProtocolsCheck:
           test_id: "SEC13-02"
-          labels: ["security"]
+          labels: ["security", "network"]
           step: insecure_protocols_test
 
     mfa_enforcement:
       checks:
         MfaEnforcedCheck:
           test_id: "SEC07-01"
-          labels: ["security"]
+          labels: ["security", "iam"]
           step: mfa_enforcement
 
     cert_rotation:
@@ -127,7 +127,7 @@ tests:
       checks:
         CustomerManagedKeyCheck:
           test_id: "SEC09-04"
-          labels: ["security"]
+          labels: ["security", "workload", "slow"]
           step: customer_managed_key_test
 
     service_account_auth:
@@ -141,28 +141,28 @@ tests:
       checks:
         OidcUserAuthCheck:
           test_id: "SEC01-01"
-          labels: ["security"]
+          labels: ["security", "iam"]
           step: oidc_user_auth_test
 
     short_lived_credentials:
       checks:
         ShortLivedCredentialsCheck:
           test_id: "SEC02-01"
-          labels: ["security"]
+          labels: ["security", "iam"]
           step: short_lived_credentials_test
 
     least_privilege_policy:
       checks:
         LeastPrivilegePolicyCheck:
           test_id: "SEC04-01"
-          labels: ["security"]
+          labels: ["security", "iam"]
           step: least_privilege_test
 
     minimal_role_enforcement:
       checks:
         MinimalRoleEnforcementCheck:
           test_id: "SEC04-02"
-          labels: ["security"]
+          labels: ["security", "iam"]
           step: least_privilege_test
 
     audit_log_entry:
@@ -183,7 +183,7 @@ tests:
       checks:
         TenantIsolationCheck:
           test_id: "SEC11-01"
-          labels: ["security"]
+          labels: ["security", "network", "iam"]
           step: tenant_isolation_test
 
     # Verify capacity is logically grouped and pinned to one tenant/account

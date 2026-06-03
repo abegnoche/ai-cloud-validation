@@ -108,14 +108,14 @@ tests:
       checks:
         ConsoleRbacCheck:
           test_id: "CNP01-16"
-          labels: ["vm"]
+          labels: ["vm", "security", "iam"]
 
     virtual_device_hardening:
       step: virtual_device_hardening
       checks:
         VirtualDeviceHardeningCheck:
           test_id: "CNP01-17"
-          labels: ["vm"]
+          labels: ["vm", "security"]
 
     cloud_init:
       step: launch_instance
