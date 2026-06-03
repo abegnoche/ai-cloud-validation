@@ -270,21 +270,21 @@ tests:
       checks:
         NimHealthCheck:
           test_id: "VMAAS-XX-12"
-          labels: ["vm"]
+          labels: ["vm", "ssh", "gpu"]
 
     nim_models:
       step: deploy_nim
       checks:
         NimModelCheck:
           test_id: "VMAAS-XX-12"
-          labels: ["vm"]
+          labels: ["vm", "ssh", "gpu"]
 
     nim_inference:
       step: deploy_nim
       checks:
         NimInferenceCheck:
           test_id: "VMAAS-XX-12"
-          labels: ["vm"]
+          labels: ["vm", "ssh", "gpu", "workload", "slow"]
           prompt: "What is CUDA?"
           max_tokens: 50
 

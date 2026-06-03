@@ -393,21 +393,21 @@ tests:
       checks:
         NimHealthCheck:
           test_id: "BMAAS-XX-10"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu"]
 
     nim_models:
       step: deploy_nim
       checks:
         NimModelCheck:
           test_id: "BMAAS-XX-10"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu"]
 
     nim_inference:
       step: deploy_nim
       checks:
         NimInferenceCheck:
           test_id: "BMAAS-XX-10"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "ssh", "gpu", "workload", "slow"]
           prompt: "What is CUDA?"
           max_tokens: 50
 
