@@ -95,33 +95,33 @@ tests:
           # SDN04-03 (E/W isolation) is exercised by the same check but is not
           # separately attributable under a single test_id.
           test_id: "SDN04-02"
-          labels: ["network"]
+          labels: ["network", "security"]
           step: vpc_isolation
         SgCrudCheck-create:
           test_id: "SDN02-01"
-          labels: ["network"]
+          labels: ["network", "security"]
           step: sg_crud
           operations: ["create_vpc", "create_sg"]
         SgCrudCheck-read:
           test_id: "SDN02-02"
-          labels: ["network"]
+          labels: ["network", "security"]
           step: sg_crud
           operations: ["read_sg"]
         SgCrudCheck-update:
           test_id: "SDN02-03"
-          labels: ["network"]
+          labels: ["network", "security"]
           step: sg_crud
           operations: ["update_sg_add_rule", "update_sg_modify_rule", "update_sg_remove_rule"]
         SgCrudCheck-delete:
           test_id: "SDN02-04"
-          labels: ["network"]
+          labels: ["network", "security"]
           step: sg_crud
           operations: ["delete_sg", "verify_deleted"]
         # SG/NACL enforcement + connectivity/traffic behavior have no dedicated
         # plan item (SG CRUD is SDN02-01..04; VPC isolation is SDN04-02).
         SecurityBlockingCheck:
           test_id: "N/A"
-          labels: ["network"]
+          labels: ["network", "security"]
           step: security_blocking
         NetworkConnectivityCheck:
           test_id: "N/A"
@@ -137,37 +137,37 @@ tests:
           step: vpc_ip_config
         DhcpIpManagementCheck:
           test_id: "CP-XX-01"
-          labels: ["network"]
+          labels: ["network", "ssh"]
           step: dhcp_ip_test
 
     sg_scoping:
       checks:
         SgWorkloadScopingCheck:
           test_id: "SDN02-05"
-          labels: ["network"]
+          labels: ["network", "security"]
           step: sg_workload_scoping
         SgNodeScopingCheck:
           test_id: "SDN02-06"
-          labels: ["network"]
+          labels: ["network", "security"]
           step: sg_node_scoping
         SgSubnetScopingCheck:
           test_id: "SDN02-07"
-          labels: ["network"]
+          labels: ["network", "security"]
           step: sg_subnet_scoping
         SgServiceScopingCheck:
           test_id: "SDN02-09"
-          labels: ["network"]
+          labels: ["network", "security"]
           step: sg_service_scoping
         SgPortSecurityPolicyCheck:
           test_id: "SDN02-10"
-          labels: ["network"]
+          labels: ["network", "security"]
           step: sg_port_security_policy
 
     sdn_policy:
       checks:
         SgPolicyPropagationTimingCheck:
           test_id: "SDN02-08"
-          labels: ["network"]
+          labels: ["network", "security"]
           step: sg_policy_propagation
           max_propagation_seconds: 10
 
@@ -183,7 +183,7 @@ tests:
           step: sdn_latency_perf_logging
         SdnFilterAuditTrailCheck:
           test_id: "SDN09-03"
-          labels: ["network"]
+          labels: ["network", "security"]
           step: sdn_filter_audit_trail
 
     sdn:

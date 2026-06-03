@@ -51,7 +51,6 @@ class NetworkProvisionedCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check network was provisioned"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -80,7 +79,6 @@ class VpcCrudCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check VPC CRUD operations"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -130,7 +128,6 @@ class SubnetConfigCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check subnet configuration"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -182,7 +179,6 @@ class VpcIsolationCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check VPC isolation"
-    labels: ClassVar[tuple[str, ...]] = ("network", "security")
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -227,7 +223,6 @@ class SgCrudCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check security group CRUD operations"
-    labels: ClassVar[tuple[str, ...]] = ("network", "security")
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -278,7 +273,6 @@ class SecurityBlockingCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check security blocking rules"
-    labels: ClassVar[tuple[str, ...]] = ("network", "security")
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -324,7 +318,6 @@ class NetworkConnectivityCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check network connectivity"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -367,7 +360,6 @@ class TrafficFlowCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check traffic flow"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -417,7 +409,6 @@ class DhcpIpManagementCheck(BaseValidation):
 
     description: ClassVar[str] = "Check DHCP/IP management via SSH"
     timeout: ClassVar[int] = 60
-    labels: ClassVar[tuple[str, ...]] = ("network", "ssh")
 
     def run(self) -> None:
         try:
@@ -580,7 +571,6 @@ class VpcIpConfigCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check VPC IP configuration"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -823,7 +813,6 @@ class SdnHardwareFaultLoggingCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check SDN hardware fault logging"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         """Check hardware-fault logging from step output."""
@@ -855,7 +844,6 @@ class SdnLatencyPerfLoggingCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check SDN latency/performance logging"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         """Check latency/performance logging from step output."""
@@ -888,7 +876,6 @@ class SdnFilterAuditTrailCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check SDN filtering rule audit trail"
-    labels: ClassVar[tuple[str, ...]] = ("network", "security")
 
     def run(self) -> None:
         """Check filtering-rule audit logging from step output."""
@@ -939,7 +926,6 @@ class SgPolicyPropagationTimingCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check security policy propagation timing"
-    labels: ClassVar[tuple[str, ...]] = ("network", "security")
 
     def run(self) -> None:
         """Check policy propagation timing evidence from step output."""
@@ -1020,7 +1006,6 @@ class SgWorkloadScopingCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check SG rules scoped at workload level"
-    labels: ClassVar[tuple[str, ...]] = ("network", "security")
 
     def run(self) -> None:
         """Check workload-level SG scoping from step output."""
@@ -1047,7 +1032,6 @@ class SgNodeScopingCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check SG rules scoped at node level"
-    labels: ClassVar[tuple[str, ...]] = ("network", "security")
 
     def run(self) -> None:
         """Check node-level SG scoping from step output."""
@@ -1075,7 +1059,6 @@ class SgSubnetScopingCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check SG rules scoped at subnet/tenant level"
-    labels: ClassVar[tuple[str, ...]] = ("network", "security")
 
     def run(self) -> None:
         """Check subnet-level SG scoping from step output."""
@@ -1103,7 +1086,6 @@ class SgServiceScopingCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check SG rules scoped at service level"
-    labels: ClassVar[tuple[str, ...]] = ("network", "security")
 
     def run(self) -> None:
         """Check service-level SG scoping from step output."""
@@ -1132,7 +1114,6 @@ class SgPortSecurityPolicyCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check custom port security policies on virtual interfaces"
-    labels: ClassVar[tuple[str, ...]] = ("network", "security")
 
     def run(self) -> None:
         """Check virtual-interface port policy behavior from step output."""
@@ -1180,7 +1161,6 @@ class BackendSwitchFabricCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check backend switch fabric IDs"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         """Check backend switch fabric metadata from step output."""
@@ -1244,7 +1224,6 @@ class NvlinkDomainCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check NVLink domain ID"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         """Check NVLink domain metadata from step output."""
@@ -1292,7 +1271,6 @@ class ByoipCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check BYOIP support"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -1336,7 +1314,6 @@ class StablePrivateIpCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check private IP stability"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -1426,7 +1403,6 @@ class StableEgressIpCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check egress IP stability across probes"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         """Validate stable egress IP subtest results and record the outcome."""
@@ -1474,7 +1450,6 @@ class FloatingIpCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check floating IP switch"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -1525,7 +1500,6 @@ class LocalizedDnsCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check localized DNS"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -1571,7 +1545,6 @@ class VpcPeeringCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check VPC peering"
-    labels: ClassVar[tuple[str, ...]] = ("network",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
