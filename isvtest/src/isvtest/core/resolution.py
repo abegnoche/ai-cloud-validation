@@ -98,15 +98,15 @@ class ResolvedEntry:
 def _merge_labels(class_labels: tuple[str, ...], params_template: Any) -> tuple[str, ...]:
     """Union a class's labels with per-wiring ``labels`` from the YAML config.
 
-    Labels are migrating from class ClassVars onto the (check, context) wiring,
-    so include/exclude-label filtering must honor labels declared on the wiring
-    in addition to any still on the class.
+    Labels are declared per-check in the YAML wiring; union them with any
+    class-level ``labels`` ClassVar (kept for back-compat) so include/exclude-
+    label filtering honors both sources.
     """
     labels = list(class_labels)
     cfg_labels = params_template.get("labels") if isinstance(params_template, dict) else None
     if isinstance(cfg_labels, str):
         cfg_labels = [cfg_labels]
-    if isinstance(cfg_labels, (list, tuple)):
+    if isinstance(cfg_labels, list | tuple):
         for label in cfg_labels:
             if isinstance(label, str) and label and label not in labels:
                 labels.append(label)

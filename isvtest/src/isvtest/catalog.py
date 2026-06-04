@@ -163,10 +163,9 @@ def _extract_check_labels_from_config(config_path: Path) -> dict[str, set[str]]:
 def _build_label_map() -> dict[str, set[str]]:
     """Map check name -> labels declared on its suite YAML wiring.
 
-    Labels are migrating from class ``labels`` ClassVars onto the (check,
-    context) wiring. The catalog unions these so a check's tag metadata stays
-    correct after its class-level labels are removed. A variant's labels
-    propagate up to its base name so the base entry is not left bare.
+    Labels live on the per-check YAML wiring, so the catalog reads them from
+    there. A variant's labels propagate up to its base name so the base entry
+    is not left bare.
     """
     configs_dir = _find_configs_dir()
     if not configs_dir:
