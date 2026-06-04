@@ -14,12 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Join validation classes to docs/test-plan.yaml via the ``test_ids`` class metadata.
+"""Join validation checks to docs/test-plan.yaml via their wired ``test_id``s.
 
 This is the single source of truth for "which test plan items are implemented by
-which validation class", replacing brittle git/PR archaeology. It relies on each
-``BaseValidation`` subclass declaring the test-plan IDs it implements via the
-``test_ids`` ClassVar (surfaced through the catalog).
+which check", replacing brittle git/PR archaeology. Test IDs live on the per-check
+YAML wiring (``test_id:``); this script reads them from the suite configs and joins
+them to the plan.
 
 ``--check`` runs two CI guardrails:
 
@@ -181,9 +181,8 @@ def apply_config_test_ids(
 ) -> list[dict[str, Any]]:
     """Return entries whose ``test_ids`` are unioned with config-declared ids.
 
-    During the pilot only some checks live in YAML, so this merges the two
-    sources; the end-state (all ids in YAML) is a no-op union over empty class
-    metadata.
+    Test IDs live on the YAML wiring, so this attaches each check's wired
+    ``test_id``(s) to its catalog entry.
 
     Some checks are wired only as variants (e.g. ``SlurmPartition-cpu``,
     ``SlurmPartition-gpu``) while the catalog also carries the bare base class
@@ -272,19 +271,36 @@ def build_coverage(
         t for t in plan_entries if any(_is_released(c, released) for c in test_id_to_classes.get(t, []))
     }
 
+    uncovered = [_plan_item_summary(tid, plan_entries[tid]) for tid in plan_entries if tid not in covered]
+    # Surface scheduled, high-priority gaps first; unscheduled items (blank
+    # milestone/priority) sort last via the "~" sentinel (sorts after digits).
+    uncovered.sort(key=lambda i: (i["milestone"] or "~", i["priority"] or "~", i["req_id"], i["test_id"]))
+
     return {
         "plan_test_ids": len(plan_entries),
         "plan_test_ids_covered": len(covered),
         "plan_test_ids_covered_by_released_class": len(covered_released),
         "classes_with_test_ids": len(class_map),
         "test_id_to_classes": {t: sorted(c) for t, c in sorted(test_id_to_classes.items())},
+        "uncovered": uncovered,
+    }
+
+
+def _plan_item_summary(test_id: str, entry: dict[str, Any]) -> dict[str, str]:
+    """Extract the fields used to describe an (un)covered plan item."""
+    return {
+        "test_id": test_id,
+        "req_id": entry.get("req_id", "") or "",
+        "summary": entry.get("summary", "") or "",
+        "milestone": entry.get("milestone", "") or "",
+        "priority": entry.get("priority", "") or "",
     }
 
 
 def render_markdown(coverage: dict[str, Any], plan_entries: dict[str, dict[str, Any]]) -> str:
     """Render the coverage report as Markdown."""
     lines = [
-        "# Test-plan coverage (via class `test_ids`)",
+        "# Test-plan coverage (via wired `test_id`s)",
         "",
         f"- Test-plan items: **{coverage['plan_test_ids']}**",
         f"- Covered by \u22651 class: **{coverage['plan_test_ids_covered']}**",
@@ -300,6 +316,21 @@ def render_markdown(coverage: dict[str, Any], plan_entries: dict[str, dict[str, 
         entry = plan_entries.get(tid, {})
         req = entry.get("req_id", "")
         lines.append(f"| `{tid}` | {req} | {', '.join(f'`{c}`' for c in classes)} |")
+
+    uncovered = coverage.get("uncovered", [])
+    lines += [
+        "",
+        f"## Uncovered test IDs ({len(uncovered)})",
+        "",
+        "Plan items with no implementing check - the gap to close.",
+        "",
+        "| Test ID | Req | Milestone | Priority | Summary |",
+        "|---|---|---|---|---|",
+    ]
+    for item in uncovered:
+        lines.append(
+            f"| `{item['test_id']}` | {item['req_id']} | {item['milestone']} | {item['priority']} | {item['summary']} |"
+        )
     return "\n".join(lines) + "\n"
 
 
@@ -369,11 +400,55 @@ def main(argv: list[str] | None = None) -> int:
         Path(args.review).write_text(render_review(entries, plan_entries))
         print(f"Wrote {args.review}")
 
-    print(f"Test-plan items:                     {coverage['plan_test_ids']}")
-    print(f"Covered by >=1 class:                 {coverage['plan_test_ids_covered']}")
-    print(f"Covered by a released class:          {coverage['plan_test_ids_covered_by_released_class']}")
-    print(f"Classes declaring test_ids:          {coverage['classes_with_test_ids']}")
+    _print_summary(coverage)
+    _print_uncovered(coverage["uncovered"])
     return 0
+
+
+def _print_summary(coverage: dict[str, Any]) -> None:
+    """Print the headline coverage numbers, column-aligned and self-explanatory.
+
+    The first block is all out of the same denominator (every test ID in the
+    plan); ``released`` is a subset of ``implemented``. The trailing line is a
+    separate count of *checks*, not plan items, and is called out as such to
+    avoid mixing the two units.
+    """
+    total = coverage["plan_test_ids"]
+    implemented = coverage["plan_test_ids_covered"]
+    released = coverage["plan_test_ids_covered_by_released_class"]
+    gap = len(coverage["uncovered"])
+    checks = coverage["classes_with_test_ids"]
+
+    def pct(n: int) -> str:
+        return f"{round(100 * n / total)}%" if total else "-"
+
+    rows = [
+        ("Plan items (every test ID in the plan)", total, ""),
+        ("Implemented (>=1 check maps to it)", implemented, pct(implemented)),
+        ("...of which released (shipped to users)", released, pct(released)),
+        ("Not yet implemented (the gap)", gap, pct(gap)),
+    ]
+    label_w = max(len(label) for label, _, _ in rows)
+
+    print("Test-plan coverage  (source: docs/test-plan.yaml)\n")
+    for label, value, percent in rows:
+        print(f"  {label:<{label_w}}  {value:>4}  {percent:>4}")
+    print(
+        f"\n  ({checks} checks declare a test_id - a count of checks, not plan items; "
+        "several\n   checks can map to the same plan item.)"
+    )
+
+
+def _print_uncovered(uncovered: list[dict[str, str]]) -> None:
+    """Print the uncovered plan items as a compact table, ordered by milestone/priority."""
+    if not uncovered:
+        return
+    print("\nUncovered plan items (no implementing check):\n")
+    print(f"  {'Test ID':<13} {'Mile':<5} {'Pri':<4} {'Req':<8} Summary")
+    print(f"  {'-' * 13} {'-' * 5} {'-' * 4} {'-' * 8} {'-' * 40}")
+    for item in uncovered:
+        summary = item["summary"] if len(item["summary"]) <= 70 else item["summary"][:67] + "..."
+        print(f"  {item['test_id']:<13} {item['milestone']!s:<5} {item['priority']!s:<4} {item['req_id']:<8} {summary}")
 
 
 if __name__ == "__main__":
