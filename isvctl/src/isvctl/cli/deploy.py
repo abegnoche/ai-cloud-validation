@@ -15,7 +15,7 @@
 
 """Deploy subcommand for isvctl.
 
-Deploys ISV-NCP-Validation-Suite to a remote machine and runs validation tests.
+Deploys ai-cloud-validation to a remote machine and runs validation tests.
 """
 
 import logging
