@@ -112,13 +112,27 @@ def test_repo_metadata_passes_all_guardrails() -> None:
     completeness check: a check with no test_id is allowed.
     """
     plan_ids = set(test_plan_coverage.load_plan())
-    entries = test_plan_coverage.apply_config_labels(
-        test_plan_coverage.apply_config_test_ids(test_plan_coverage.catalog_entries())
-    )
-    class_map = test_plan_coverage.class_test_id_map(entries)
+    checks = test_plan_coverage.run_guardrails(plan_ids, test_plan_coverage.entries_from_config_maps())
+    all_errors = [msg for msgs in checks.values() for msg in msgs]
+    assert not all_errors, "\n  ".join(["test-plan coverage guardrails failed:", *all_errors])
 
-    integrity = test_plan_coverage.integrity_errors(plan_ids, class_map)
-    consistency = test_plan_coverage.consistency_errors(entries)
-    assert not (integrity or consistency), "\n  ".join(
-        ["test-plan coverage guardrails failed:", *integrity, *consistency]
+
+def test_guardrail_fast_path_matches_catalog_path() -> None:
+    """YAML-only guardrail seed must agree with the catalog-backed report path."""
+    plan_ids = set(test_plan_coverage.load_plan())
+    test_id_map = test_plan_coverage.config_test_id_map()
+    label_map = test_plan_coverage.config_label_map()
+
+    fast = test_plan_coverage.run_guardrails(
+        plan_ids,
+        test_plan_coverage.entries_from_config_maps(test_id_map, label_map),
     )
+    slow = test_plan_coverage.run_guardrails(
+        plan_ids,
+        test_plan_coverage.entries_from_config_maps(
+            test_id_map,
+            label_map,
+            test_plan_coverage.catalog_entries(),
+        ),
+    )
+    assert fast == slow

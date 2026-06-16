@@ -208,6 +208,26 @@ def apply_config_test_ids(
     return merged
 
 
+def entries_from_config_maps(
+    test_id_map: dict[str, list[str]] | None = None,
+    label_map: dict[str, list[str]] | None = None,
+    seed_entries: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """Merge suite YAML wiring onto catalog entries or YAML-only seeds.
+
+    When ``seed_entries`` is omitted, build one stub entry per wired check name
+    from the suite configs. That path is enough for ``--check`` guardrails and
+    avoids importing the full validation catalog.
+    """
+    test_id_map = config_test_id_map() if test_id_map is None else test_id_map
+    label_map = config_label_map() if label_map is None else label_map
+    if seed_entries is None:
+        seed_entries = [
+            {"name": name, "test_ids": [], "labels": []} for name in sorted(set(test_id_map) | set(label_map))
+        ]
+    return apply_config_labels(apply_config_test_ids(seed_entries, test_id_map), label_map)
+
+
 def class_test_id_map(entries: list[dict[str, Any]] | None = None) -> dict[str, list[str]]:
     """Return a mapping of class/variant name to its real (non-sentinel) test IDs."""
     entries = catalog_entries() if entries is None else entries
@@ -253,6 +273,18 @@ def consistency_errors(entries: list[dict[str, Any]]) -> list[str]:
                     f"{entry['name']}: test_id {tid} implies label {required!r}, but wiring labels are {sorted(labels)}"
                 )
     return sorted(errors)
+
+
+def run_guardrails(
+    plan_ids: set[str],
+    entries: list[dict[str, Any]],
+) -> dict[str, list[str]]:
+    """Return integrity and consistency errors for ``entries`` against ``plan_ids``."""
+    class_map = class_test_id_map(entries)
+    return {
+        "integrity": integrity_errors(plan_ids, class_map),
+        "consistency": consistency_errors(entries),
+    }
 
 
 def build_coverage(
@@ -369,13 +401,13 @@ def main(argv: list[str] | None = None) -> int:
 
     plan_entries = load_plan()
     plan_ids = set(plan_entries)
-    entries = apply_config_labels(apply_config_test_ids(catalog_entries()))
-    class_map = class_test_id_map(entries)
+    if args.check:
+        entries = entries_from_config_maps()
+    else:
+        entries = entries_from_config_maps(seed_entries=catalog_entries())
 
-    checks = {
-        "integrity": integrity_errors(plan_ids, class_map),
-        "consistency": consistency_errors(entries),
-    }
+    checks = run_guardrails(plan_ids, entries)
+    class_map = class_test_id_map(entries)
     all_errors = [f"[{kind}] {msg}" for kind, msgs in checks.items() for msg in msgs]
 
     if args.check:
