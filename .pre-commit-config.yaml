@@ -28,21 +28,28 @@ repos:
   - repo: local
     hooks:
       - id: check-md-links
-        name: Check markdown relative links
+        name: check markdown relative links
         entry: python3 scripts/check_md_links.py
         language: system
         pass_filenames: false
         types: [markdown]
 
       - id: check-spdx-headers
-        name: Check SPDX license headers
+        name: check SPDX license headers
         entry: python3 scripts/add_spdx_headers.py --check
         language: system
         pass_filenames: false
         types_or: [python, shell, yaml]
 
+      - id: plan-coverage
+        name: check test-plan coverage
+        entry: uv run python scripts/test_plan_coverage.py --check
+        language: system
+        pass_filenames: false
+        files: ^(docs/test-plan\.yaml|isvctl/configs/suites/.*\.yaml|scripts/test_plan_coverage\.py)$
+
       - id: validate-suites
-        name: Validate suite check wiring (test_id + labels)
+        name: check tests suites (test_id + labels)
         entry: python3 scripts/validate_suite_wiring.py --check
         language: system
         pass_filenames: false

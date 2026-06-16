@@ -185,7 +185,7 @@ plan: ## Render docs/test-plan.yaml to AsciiDoc
 	@uv run python scripts/test_plan_yaml_to_adoc.py
 	@echo "✅ Test plan rendered!"
 
-plan-coverage: ## Report test-plan coverage + gaps via wired test_ids (CHECK=1 for CI integrity guardrail)
+plan-coverage: ## Report test-plan coverage + gaps via wired test_ids (CHECK=1 for pre-commit guardrail)
 	@uv run python scripts/test_plan_coverage.py $(if $(CHECK),--check,)
 
 validate-suites: ## Require test_id and labels on every suite check (CHECK=1 for CI/pre-commit)
