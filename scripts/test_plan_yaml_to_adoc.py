@@ -133,9 +133,7 @@ def validate_test_plan(data: dict[str, Any]) -> None:
                     _validate_string_list("dependencies", t.get("dependencies"), tid, errors)
                     for entry in t.get("github_issues") or []:
                         if not re.fullmatch(r"#\d+", str(entry)):
-                            errors.append(
-                                f"{tid}: github_issues entry {entry!r} must be a bare '#N' reference"
-                            )
+                            errors.append(f"{tid}: github_issues entry {entry!r} must be a bare '#N' reference")
     if errors:
         raise SystemExit("test-plan.yaml validation failed:\n  " + "\n  ".join(errors))
 
