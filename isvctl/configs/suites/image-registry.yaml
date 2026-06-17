@@ -54,69 +54,107 @@ tests:
     image_upload:
       step: upload_image
       checks:
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["image_registry"]
         FieldExistsCheck:
+          test_id: "BOOT01-01"
+          labels: ["image_registry"]
           fields: ["image_id", "storage_bucket", "disk_ids"]
 
     # --- Image CRUD ---
     image_crud:
       step: crud_image
       checks:
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["image_registry"]
         FieldExistsCheck:
+          test_id: "N/A"
+          labels: ["image_registry"]
           fields: ["image_id", "operations"]
         CrudOperationsCheck:
+          test_id: "BOOT03-02"
+          labels: ["image_registry"]
           operations: ["get", "list", "create", "delete"]
 
     # --- VM Launch from Image ---
     vm_from_image:
       step: launch_instance
       checks:
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "BOOT01-05"
+          labels: ["image_registry"]
         FieldExistsCheck:
+          test_id: "N/A"
+          labels: ["image_registry"]
           fields: ["instance_id", "public_ip", "key_path"]
         InstanceStateCheck:
+          test_id: "N/A"
+          labels: ["image_registry"]
           expected_state: "running"
 
     vm_ssh:
       step: launch_instance
       checks:
-        ConnectivityCheck: {}
+        ConnectivityCheck:
+          test_id: "N/A"
+          labels: ["image_registry", "ssh"]
         OsCheck:
+          test_id: "N/A"
+          labels: ["image_registry", "ssh"]
           expected_os: "ubuntu"
 
     # --- OS Install Config CRUD ---
     install_config_crud:
       step: crud_install_config
       checks:
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["image_registry"]
         FieldExistsCheck:
+          test_id: "BOOT01-02"
+          labels: ["image_registry"]
           fields: ["config_id", "config_name", "operations"]
 
     # --- OS Image on BMaaS ---
     bm_from_image:
       step: install_image_bm
       checks:
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "BOOT01-03"
+          labels: ["image_registry"]
         FieldExistsCheck:
+          test_id: "N/A"
+          labels: ["image_registry"]
           fields: ["instance_id", "image_id", "instance_state"]
         InstanceStateCheck:
+          test_id: "N/A"
+          labels: ["image_registry"]
           expected_state: "running"
 
     # --- OS Install Config on BMaaS ---
     bm_from_config:
       step: install_config_bm
       checks:
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "BOOT01-04"
+          labels: ["image_registry"]
         FieldExistsCheck:
+          test_id: "N/A"
+          labels: ["image_registry"]
           fields: ["instance_id", "config_id", "instance_state"]
         InstanceStateCheck:
+          test_id: "N/A"
+          labels: ["image_registry"]
           expected_state: "running"
 
     teardown_checks:
       step: teardown
       checks:
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["image_registry"]
 
   exclude:
     labels: []

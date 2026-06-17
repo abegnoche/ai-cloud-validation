@@ -2,7 +2,7 @@ MY_ISV_DOMAINS := bare_metal control-plane iam image-registry network observabil
 DEMO_TARGETS := $(addprefix demo-,$(MY_ISV_DOMAINS))
 
 .PHONY: help pre-commit build test coverage clean lint format install bump-patch bump-fix bump-minor bump-feat bump-major bump bump-check \
-	security-trivy security-trivy-detail security-trufflehog ci-security demo-test demo-all $(DEMO_TARGETS) plan
+	security-trivy security-trivy-detail security-trufflehog ci-security demo-test demo-all $(DEMO_TARGETS) plan plan-coverage validate-suites
 
 PACKAGES := isvctl isvreporter isvtest
 BUMP_SCRIPT := scripts/bump-version.py
@@ -184,6 +184,12 @@ plan: ## Render docs/test-plan.yaml to AsciiDoc
 	@echo "Rendering test plan..."
 	@uv run python scripts/test_plan_yaml_to_adoc.py
 	@echo "✅ Test plan rendered!"
+
+plan-coverage: ## Report test-plan coverage + gaps via wired test_ids (CHECK=1 for pre-commit guardrail)
+	@uv run python scripts/test_plan_coverage.py $(if $(CHECK),--check,)
+
+validate-suites: ## Require test_id and labels on every suite check (CHECK=1 for CI/pre-commit)
+	@uv run python scripts/validate_suite_wiring.py $(if $(CHECK),--check,)
 
 .PHONY: changelog-fill
 changelog-fill: ## Fill CHANGELOG.md gaps via an LLM CLI (CLI=auto|cursor|codex|claude)

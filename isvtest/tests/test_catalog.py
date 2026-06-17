@@ -15,7 +15,6 @@
 
 """Tests for the catalog module."""
 
-from typing import ClassVar
 from unittest.mock import patch
 
 from isvtest.catalog import build_catalog, get_catalog_version
@@ -23,10 +22,9 @@ from isvtest.core.validation import BaseValidation
 
 
 class ExplicitLabelCatalogCheck(BaseValidation):
-    """Catalog fixture with explicit labels."""
+    """Catalog fixture whose labels are supplied by the YAML wiring scan."""
 
     description = "Explicit labels"
-    labels: ClassVar[tuple[str, ...]] = ("accelerator", "long_running")
 
     def run(self) -> None:
         """Mark the validation passed."""
@@ -76,6 +74,25 @@ class TestBuildCatalog:
         assert "StepSuccessCheck" in names
         assert "FieldExistsCheck" in names
 
+    def test_extract_checks_supports_direct_dict_category_form(self, tmp_path) -> None:
+        """Direct dict category wiring is included in catalog config scans."""
+        from isvtest.catalog import _extract_checks_from_config
+
+        config = tmp_path / "direct-dict.yaml"
+        config.write_text(
+            """\
+tests:
+  validations:
+    direct:
+      DirectCheck:
+        labels: ["network"]
+      EmptyParamsCheck: {}
+""",
+            encoding="utf-8",
+        )
+
+        assert _extract_checks_from_config(config) == ["DirectCheck", "EmptyParamsCheck"]
+
     def test_released_only_filters_catalog(self) -> None:
         """Default catalog generation excludes tests not in the release manifest."""
         with patch("isvtest.catalog.load_released_test_filter", return_value={"StepSuccessCheck"}):
@@ -100,10 +117,14 @@ class TestBuildCatalog:
                 assert isinstance(label, str)
 
     def test_catalog_emits_explicit_labels(self) -> None:
-        """Explicit class labels are the only source of catalog tag metadata."""
+        """Per-wiring YAML labels are surfaced as catalog tag metadata."""
         with (
             patch("isvtest.catalog.discover_all_tests", return_value=[ExplicitLabelCatalogCheck]),
             patch("isvtest.catalog._build_platform_map", return_value={}),
+            patch(
+                "isvtest.catalog.build_label_map",
+                return_value={"ExplicitLabelCatalogCheck": {"accelerator", "long_running"}},
+            ),
             patch("isvtest.catalog.load_released_test_filter", return_value=None),
         ):
             catalog = build_catalog()
@@ -176,7 +197,6 @@ class TestBuildCatalog:
 
         class ObservabilityLabelledCheck(BaseValidation):
             description = "Observability check labelled but not in any suite"
-            labels: ClassVar[tuple[str, ...]] = ("observability",)
 
             def run(self) -> None:
                 self.set_passed()
@@ -186,6 +206,10 @@ class TestBuildCatalog:
         with (
             patch("isvtest.catalog.discover_all_tests", return_value=[ObservabilityLabelledCheck]),
             patch("isvtest.catalog._build_platform_map", return_value={}),
+            patch(
+                "isvtest.catalog.build_label_map",
+                return_value={"ObservabilityLabelledCheck": {"observability"}},
+            ),
             patch("isvtest.catalog.load_released_test_filter", return_value=None),
         ):
             catalog = build_catalog()

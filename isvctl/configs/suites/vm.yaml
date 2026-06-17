@@ -58,49 +58,67 @@ tests:
       step: launch_instance
       checks:
         InstanceStateCheck:
+          test_id: "N/A"
+          labels: ["vm"]
           expected_state: "running"
 
     specified_key:
       step: launch_instance
       checks:
-        InstanceSpecifiedKeyCheck: {}
+        InstanceSpecifiedKeyCheck:
+          test_id: "AUTH-XX-02"
+          labels: ["vm"]
 
     instance_created:
       step: launch_instance
       checks:
-        InstanceCreatedCheck: {}
+        InstanceCreatedCheck:
+          test_id: "CNP01-09"
+          labels: ["vm"]
 
     list_instances:
       step: list_instances
       checks:
         InstanceListCheck:
+          test_id: "CNP01-11"
+          labels: ["vm"]
           min_count: 1
 
     tag_checks:
       step: verify_tags
       checks:
         InstanceTagCheck:
+          test_id: "CNP05-02"
+          labels: ["vm"]
           required_keys: ["Name", "CreatedBy"]
 
     serial_console:
       step: serial_console
       checks:
-        SerialConsoleCheck: {}
+        SerialConsoleCheck:
+          test_id: "CNP06-03"
+          labels: ["vm"]
 
     console_rbac:
       step: console_rbac
       checks:
-        ConsoleRbacCheck: {}
+        ConsoleRbacCheck:
+          test_id: "CNP01-16"
+          labels: ["vm", "security", "iam"]
 
     virtual_device_hardening:
       step: virtual_device_hardening
       checks:
-        VirtualDeviceHardeningCheck: {}
+        VirtualDeviceHardeningCheck:
+          test_id: "CNP01-17"
+          labels: ["vm", "security"]
 
     cloud_init:
       step: launch_instance
       checks:
-        CloudInitCheck: {}
+        CloudInitCheck:
+          test_id: "BOOT02-02"
+          labels: ["vm", "ssh"]
 
     # ─── Host-level validations anchored to describe_instance ────────
     # describe_instance runs AFTER reboot, so these checks prove the
@@ -109,112 +127,167 @@ tests:
       step: describe_instance
       checks:
         InstanceStateCheck:
+          test_id: "N/A"
+          labels: ["vm"]
           expected_state: "running"
 
     ssh:
       step: describe_instance
       checks:
-        ConnectivityCheck: {}
+        ConnectivityCheck:
+          test_id: "VMAAS-XX-01"
+          labels: ["vm", "ssh"]
         OsCheck:
+          test_id: "VMAAS-XX-05"
+          labels: ["vm", "ssh"]
           expected_os: "ubuntu"
 
     gpu:
       step: describe_instance
       checks:
         GpuCheck:
+          test_id: "VMAAS-XX-06"
+          labels: ["vm", "ssh", "gpu"]
           expected_gpus: 1
 
     host_os:
       step: describe_instance
       checks:
-        VcpuPinningCheck: {}
+        VcpuPinningCheck:
+          test_id: "VMAAS-XX-09"
+          labels: ["vm", "ssh"]
         PciBusCheck:
+          test_id: "VMAAS-XX-09"
+          labels: ["vm", "ssh", "gpu"]
           expected_gpus: 1
-        HostSoftwareCheck: {}
+        HostSoftwareCheck:
+          test_id: "VMAAS-XX-07"
+          labels: ["vm", "ssh"]
 
     driver_info:
       step: describe_instance
       checks:
-        DriverCheck: {}
+        DriverCheck:
+          test_id: "VMAAS-XX-07"
+          labels: ["vm", "ssh", "gpu"]
 
     cpu_info:
       step: describe_instance
       checks:
-        CpuInfoCheck: {}
+        CpuInfoCheck:
+          test_id: "N/A"
+          labels: ["vm", "ssh"]
 
     container_runtime:
       step: describe_instance
       checks:
-        ContainerRuntimeCheck: {}
+        ContainerRuntimeCheck:
+          test_id: "N/A"
+          labels: ["vm", "ssh", "gpu", "workload", "slow"]
 
     # ─── Lifecycle validations ───────────────────────────────────────
     stop_checks:
       step: stop_instance
       checks:
-        InstanceStopCheck: {}
+        InstanceStopCheck:
+          test_id: "CNP01-14"
+          labels: ["vm"]
 
     start_checks:
       step: start_instance
       checks:
-        InstanceStartCheck: {}
+        InstanceStartCheck:
+          test_id: "CNP01-15"
+          labels: ["vm"]
         StableIdentifierCheck:
+          test_id: "CNP08-03"
+          labels: ["vm"]
           reference_id: "{{steps.launch_instance.instance_id}}"
 
     start_ssh:
       step: start_instance
       checks:
-        ConnectivityCheck: {}
+        # ConnectivityCheck -> VMAAS-XX-01, OsCheck -> VMAAS-XX-05 (declared in the "ssh" section)
+        ConnectivityCheck:
+          test_id: "VMAAS-XX-01"
+          labels: ["vm", "ssh"]
         OsCheck:
+          test_id: "VMAAS-XX-05"
+          labels: ["vm", "ssh"]
           expected_os: "ubuntu"
 
     start_gpu:
       step: start_instance
       checks:
+        # GpuCheck -> VMAAS-XX-06 (declared in the "gpu" section)
         GpuCheck:
+          test_id: "VMAAS-XX-06"
+          labels: ["vm", "ssh", "gpu"]
           expected_gpus: 1
 
     reboot_checks:
       step: reboot_instance
       checks:
         InstanceRebootCheck:
+          test_id: "CNP01-13"
+          labels: ["vm"]
           max_uptime: 600
+        # StableIdentifierCheck -> CNP08-03 (declared in the "start_checks" section)
         StableIdentifierCheck:
+          test_id: "CNP08-03"
+          labels: ["vm"]
           reference_id: "{{steps.launch_instance.instance_id}}"
 
     reboot_state:
       step: reboot_instance
       checks:
         InstanceStateCheck:
+          test_id: "N/A"
+          labels: ["vm"]
           expected_state: "running"
 
     reboot_ssh:
       step: reboot_instance
       checks:
-        ConnectivityCheck: {}
+        # ConnectivityCheck -> VMAAS-XX-01, OsCheck -> VMAAS-XX-05 (declared in the "ssh" section)
+        ConnectivityCheck:
+          test_id: "VMAAS-XX-01"
+          labels: ["vm", "ssh"]
         OsCheck:
+          test_id: "VMAAS-XX-05"
+          labels: ["vm", "ssh"]
           expected_os: "ubuntu"
 
     reboot_gpu:
       step: reboot_instance
       checks:
+        # GpuCheck -> VMAAS-XX-06 (declared in the "gpu" section)
         GpuCheck:
+          test_id: "VMAAS-XX-06"
+          labels: ["vm", "ssh", "gpu"]
           expected_gpus: 1
 
     # ─── NIM validations ─────────────────────────────────────────────
     nim_health:
       step: deploy_nim
       checks:
-        NimHealthCheck: {}
+        NimHealthCheck:
+          test_id: "VMAAS-XX-12"
+          labels: ["vm", "ssh", "gpu"]
 
     nim_models:
       step: deploy_nim
       checks:
-        NimModelCheck: {}
+        NimModelCheck:
+          test_id: "VMAAS-XX-12"
+          labels: ["vm", "ssh", "gpu"]
 
     nim_inference:
       step: deploy_nim
       checks:
         NimInferenceCheck:
+          test_id: "VMAAS-XX-12"
+          labels: ["vm", "ssh", "gpu", "workload", "slow"]
           prompt: "What is CUDA?"
           max_tokens: 50
 
@@ -222,12 +295,16 @@ tests:
     nim_teardown:
       step: teardown_nim
       checks:
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["vm"]
 
     teardown_checks:
       step: teardown
       checks:
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["vm"]
 
   exclude:
     labels: []

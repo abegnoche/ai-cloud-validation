@@ -58,48 +58,84 @@ tests:
       step: check_api
       checks:
         FieldExistsCheck:
+          test_id: "N/A"
+          labels: ["control_plane"]
           fields: ["account_id", "tests"]
+        # DATASVC-XX-01 (S3-compatible API w/ authenticated endpoints):
+        # authenticated-endpoint half - a successful authenticated check_api
+        # response. The data-path half is the CrudOperationsCheck in the
+        # "s3_object_lifecycle" section, which declares the same test_id.
         FieldValueCheck:
+          test_id: "DATASVC-XX-01"
+          labels: ["control_plane"]
           field: "success"
           expected: true
 
     setup_checks:
       checks:
         AccessKeyCreatedCheck:
+          test_id: "CP-XX-05"
+          labels: ["control_plane", "iam"]
           step: create_access_key
         TenantCreatedCheck:
+          test_id: "CP-XX-07"
+          labels: ["control_plane", "iam"]
           step: create_tenant
 
     access_key_lifecycle:
       checks:
         AccessKeyAuthenticatedCheck:
+          test_id: "CP-XX-05"
+          labels: ["control_plane", "iam"]
           step: test_access_key
         AccessKeyDisabledCheck:
+          test_id: "CP-XX-06"
+          labels: ["control_plane", "iam"]
           step: disable_access_key
         AccessKeyRejectedCheck:
+          test_id: "CP-XX-06"
+          labels: ["control_plane", "iam"]
           step: verify_key_rejected
 
     tenant_lifecycle:
       checks:
         TenantListedCheck:
+          test_id: "CP-XX-08"
+          labels: ["control_plane", "iam"]
           step: list_tenants
         TenantInfoCheck:
+          test_id: "CP-XX-09"
+          labels: ["control_plane", "iam"]
           step: get_tenant
 
     s3_object_lifecycle:
       step: s3_object_lifecycle
       checks:
-        StepSuccessCheck: {}
+        # Data-path half of DATASVC-XX-01 (object put/get/delete); the
+        # authenticated-endpoint half is the FieldValueCheck in "api_health".
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["control_plane"]
         FieldExistsCheck:
+          test_id: "N/A"
+          labels: ["control_plane"]
           fields: ["bucket_name", "object_key", "operations"]
         CrudOperationsCheck:
+          test_id: "DATASVC-XX-01"
+          labels: ["control_plane"]
           operations: ["put", "get", "delete"]
 
     teardown_checks:
       checks:
         StepSuccessCheck-delete_access_key:
+          # No dedicated "delete access key" plan item; access-key lifecycle is
+          # CP-XX-05 (create) and CP-XX-06 (disable).
+          test_id: "N/A"
+          labels: ["control_plane"]
           step: delete_access_key
         StepSuccessCheck-delete_tenant:
+          test_id: "CP-XX-10"
+          labels: ["control_plane"]
           step: delete_tenant
 
   exclude:

@@ -33,21 +33,29 @@ tests:
     network_logs:
       checks:
         VpcFlowLogsCheck:
+          test_id: "OBS-XX-19"
+          labels: ["observability", "network"]
           step: vpc_flow_logs
 
     host_logs:
       checks:
         HostSyslogCheck:
+          test_id: "OBS-XX-18"
+          labels: ["observability", "bare_metal"]
           step: host_syslogs
 
     bmc_logs:
       checks:
         BmcSelLogsCheck:
+          test_id: "OBS-XX-17"
+          labels: ["observability", "security"]
           step: bmc_sel_logs
 
     bmc_telemetry:
       checks:
         BmcGpuTelemetryCheck:
+          test_id: "TELEM-XX-04"
+          labels: ["observability", "security", "gpu"]
           step: bmc_gpu_telemetry
 
   exclude:

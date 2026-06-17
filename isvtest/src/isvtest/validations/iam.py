@@ -40,7 +40,6 @@ class AccessKeyCreatedCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check access key was created"
-    labels: ClassVar[tuple[str, ...]] = ("iam",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -71,7 +70,6 @@ class AccessKeyAuthenticatedCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check access key can authenticate"
-    labels: ClassVar[tuple[str, ...]] = ("iam",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -100,7 +98,6 @@ class AccessKeyDisabledCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check access key was disabled"
-    labels: ClassVar[tuple[str, ...]] = ("iam",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -124,7 +121,6 @@ class AccessKeyRejectedCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check disabled key is rejected"
-    labels: ClassVar[tuple[str, ...]] = ("iam",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -171,7 +167,6 @@ class ServiceAccountCredentialCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check service account can obtain credentials and authenticate"
-    labels: ClassVar[tuple[str, ...]] = ("iam", "security")
 
     def run(self) -> None:
         """Validate SA credential authentication from step output."""
@@ -220,7 +215,6 @@ class TenantCreatedCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check tenant was created"
-    labels: ClassVar[tuple[str, ...]] = ("iam",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -252,7 +246,6 @@ class TenantListedCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check tenant appears in list"
-    labels: ClassVar[tuple[str, ...]] = ("iam",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})
@@ -285,7 +278,6 @@ class TenantInfoCheck(BaseValidation):
     """
 
     description: ClassVar[str] = "Check tenant info retrieved"
-    labels: ClassVar[tuple[str, ...]] = ("iam",)
 
     def run(self) -> None:
         step_output = self.config.get("step_output", {})

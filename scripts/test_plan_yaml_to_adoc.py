@@ -38,6 +38,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Constraint shared by `labels` and `dependencies` entries: identifier-like only.
 LABEL_RE = re.compile(r"^[a-zA-Z0-9_-]+$")
+ISSUE_REF_RE = re.compile(r"#(\d+)")
 
 
 # ---------------------------------------------------------------------------
@@ -85,23 +86,18 @@ def span_cell(span: int, content: str) -> str:
 
 
 def fmt_gh_issues_adoc(entries: list[str] | None) -> str:
-    """Render `#N (state) ...` GitHub issue entries as linked AsciiDoc with status icons."""
+    """Render bare ``#N`` GitHub issue entries as linked AsciiDoc."""
     if not entries:
         return ""
     parts = []
     for entry in entries:
-        m = re.match(r"#(\d+)\s*\((\w+)\)(.*)", entry)
-        if m:
-            num, state, rest = m.group(1), m.group(2), m.group(3).strip()
-            link = f"https://github.com/{GH_REPO}/issues/{num}"
-            icon = "icon:check-circle[role=green]" if state == "closed" else "icon:exclamation-circle[role=red]"
-            label = f"{icon} {link}[#{num}]"
-            if "TODO" in rest:
-                todo_text = rest.lstrip("# ").strip()
-                label += f" [small]#({todo_text})#"
-            parts.append(label)
-        else:
+        m = ISSUE_REF_RE.fullmatch(str(entry))
+        if not m:
             parts.append(esc_adoc(entry))
+            continue
+        num = m.group(1)
+        link = f"https://github.com/{GH_REPO}/issues/{num}"
+        parts.append(f"{link}[#{num}]")
     return " +\n".join(parts)
 
 
@@ -136,6 +132,9 @@ def validate_test_plan(data: dict[str, Any]) -> None:
                     tid = t.get("test_id", "<no test_id>")
                     _validate_string_list("labels", t.get("labels"), tid, errors)
                     _validate_string_list("dependencies", t.get("dependencies"), tid, errors)
+                    for entry in t.get("github_issues") or []:
+                        if not re.fullmatch(r"#\d+", str(entry)):
+                            errors.append(f"{tid}: github_issues entry {entry!r} must be a bare '#N' reference")
     if errors:
         raise SystemExit("test-plan.yaml validation failed:\n  " + "\n  ".join(errors))
 
@@ -155,7 +154,6 @@ def generate_adoc(data: dict[str, Any], outfile: str) -> None:
         "////",
         "= AI Cloud Validation Test Suite",
         ":toc:",
-        ":icons: font",
         ":max-width: none",
         "",
         '[cols="2,2,5,2,2,1,1,1,1,1,3,1,1,1,6,1,4",options="header"]',
@@ -198,7 +196,7 @@ def generate_adoc(data: dict[str, Any], outfile: str) -> None:
                     gh_entries = test.get("github_issues", [])
                     first_gh_link = ""
                     if gh_entries:
-                        m = re.match(r"#(\d+)", gh_entries[0])
+                        m = ISSUE_REF_RE.fullmatch(str(gh_entries[0]))
                         if m:
                             num = m.group(1)
                             first_gh_link = f"https://github.com/{GH_REPO}/issues/{num}[#{num}]"

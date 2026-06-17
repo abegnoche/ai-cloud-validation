@@ -16,7 +16,7 @@
 """Tests for validation resolution."""
 
 import logging
-from typing import Any, ClassVar, cast
+from typing import Any, cast
 
 import pytest
 
@@ -33,9 +33,7 @@ from isvtest.core.validation import BaseValidation
 
 
 class KubernetesSlowCheck(BaseValidation):
-    """Validation with multiple labels used by parser tests."""
-
-    labels: ClassVar[tuple[str, ...]] = ("slow", "kubernetes")
+    """Validation used by parser tests (labels supplied via wiring)."""
 
     def run(self) -> None:
         """Mark the validation passed."""
@@ -43,9 +41,7 @@ class KubernetesSlowCheck(BaseValidation):
 
 
 class AcceleratorCheck(BaseValidation):
-    """Validation with accelerator-themed labels used by parser tests."""
-
-    labels: ClassVar[tuple[str, ...]] = ("accelerator", "long_running")
+    """Validation used by parser tests (labels supplied via wiring)."""
 
     def run(self) -> None:
         """Mark the validation passed."""
@@ -275,21 +271,15 @@ def test_resolve_entries_requires_all_include_labels() -> None:
     assert "labels" in by_name["GpuOnlyCheck"].message
 
 
-def test_parse_validations_supports_group_defaults_and_labels(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Parser expands config groups and populates labels from discovered classes."""
-    monkeypatch.setattr(
-        "isvtest.core.resolution.discover_all_tests",
-        lambda: [KubernetesSlowCheck, AcceleratorCheck, PlainCheck],
-    )
+def test_parse_validations_supports_group_defaults_and_labels() -> None:
+    """Parser expands config groups and populates labels from the wiring."""
     raw_config: dict[str, Any] = {
         "cluster": {
             "step": "create_cluster",
             "phase": "setup",
             "checks": {
-                "KubernetesSlowCheck": {"expected": 4},
-                "AcceleratorCheck": {"expected": 8},
+                "KubernetesSlowCheck": {"expected": 4, "labels": ["slow", "kubernetes"]},
+                "AcceleratorCheck": {"expected": 8, "labels": ["accelerator", "long_running"]},
                 "PlainCheck": {},
             },
         },
@@ -301,7 +291,7 @@ def test_parse_validations_supports_group_defaults_and_labels(
         ValidationEntry(
             name="KubernetesSlowCheck",
             category="cluster",
-            params_template={"expected": 4},
+            params_template={"expected": 4, "labels": ["slow", "kubernetes"]},
             step="create_cluster",
             phase="setup",
             labels=("slow", "kubernetes"),
@@ -309,7 +299,7 @@ def test_parse_validations_supports_group_defaults_and_labels(
         ValidationEntry(
             name="AcceleratorCheck",
             category="cluster",
-            params_template={"expected": 8},
+            params_template={"expected": 8, "labels": ["accelerator", "long_running"]},
             step="create_cluster",
             phase="setup",
             labels=("accelerator", "long_running"),
@@ -325,12 +315,8 @@ def test_parse_validations_supports_group_defaults_and_labels(
     ]
 
 
-def test_parse_validations_preserves_list_order(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_parse_validations_preserves_list_order() -> None:
     """Parser keeps list-format validation order for report and execution order."""
-    monkeypatch.setattr(
-        "isvtest.core.resolution.discover_all_tests",
-        lambda: [PlainCheck],
-    )
     raw_config: dict[str, Any] = {
         "checks": [
             {"PlainCheck": {"step": "first"}},
@@ -343,12 +329,8 @@ def test_parse_validations_preserves_list_order(monkeypatch: pytest.MonkeyPatch)
     assert [entry.step for entry in entries] == ["first", "second"]
 
 
-def test_parse_validations_emits_invalid_for_non_dict_list_items(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_parse_validations_emits_invalid_for_non_dict_list_items() -> None:
     """Stray scalars/lists in YAML produce ERROR(invalid_config) instead of vanishing."""
-    monkeypatch.setattr(
-        "isvtest.core.resolution.discover_all_tests",
-        lambda: [PlainCheck],
-    )
     raw_config: dict[str, Any] = {
         "cluster": {
             "checks": [

@@ -16,13 +16,13 @@
 """Tests for validation module."""
 
 import json
-from typing import Any, ClassVar
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from isvtest.core.runners import CommandResult
-from isvtest.core.validation import BaseValidation, _normalize_metadata_values, get_validation_labels
+from isvtest.core.validation import BaseValidation
 from isvtest.tests.test_validations import (
     _validation_results,
     clear_validation_results,
@@ -62,24 +62,6 @@ class ConcreteValidation(BaseValidation):
 
     description = "Test validation"
     timeout = 30
-
-    def run(self) -> None:
-        """Simple run implementation."""
-        self.set_passed("Test passed")
-
-
-class LabelledValidation(BaseValidation):
-    """Validation that publishes public labels."""
-
-    labels: ClassVar[tuple[str, ...]] = ("accelerator", "long_running")
-
-    def run(self) -> None:
-        """Simple run implementation."""
-        self.set_passed("Test passed")
-
-
-class UnlabelledValidation(BaseValidation):
-    """Validation that does not declare any labels."""
 
     def run(self) -> None:
         """Simple run implementation."""
@@ -240,23 +222,6 @@ class TestBaseValidation:
         validation = ConcreteValidation()
         assert validation.log is not None
         assert validation.log.name == "ConcreteValidation"
-
-    def test_get_validation_labels_returns_declared_labels(self) -> None:
-        """Validation labels come from the class's `labels` attribute."""
-        assert get_validation_labels(LabelledValidation) == ("accelerator", "long_running")
-
-    def test_get_validation_labels_empty_when_unset(self) -> None:
-        """Classes without labels surface an empty tuple, not the missing markers default."""
-        assert get_validation_labels(UnlabelledValidation) == ()
-        assert not hasattr(UnlabelledValidation, "markers")
-
-    def test_normalize_metadata_values_accepts_string_iterables(self) -> None:
-        """Mixed input types (str, tuple, list) all normalize to tuples of strings."""
-        assert _normalize_metadata_values(()) == ()
-        assert _normalize_metadata_values(None) == ()
-        assert _normalize_metadata_values("gpu") == ("gpu",)
-        assert _normalize_metadata_values(["gpu", "slow"]) == ("gpu", "slow")
-        assert _normalize_metadata_values(("gpu", 1)) == ("gpu", "1")
 
 
 class TestInstanceListCheck:

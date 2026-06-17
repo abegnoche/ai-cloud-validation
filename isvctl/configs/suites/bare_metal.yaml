@@ -52,63 +52,97 @@ tests:
       step: launch_instance
       checks:
         InstanceStateCheck:
+          test_id: "N/A"
+          labels: ["bare_metal"]
           expected_state: "running"
 
     list_instances:
       step: list_instances
       checks:
         InstanceListCheck:
+          # CNP01-11 (list nodes) is a VMaaS plan item; the BMaaS plan has no equivalent list-nodes item.
+          test_id: "N/A"
+          labels: ["bare_metal"]
           min_count: 1
 
     tag_checks:
       step: verify_tags
       checks:
         InstanceTagCheck:
+          test_id: "CNP05-01"
+          labels: ["bare_metal"]
           required_keys: ["Name", "CreatedBy"]
 
     topology_placement:
       step: topology_placement
       checks:
-        StepSuccessCheck: {}
-        TopologyPlacementCheck: {}
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["bare_metal"]
+        TopologyPlacementCheck:
+          test_id: "CNP01-04"
+          labels: ["bare_metal"]
 
     serial_console:
       step: serial_console
       checks:
-        SerialConsoleCheck: {}
-        SerialConsoleRetentionCheck: {}
+        SerialConsoleCheck:
+          test_id: "CNP06-01"
+          labels: ["bare_metal"]
+        SerialConsoleRetentionCheck:
+          test_id: "CNP06-02"
+          labels: ["bare_metal"]
 
     cloud_init:
       step: launch_instance
       checks:
-        CloudInitCheck: {}
+        CloudInitCheck:
+          test_id: "BOOT02-01"
+          labels: ["bare_metal", "ssh"]
 
     instance_info:
       step: describe_instance
       checks:
         InstanceStateCheck:
+          test_id: "N/A"
+          labels: ["bare_metal"]
           expected_state: "running"
 
     ssh:
       step: describe_instance
       checks:
-        ConnectivityCheck: {}
+        ConnectivityCheck:
+          test_id: "BMAAS-XX-03"
+          labels: ["bare_metal", "ssh"]
         OsCheck:
+          # No BMaaS plan item for a host-OS image check (VMAAS-XX-05 is VM-only).
+          test_id: "N/A"
+          labels: ["bare_metal", "ssh"]
           expected_os: "ubuntu"
 
     gpu:
       step: describe_instance
       checks:
         GpuCheck:
+          test_id: "BMAAS-XX-08"
+          labels: ["bare_metal", "ssh", "gpu"]
           expected_gpus: 8
 
     host_os:
       step: describe_instance
       checks:
-        VcpuPinningCheck: {}
+        # vCPU pinning / PCI passthrough / host-software are VMAAS plan items;
+        # the BMaaS plan has no equivalent, so these are intentional gaps here.
+        VcpuPinningCheck:
+          test_id: "N/A"
+          labels: ["bare_metal", "ssh"]
         PciBusCheck:
+          test_id: "N/A"
+          labels: ["bare_metal", "ssh", "gpu"]
           expected_gpus: 8
-        HostSoftwareCheck: {}
+        HostSoftwareCheck:
+          test_id: "N/A"
+          labels: ["bare_metal", "ssh"]
 
     # Per-host status log sampling: verify journalctl/dmesg
     # are emitting fresh entries within max_age_minutes. Pass if at least
@@ -116,14 +150,20 @@ tests:
     host_status_logs:
       step: host_status_log
       checks:
-        StepSuccessCheck: {}
-        BmHostStatusLog: {}
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["bare_metal"]
+        BmHostStatusLog:
+          test_id: "BMAAS-XX-07"
+          labels: ["bare_metal"]
 
     # GPU stress test - PyTorch matrix multiplications on all GPUs
     gpu_stress:
       step: describe_instance
       checks:
         GpuStressCheck:
+          test_id: "BMAAS-XX-09"
+          labels: ["bare_metal", "ssh", "gpu", "workload"]
           runtime: 30
           memory_gb: 16
 
@@ -131,57 +171,80 @@ tests:
     nccl:
       step: describe_instance
       checks:
-        NcclCheck: {}
+        NcclCheck:
+          test_id: "BMAAS-XX-11"
+          labels: ["bare_metal", "ssh", "gpu", "workload"]
 
     # DDP training workload - validates full training stack
     training:
       step: describe_instance
       checks:
         TrainingCheck:
+          test_id: "BMAAS-XX-12"
+          labels: ["bare_metal", "ssh", "gpu", "workload"]
           steps: 50
 
     # Network / interconnect checks
     nvlink:
       step: describe_instance
       checks:
-        NvlinkCheck: {}
+        NvlinkCheck:
+          test_id: "BMAAS-XX-06"
+          labels: ["bare_metal", "ssh", "gpu", "network"]
 
     infiniband:
       step: describe_instance
       checks:
-        InfiniBandCheck: {}
+        InfiniBandCheck:
+          test_id: "BMAAS-XX-06"
+          labels: ["bare_metal", "ssh", "network"]
 
     ethernet:
       step: describe_instance
       checks:
         EthernetCheck:
+          test_id: "BMAAS-XX-06"
+          labels: ["bare_metal", "ssh", "network"]
           ping_target: "8.8.8.8"
 
     driver_info:
       step: describe_instance
       checks:
-        DriverCheck: {}
+        # No BMaaS plan item for a host driver/kernel check (VMAAS-XX-07 is VM-only).
+        DriverCheck:
+          test_id: "N/A"
+          labels: ["bare_metal", "ssh", "gpu"]
 
     cpu_info:
       step: describe_instance
       checks:
-        CpuInfoCheck: {}
+        CpuInfoCheck:
+          test_id: "N/A"
+          labels: ["bare_metal", "ssh"]
 
     container_runtime:
       step: describe_instance
       checks:
-        ContainerRuntimeCheck: {}
+        ContainerRuntimeCheck:
+          test_id: "N/A"
+          labels: ["bare_metal", "ssh", "gpu", "workload", "slow"]
 
     stop_checks:
       step: stop_instance
       checks:
-        InstanceStopCheck: {}
+        InstanceStopCheck:
+          test_id: "CNP01-07"
+          labels: ["bare_metal"]
 
     start_checks:
       step: start_instance
       checks:
-        InstanceStartCheck: {}
+        InstanceStartCheck:
+          test_id: "CNP01-08"
+          labels: ["bare_metal"]
         StableIdentifierCheck:
+          test_id: "CNP08-01"
+          labels: ["bare_metal"]
           reference_id: "{{steps.launch_instance.instance_id}}"
 
     # SSH/GPU checks bound to start_instance / reboot_instance use the IP
@@ -191,10 +254,15 @@ tests:
     start_ssh:
       step: start_instance
       checks:
+        # ConnectivityCheck -> BMAAS-XX-03, OsCheck -> N/A (declared in the "ssh" section)
         ConnectivityCheck:
+          test_id: "BMAAS-XX-03"
+          labels: ["bare_metal", "ssh"]
           host: "{{steps.describe_instance.public_ip}}"
           key_file: "{{steps.describe_instance.key_file}}"
         OsCheck:
+          test_id: "N/A"
+          labels: ["bare_metal", "ssh"]
           host: "{{steps.describe_instance.public_ip}}"
           key_file: "{{steps.describe_instance.key_file}}"
           expected_os: "ubuntu"
@@ -202,7 +270,10 @@ tests:
     start_gpu:
       step: start_instance
       checks:
+        # GpuCheck -> BMAAS-XX-08 (declared in the "gpu" section)
         GpuCheck:
+          test_id: "BMAAS-XX-08"
+          labels: ["bare_metal", "ssh", "gpu"]
           host: "{{steps.describe_instance.public_ip}}"
           key_file: "{{steps.describe_instance.key_file}}"
 
@@ -210,23 +281,35 @@ tests:
       step: reboot_instance
       checks:
         InstanceRebootCheck:
+          test_id: "CNP01-05"
+          labels: ["bare_metal"]
           max_uptime: 600
+        # StableIdentifierCheck -> CNP08-01 (declared in the "start_checks" section)
         StableIdentifierCheck:
+          test_id: "CNP08-01"
+          labels: ["bare_metal"]
           reference_id: "{{steps.launch_instance.instance_id}}"
 
     reboot_state:
       step: reboot_instance
       checks:
         InstanceStateCheck:
+          test_id: "N/A"
+          labels: ["bare_metal"]
           expected_state: "running"
 
     reboot_ssh:
       step: reboot_instance
       checks:
+        # ConnectivityCheck -> BMAAS-XX-03, OsCheck -> N/A (declared in the "ssh" section)
         ConnectivityCheck:
+          test_id: "BMAAS-XX-03"
+          labels: ["bare_metal", "ssh"]
           host: "{{steps.describe_instance.public_ip}}"
           key_file: "{{steps.describe_instance.key_file}}"
         OsCheck:
+          test_id: "N/A"
+          labels: ["bare_metal", "ssh"]
           host: "{{steps.describe_instance.public_ip}}"
           key_file: "{{steps.describe_instance.key_file}}"
           expected_os: "ubuntu"
@@ -234,7 +317,10 @@ tests:
     reboot_gpu:
       step: reboot_instance
       checks:
+        # GpuCheck -> BMAAS-XX-08 (declared in the "gpu" section)
         GpuCheck:
+          test_id: "BMAAS-XX-08"
+          labels: ["bare_metal", "ssh", "gpu"]
           host: "{{steps.describe_instance.public_ip}}"
           key_file: "{{steps.describe_instance.key_file}}"
           expected_gpus: 8
@@ -243,27 +329,42 @@ tests:
       step: power_cycle_instance
       checks:
         InstancePowerCycleCheck:
+          test_id: "CNP01-06"
+          labels: ["bare_metal"]
           max_recovery_time: 900
+        # StableIdentifierCheck -> CNP08-01 (declared in the "start_checks" section)
         StableIdentifierCheck:
+          test_id: "CNP08-01"
+          labels: ["bare_metal"]
           reference_id: "{{steps.launch_instance.instance_id}}"
 
     power_cycle_state:
       step: power_cycle_instance
       checks:
         InstanceStateCheck:
+          test_id: "N/A"
+          labels: ["bare_metal"]
           expected_state: "running"
 
     power_cycle_ssh:
       step: power_cycle_instance
       checks:
-        ConnectivityCheck: {}
+        # ConnectivityCheck -> BMAAS-XX-03, OsCheck -> N/A (declared in the "ssh" section)
+        ConnectivityCheck:
+          test_id: "BMAAS-XX-03"
+          labels: ["bare_metal", "ssh"]
         OsCheck:
+          test_id: "N/A"
+          labels: ["bare_metal", "ssh"]
           expected_os: "ubuntu"
 
     power_cycle_gpu:
       step: power_cycle_instance
       checks:
+        # GpuCheck -> BMAAS-XX-08 (declared in the "gpu" section)
         GpuCheck:
+          test_id: "BMAAS-XX-08"
+          labels: ["bare_metal", "ssh", "gpu"]
           expected_gpus: 8
 
     # Reinstall validations (skipped when reinstall_instance step is skipped)
@@ -271,53 +372,77 @@ tests:
       step: reinstall_instance
       checks:
         InstanceStateCheck:
+          test_id: "N/A"
+          labels: ["bare_metal"]
           expected_state: "running"
         StableIdentifierCheck:
+          test_id: "CNP08-01"
+          labels: ["bare_metal"]
           reference_id: "{{steps.launch_instance.instance_id}}"
 
     reinstall_ssh:
       step: reinstall_instance
       checks:
-        ConnectivityCheck: {}
+        # ConnectivityCheck -> BMAAS-XX-03, OsCheck -> N/A (declared in the "ssh" section)
+        ConnectivityCheck:
+          test_id: "BMAAS-XX-03"
+          labels: ["bare_metal", "ssh"]
         OsCheck:
+          test_id: "N/A"
+          labels: ["bare_metal", "ssh"]
           expected_os: "ubuntu"
 
     reinstall_gpu:
       step: reinstall_instance
       checks:
-        GpuCheck: {}
+        # GpuCheck -> BMAAS-XX-08 (declared in the "gpu" section)
+        GpuCheck:
+          test_id: "BMAAS-XX-08"
+          labels: ["bare_metal", "ssh", "gpu"]
 
     nim_health:
       step: deploy_nim
       checks:
-        NimHealthCheck: {}
+        NimHealthCheck:
+          test_id: "BMAAS-XX-10"
+          labels: ["bare_metal", "ssh", "gpu"]
 
     nim_models:
       step: deploy_nim
       checks:
-        NimModelCheck: {}
+        NimModelCheck:
+          test_id: "BMAAS-XX-10"
+          labels: ["bare_metal", "ssh", "gpu"]
 
     nim_inference:
       step: deploy_nim
       checks:
         NimInferenceCheck:
+          test_id: "BMAAS-XX-10"
+          labels: ["bare_metal", "ssh", "gpu", "workload", "slow"]
           prompt: "What is CUDA?"
           max_tokens: 50
 
     nim_teardown:
       step: teardown_nim
       checks:
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["bare_metal"]
 
     teardown_checks:
       step: teardown
       checks:
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["bare_metal"]
 
     sanitization:
       step: verify_teardown
       checks:
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "SEC21-01"
+          labels: ["bare_metal", "security"]
 
     # Hardware ingestion: expected-machine manifest vs discovered machines.
     # Only runs for providers that implement the verify_ingestion step.
@@ -325,6 +450,8 @@ tests:
       step: verify_ingestion
       checks:
         HardwareIngestionCheck:
+          test_id: "HWING-XX-01"
+          labels: ["bare_metal", "ingestion"]
           min_machines: 1
           expected_status: ["Ready", "InUse"]
           require_healthy: true
@@ -335,6 +462,8 @@ tests:
       step: check_dpu_health
       checks:
         DpuHealthCheck:
+          test_id: "BMAAS-XX-05"
+          labels: ["bare_metal", "dpu"]
           require_heartbeat: true
 
     # Governance metrics (CAP01-01): the provider's governance API must
@@ -345,6 +474,8 @@ tests:
       step: query_governance_metrics
       checks:
         GovernanceMetricsCheck:
+          test_id: "CAP01-01"
+          labels: ["bare_metal", "governance"]
           min_delivered_nodes: 1
 
     # Per-host health API (CAP05-01). Asserts the API returns a report per host
@@ -357,6 +488,8 @@ tests:
       step: query_host_health
       checks:
         HostHealthCheck:
+          test_id: "CAP05-01"
+          labels: ["bare_metal", "health"]
           require_report: true
 
     # Primitive-level health aggregation at the nodegroup/reservation level
@@ -366,6 +499,8 @@ tests:
       step: query_health_aggregation
       checks:
         HealthAggregationCheck:
+          test_id: "CAP05-02"
+          labels: ["bare_metal", "health"]
           min_groups: 1
 
     # InfiniBand tenant isolation (SDN04-04). Verifies each tenant's IB
@@ -377,6 +512,8 @@ tests:
       step: query_ib_tenant_isolation
       checks:
         IbTenantIsolationCheck:
+          test_id: "SDN04-04"
+          labels: ["bare_metal", "security", "network", "infiniband"]
           min_partitions: 1
 
     # InfiniBand security keys (SDN04-05). The full requirement covers the
@@ -391,6 +528,8 @@ tests:
       step: query_ib_keys
       checks:
         IbKeysConfiguredCheck:
+          test_id: "SDN04-05"
+          labels: ["bare_metal", "security", "network", "infiniband"]
           required_keys: ["p_key", "management_key"]
 
     # Tenant-transition data sanitization (SEC21 / SEC22). Each check asserts
@@ -404,17 +543,23 @@ tests:
     memory_sanitization:
       step: query_sanitization
       checks:
-        MemorySanitizationCheck: {}
+        MemorySanitizationCheck:
+          test_id: "SEC21-04"
+          labels: ["bare_metal", "security", "sanitization"]
 
     gpu_memory_sanitization:
       step: query_sanitization
       checks:
-        GpuMemorySanitizationCheck: {}
+        GpuMemorySanitizationCheck:
+          test_id: "SEC21-05"
+          labels: ["bare_metal", "security", "sanitization", "gpu"]
 
     firmware_reset:
       step: query_sanitization
       checks:
-        FirmwareResetCheck: {}
+        FirmwareResetCheck:
+          test_id: "SEC21-06"
+          labels: ["bare_metal", "security", "sanitization", "firmware"]
 
     # SEC21-02: confirm storage is sanitized on delete. Gates on the same
     # sanitizing lifecycle stage as the memory check, because that stage also
@@ -423,7 +568,9 @@ tests:
     disk_sanitization:
       step: query_sanitization
       checks:
-        DiskSanitizationCheck: {}
+        DiskSanitizationCheck:
+          test_id: "SEC21-02"
+          labels: ["bare_metal", "security", "sanitization", "disk"]
 
     # Hardware/firmware attestation (SEC22 / CNP09). Each check asserts a host
     # establishes a hardware root of trust. Only runs for providers that
@@ -435,12 +582,16 @@ tests:
     nonce_attestation:
       step: query_attestation
       checks:
-        NonceAttestationCheck: {}
+        NonceAttestationCheck:
+          test_id: "SEC22-01"
+          labels: ["bare_metal", "security", "attestation"]
 
     firmware_attestation:
       step: query_attestation
       checks:
-        FirmwareAttestationCheck: {}
+        FirmwareAttestationCheck:
+          test_id: "CNP09-02"
+          labels: ["bare_metal", "security", "attestation", "firmware"]
 
   exclude:
     labels: []

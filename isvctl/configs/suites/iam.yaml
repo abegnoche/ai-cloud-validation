@@ -52,20 +52,30 @@ tests:
       step: create_user
       checks:
         FieldExistsCheck:
+          test_id: "IAM-XX-01"
+          labels: ["iam"]
           fields: ["username", "access_key_id"]
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["iam"]
 
     credentials:
       step: test_credentials
       checks:
         FieldExistsCheck:
+          test_id: "IAM-XX-03"
+          labels: ["iam"]
           field: "account_id"
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["iam"]
 
     teardown_checks:
       step: teardown
       checks:
-        StepSuccessCheck: {}
+        StepSuccessCheck:
+          test_id: "N/A"
+          labels: ["iam"]
 
   exclude:
     labels: []
