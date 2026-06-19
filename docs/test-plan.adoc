@@ -18,7 +18,7 @@ Run `make plan` to regenerate.
 | [[BOOT01-01]]BOOT01-01
 | BOOT01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/37[#37]
-| min_req
+| image_registry, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/37[#37] +
@@ -33,7 +33,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/38[#38]
 | [[BOOT01-02]]BOOT01-02
 | BOOT01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/39[#39]
-|
+| image_registry
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/39[#39]
@@ -61,7 +61,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/40[#40]
 | [[BOOT03-02]]BOOT03-02
 | BOOT03
 | https://github.com/NVIDIA/ai-cloud-validation/issues/104[#104]
-| min_req
+| image_registry, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/104[#104]
@@ -75,7 +75,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/104[#104]
 | [[BOOT01-03]]BOOT01-03
 | BOOT01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/41[#41]
-| min_req
+| image_registry, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/41[#41]
@@ -89,7 +89,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/41[#41]
 | [[BOOT01-04]]BOOT01-04
 | BOOT01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/43[#43]
-| min_req
+| image_registry, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/43[#43]
@@ -103,7 +103,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/43[#43]
 | [[BOOT01-05]]BOOT01-05
 | BOOT01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/44[#44]
-| min_req
+| image_registry, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/44[#44]
@@ -176,7 +176,7 @@ a|
 | [[AUTH-XX-02]]AUTH-XX-02
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/247[#247]
-|
+| vm
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/247[#247]
@@ -207,7 +207,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/248[#248]
 | [[IAM-XX-01]]IAM-XX-01
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/21[#21]
-| min_req
+| iam, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/21[#21]
@@ -235,7 +235,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/23[#23]
 | [[IAM-XX-03]]IAM-XX-03
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/341[#341]
-|
+| iam
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/341[#341]
@@ -252,7 +252,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/341[#341]
 | [[CP-XX-01]]CP-XX-01
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/131[#131]
-|
+| network, ssh
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/131[#131]
@@ -266,7 +266,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/131[#131]
 | [[CP-XX-02]]CP-XX-02
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/132[#132]
-|
+| network
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/132[#132]
@@ -347,7 +347,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/261[#261]
 | [[CP-XX-05]]CP-XX-05
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/28[#28]
-|
+| control_plane, iam
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/28[#28]
@@ -361,7 +361,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/28[#28]
 | [[CP-XX-06]]CP-XX-06
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/29[#29]
-| min_req
+| control_plane, iam, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/29[#29]
@@ -375,7 +375,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/29[#29]
 | [[CP-XX-07]]CP-XX-07
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/30[#30]
-|
+| control_plane, iam
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/30[#30]
@@ -389,7 +389,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/30[#30]
 | [[CP-XX-08]]CP-XX-08
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/31[#31]
-|
+| control_plane, iam
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/31[#31]
@@ -403,7 +403,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/31[#31]
 | [[CP-XX-09]]CP-XX-09
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/32[#32]
-|
+| control_plane, iam
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/32[#32] +
@@ -418,7 +418,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/33[#33]
 | [[CP-XX-10]]CP-XX-10
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/34[#34]
-|
+| control_plane
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/34[#34]
@@ -449,7 +449,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/35[#35]
 | [[HWING-XX-01]]HWING-XX-01
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/133[#133]
-|
+| bare_metal, ingestion
 |
 | P1 (check w/ ISVs)
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/133[#133]
@@ -480,7 +480,7 @@ a|
 | [[SEC22-01]]SEC22-01
 | SEC22
 | https://github.com/NVIDIA/ai-cloud-validation/issues/315[#315]
-|
+| attestation, bare_metal, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/315[#315]
@@ -551,7 +551,7 @@ a|
 | [[CNP09-02]]CNP09-02
 | CNP09
 | https://github.com/NVIDIA/ai-cloud-validation/issues/259[#259]
-| min_req
+| attestation, bare_metal, firmware, min_req, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/259[#259]
@@ -625,7 +625,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/53[#53]
 | [[SEC21-01]]SEC21-01
 | SEC21
 | https://github.com/NVIDIA/ai-cloud-validation/issues/54[#54]
-| min_req
+| bare_metal, min_req, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/54[#54] +
@@ -640,7 +640,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/47[#47]
 | [[SEC21-02]]SEC21-02
 | SEC21
 | https://github.com/NVIDIA/ai-cloud-validation/issues/134[#134]
-| min_req
+| bare_metal, disk, min_req, sanitization, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/134[#134]
@@ -654,7 +654,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/134[#134]
 | [[CNP01-04]]CNP01-04
 | CNP01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/105[#105]
-| min_req
+| bare_metal, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/105[#105]
@@ -698,7 +698,7 @@ a|
 | [[BMAAS-XX-03]]BMAAS-XX-03
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/48[#48]
-|
+| bare_metal, ssh
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/48[#48] +
@@ -713,7 +713,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/56[#56]
 | [[CNP01-05]]CNP01-05
 | CNP01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/50[#50]
-| min_req
+| bare_metal, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/50[#50] +
@@ -728,7 +728,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/57[#57]
 | [[CNP01-06]]CNP01-06
 | CNP01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/135[#135]
-| min_req
+| bare_metal, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/135[#135]
@@ -757,7 +757,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/69[#69]
 | [[CNP01-07]]CNP01-07
 | CNP01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/106[#106]
-| min_req
+| bare_metal, min_req
 | MinAPI
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/106[#106]
@@ -771,7 +771,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/106[#106]
 | [[BOOT02-01]]BOOT02-01
 | BOOT02
 | https://github.com/NVIDIA/ai-cloud-validation/issues/107[#107]
-| min_req
+| bare_metal, min_req, ssh
 | MinAPI
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/107[#107] +
@@ -786,7 +786,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/113[#113]
 | [[CNP01-08]]CNP01-08
 | CNP01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/108[#108]
-| min_req
+| bare_metal, min_req
 | MinAPI
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/108[#108]
@@ -800,7 +800,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/108[#108]
 | [[CNP05-01]]CNP05-01
 | CNP05
 | https://github.com/NVIDIA/ai-cloud-validation/issues/112[#112]
-| min_req
+| bare_metal, min_req
 | MinAPI
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/112[#112] +
@@ -817,7 +817,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/181[#181]
 | [[BMAAS-XX-05]]BMAAS-XX-05
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/136[#136]
-|
+| bare_metal, dpu
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/136[#136]
@@ -831,7 +831,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/136[#136]
 | [[BMAAS-XX-06]]BMAAS-XX-06
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/60[#60]
-|
+| bare_metal, gpu, network, ssh
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/60[#60]
@@ -847,7 +847,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/60[#60]
 | [[BMAAS-XX-07]]BMAAS-XX-07
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/250[#250]
-|
+| bare_metal
 | REVIEW
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/250[#250]
@@ -861,7 +861,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/250[#250]
 | [[CNP06-01]]CNP06-01
 | CNP06
 | https://github.com/NVIDIA/ai-cloud-validation/issues/109[#109]
-| min_req
+| bare_metal, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/109[#109] +
@@ -876,7 +876,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/114[#114]
 | [[BMAAS-XX-08]]BMAAS-XX-08
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/61[#61]
-|
+| bare_metal, gpu, ssh
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/61[#61]
@@ -890,7 +890,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/61[#61]
 | [[BMAAS-XX-09]]BMAAS-XX-09
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/63[#63]
-| min_req
+| bare_metal, gpu, min_req, ssh, workload
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/63[#63] +
@@ -905,7 +905,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/68[#68]
 | [[BMAAS-XX-10]]BMAAS-XX-10
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/64[#64]
-| min_req
+| bare_metal, gpu, min_req, slow, ssh, workload
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/64[#64] +
@@ -920,7 +920,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/82[#82]
 | [[BMAAS-XX-11]]BMAAS-XX-11
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/65[#65]
-| min_req
+| bare_metal, gpu, min_req, ssh, workload
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/65[#65]
@@ -934,7 +934,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/65[#65]
 | [[BMAAS-XX-12]]BMAAS-XX-12
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/66[#66]
-| min_req
+| bare_metal, gpu, min_req, ssh, workload
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/66[#66]
@@ -948,7 +948,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/66[#66]
 | [[CNP06-02]]CNP06-02
 | CNP06
 | https://github.com/NVIDIA/ai-cloud-validation/issues/258[#258]
-| min_req
+| bare_metal, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/258[#258]
@@ -964,7 +964,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/258[#258]
 | [[CNP08-01]]CNP08-01
 | CNP08
 | https://github.com/NVIDIA/ai-cloud-validation/issues/197[#197]
-| min_req
+| bare_metal, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/197[#197] +
@@ -997,7 +997,7 @@ a|
 | [[CNP01-09]]CNP01-09
 | CNP01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/42[#42]
-| min_req
+| min_req, vm
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/42[#42]
@@ -1025,7 +1025,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/51[#51]
 | [[CNP01-11]]CNP01-11
 | CNP01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/45[#45]
-| min_req
+| min_req, vm
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/45[#45]
@@ -1069,7 +1069,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/47[#47]
 | [[VMAAS-XX-01]]VMAAS-XX-01
 |
 |
-|
+| ssh, vm
 |
 | P0
 a|
@@ -1083,7 +1083,7 @@ a|
 | [[CNP01-13]]CNP01-13
 | CNP01
 |
-|
+| vm
 |
 | P0
 a|
@@ -1111,7 +1111,7 @@ a|
 | [[CNP01-14]]CNP01-14
 | CNP01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/110[#110]
-| min_req
+| min_req, vm
 | MinAPI
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/110[#110]
@@ -1125,7 +1125,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/110[#110]
 | [[CNP01-15]]CNP01-15
 | CNP01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/111[#111]
-| min_req
+| min_req, vm
 | MinAPI
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/111[#111]
@@ -1139,7 +1139,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/111[#111]
 | [[CNP05-02]]CNP05-02
 | CNP05
 | https://github.com/NVIDIA/ai-cloud-validation/issues/112[#112]
-| min_req
+| min_req, vm
 | MinAPI
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/112[#112]
@@ -1153,7 +1153,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/112[#112]
 | [[BOOT02-02]]BOOT02-02
 | BOOT02
 | https://github.com/NVIDIA/ai-cloud-validation/issues/113[#113]
-| min_req
+| min_req, ssh, vm
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/113[#113]
@@ -1199,7 +1199,7 @@ a|
 | [[VMAAS-XX-05]]VMAAS-XX-05
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/55[#55]
-|
+| ssh, vm
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/55[#55]
@@ -1213,7 +1213,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/55[#55]
 | [[VMAAS-XX-06]]VMAAS-XX-06
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/59[#59]
-|
+| gpu, ssh, vm
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/59[#59]
@@ -1227,7 +1227,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/59[#59]
 | [[VMAAS-XX-07]]VMAAS-XX-07
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/62[#62]
-|
+| gpu, ssh, vm
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/62[#62]
@@ -1255,7 +1255,7 @@ a|
 | [[VMAAS-XX-09]]VMAAS-XX-09
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/67[#67]
-|
+| gpu, ssh, vm
 | Does this include GPU Passthrough
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/67[#67]
@@ -1299,7 +1299,7 @@ a|
 | [[VMAAS-XX-12]]VMAAS-XX-12
 |
 |
-|
+| gpu, slow, ssh, vm, workload
 |
 | P0
 a|
@@ -1345,7 +1345,7 @@ a|
 | [[CNP06-03]]CNP06-03
 | CNP06
 | https://github.com/NVIDIA/ai-cloud-validation/issues/114[#114]
-| min_req
+| min_req, vm
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/114[#114]
@@ -1361,7 +1361,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/114[#114]
 | [[CNP08-03]]CNP08-03
 | CNP08
 | https://github.com/NVIDIA/ai-cloud-validation/issues/198[#198]
-| min_req
+| min_req, vm
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/198[#198]
@@ -1391,7 +1391,7 @@ a|
 | [[CNP01-16]]CNP01-16
 | CNP01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/256[#256]
-| min_req
+| iam, min_req, security, vm
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/256[#256]
@@ -1405,7 +1405,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/256[#256]
 | [[CNP01-17]]CNP01-17
 | CNP01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/257[#257]
-| min_req
+| min_req, security, vm
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/257[#257]
@@ -1422,7 +1422,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/257[#257]
 | [[SDN01-01]]SDN01-01
 | SDN01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/11[#11]
-| min_req
+| min_req, network
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/11[#11]
@@ -1436,7 +1436,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/11[#11]
 | [[SDN01-02]]SDN01-02
 | SDN01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/12[#12]
-| min_req
+| min_req, network
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/12[#12]
@@ -1450,7 +1450,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/12[#12]
 | [[SDN01-03]]SDN01-03
 | SDN01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/13[#13]
-| min_req
+| min_req, network
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/13[#13]
@@ -1464,7 +1464,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/13[#13]
 | [[SDN01-04]]SDN01-04
 | SDN01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/14[#14]
-| min_req
+| min_req, network
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/14[#14]
@@ -1492,7 +1492,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/16[#16]
 | [[SDN04-02]]SDN04-02
 | SDN04
 | https://github.com/NVIDIA/ai-cloud-validation/issues/17[#17]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/17[#17] +
@@ -1521,7 +1521,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/18[#18]
 | [[NET03-01]]NET03-01
 | NET03, SDN01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/115[#115]
-| min_req
+| min_req, network
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/115[#115]
@@ -1535,7 +1535,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/115[#115]
 | [[SDN-XX-01]]SDN-XX-01
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/116[#116]
-| min_req
+| min_req, network
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/116[#116]
@@ -1549,7 +1549,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/116[#116]
 | [[SDN05-01]]SDN05-01
 | SDN05
 | https://github.com/NVIDIA/ai-cloud-validation/issues/117[#117]
-| min_req
+| min_req, network
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/117[#117]
@@ -1563,7 +1563,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/117[#117]
 | [[SDN06-01]]SDN06-01
 | SDN06
 | https://github.com/NVIDIA/ai-cloud-validation/issues/118[#118]
-| min_req
+| min_req, network
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/118[#118]
@@ -1577,7 +1577,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/118[#118]
 | [[SDN07-01]]SDN07-01
 | SDN07
 | https://github.com/NVIDIA/ai-cloud-validation/issues/119[#119]
-| min_req
+| min_req, network
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/119[#119]
@@ -1591,7 +1591,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/119[#119]
 | [[SDN02-01]]SDN02-01
 | SDN02, SDN03
 | https://github.com/NVIDIA/ai-cloud-validation/issues/199[#199]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/199[#199] +
@@ -1607,7 +1607,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/178[#178]
 | [[SDN02-02]]SDN02-02
 | SDN02, SDN03
 | https://github.com/NVIDIA/ai-cloud-validation/issues/200[#200]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/200[#200]
@@ -1621,7 +1621,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/200[#200]
 | [[SDN02-03]]SDN02-03
 | SDN02, SDN03
 | https://github.com/NVIDIA/ai-cloud-validation/issues/201[#201]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/201[#201]
@@ -1635,7 +1635,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/201[#201]
 | [[SDN02-04]]SDN02-04
 | SDN02, SDN03
 | https://github.com/NVIDIA/ai-cloud-validation/issues/202[#202]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/202[#202]
@@ -1903,7 +1903,7 @@ a|
 | [[SDN02-05]]SDN02-05
 | SDN02
 | https://github.com/NVIDIA/ai-cloud-validation/issues/281[#281]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/281[#281]
@@ -1917,7 +1917,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/281[#281]
 | [[SDN02-06]]SDN02-06
 | SDN02
 | https://github.com/NVIDIA/ai-cloud-validation/issues/282[#282]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/282[#282]
@@ -1931,7 +1931,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/282[#282]
 | [[SDN02-07]]SDN02-07
 | SDN02
 | https://github.com/NVIDIA/ai-cloud-validation/issues/283[#283]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/283[#283]
@@ -1945,7 +1945,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/283[#283]
 | [[SDN02-08]]SDN02-08
 | SDN02
 | https://github.com/NVIDIA/ai-cloud-validation/issues/284[#284]
-| min_req
+| min_req, network, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/284[#284]
@@ -1959,7 +1959,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/284[#284]
 | [[SDN02-09]]SDN02-09
 | SDN02
 | https://github.com/NVIDIA/ai-cloud-validation/issues/285[#285]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/285[#285]
@@ -1975,7 +1975,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/285[#285]
 | [[SDN08-01]]SDN08-01
 | SDN08
 | https://github.com/NVIDIA/ai-cloud-validation/issues/289[#289]
-| min_req
+| min_req, network
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/289[#289]
@@ -1991,7 +1991,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/289[#289]
 | [[SDN02-10]]SDN02-10
 | SDN02
 | https://github.com/NVIDIA/ai-cloud-validation/issues/286[#286]
-| min_req
+| min_req, network, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/286[#286]
@@ -2007,7 +2007,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/286[#286]
 | [[SDN09-01]]SDN09-01
 | SDN09
 | https://github.com/NVIDIA/ai-cloud-validation/issues/290[#290]
-| min_req
+| min_req, network
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/290[#290]
@@ -2021,7 +2021,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/290[#290]
 | [[SDN09-02]]SDN09-02
 | SDN09
 | https://github.com/NVIDIA/ai-cloud-validation/issues/291[#291]
-| min_req
+| min_req, network
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/291[#291]
@@ -2035,7 +2035,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/291[#291]
 | [[SDN09-03]]SDN09-03
 | SDN09
 | https://github.com/NVIDIA/ai-cloud-validation/issues/292[#292]
-| min_req
+| min_req, network, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/292[#292]
@@ -2567,7 +2567,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/265[#265]
 | [[DMS05-01]]DMS05-01
 | DMS05
 | https://github.com/NVIDIA/ai-cloud-validation/issues/266[#266]
-| min_req
+| min_req, network
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/266[#266]
@@ -2641,7 +2641,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/361[#361]
 | [[SEC04-01]]SEC04-01
 | SEC04
 | https://github.com/NVIDIA/ai-cloud-validation/issues/296[#296]
-| min_req
+| iam, min_req, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/296[#296]
@@ -2789,7 +2789,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/340[#340]
 | [[DATASVC-XX-01]]DATASVC-XX-01
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/262[#262]
-| min_req
+| control_plane, min_req
 |
 | P2
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/262[#262]
@@ -2965,7 +2965,7 @@ a|
 | [[SLURM-XX-02]]SLURM-XX-02
 |
 |
-|
+| slurm
 |
 | P0
 a|
@@ -2979,7 +2979,7 @@ a|
 | [[SLURM-XX-03]]SLURM-XX-03
 |
 |
-|
+| slurm
 |
 | P0
 a|
@@ -2993,7 +2993,7 @@ a|
 | [[SLURM-XX-04]]SLURM-XX-04
 |
 |
-|
+| slurm
 |
 | P0
 a|
@@ -3007,7 +3007,7 @@ a|
 | [[SLURM-XX-05]]SLURM-XX-05
 |
 |
-|
+| slurm
 |
 | P0
 a|
@@ -3021,7 +3021,7 @@ a|
 | [[SLURM-XX-06]]SLURM-XX-06
 |
 |
-|
+| slurm
 |
 | P0
 a|
@@ -3035,7 +3035,7 @@ a|
 | [[SLURM-XX-07]]SLURM-XX-07
 |
 |
-|
+| gpu, slow, slurm, workload
 |
 | P0
 a|
@@ -3049,7 +3049,7 @@ a|
 | [[SLURM-XX-08]]SLURM-XX-08
 |
 |
-|
+| gpu, slow, slurm, workload
 |
 | P0
 a|
@@ -3063,7 +3063,7 @@ a|
 | [[SLURM-XX-09]]SLURM-XX-09
 |
 |
-|
+| slow, slurm, workload
 |
 | P0
 a|
@@ -3094,7 +3094,7 @@ a|
 | [[K8S05-01]]K8S05-01
 | K8S05
 |
-| min_req
+| kubernetes, min_req
 |
 | P0
 a|
@@ -3182,7 +3182,7 @@ a|
 | [[K8S-XX-03]]K8S-XX-03
 |
 |
-|
+| gpu, kubernetes, slow, workload
 |
 | P0
 a|
@@ -3196,7 +3196,7 @@ a|
 | [[K8S-XX-04]]K8S-XX-04
 |
 |
-|
+| gpu, kubernetes, slow, workload
 |
 | P0
 a|
@@ -3212,7 +3212,7 @@ a|
 | [[K8S-XX-05]]K8S-XX-05
 |
 |
-| min_req
+| gpu, kubernetes, min_req, slow, workload
 |
 | P0
 a|
@@ -3260,7 +3260,7 @@ a|
 | [[K8S01-01]]K8S01-01
 | K8S01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/233[#233]
-| min_req
+| kubernetes, l2, min_req, slow
 | k8s01
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/233[#233]
@@ -3324,7 +3324,7 @@ a|
 | [[K8S22-01]]K8S22-01
 | K8S22
 | https://github.com/NVIDIA/ai-cloud-validation/issues/219[#219]
-| min_req
+| kubernetes, min_req
 | K8s20
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/219[#219]
@@ -3368,7 +3368,7 @@ a|
 | [[K8S23-04]]K8S23-04
 | K8S23
 | https://github.com/NVIDIA/ai-cloud-validation/issues/273[#273]
-| min_req
+| kubernetes, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/273[#273]
@@ -3382,7 +3382,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/273[#273]
 | [[K8S23-05]]K8S23-05
 | K8S23
 | https://github.com/NVIDIA/ai-cloud-validation/issues/274[#274]
-| min_req
+| kubernetes, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/274[#274]
@@ -3396,7 +3396,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/274[#274]
 | [[K8S23-06]]K8S23-06
 | K8S23
 | https://github.com/NVIDIA/ai-cloud-validation/issues/275[#275]
-| min_req
+| kubernetes, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/275[#275]
@@ -3410,7 +3410,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/275[#275]
 | [[K8S23-07]]K8S23-07
 | K8S23
 | https://github.com/NVIDIA/ai-cloud-validation/issues/276[#276]
-| min_req
+| kubernetes, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/276[#276]
@@ -3426,7 +3426,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/276[#276]
 | [[K8S25-01]]K8S25-01
 | K8S25
 |
-| min_req
+| kubernetes, min_req
 | K8S23
 | P0
 a|
@@ -3548,7 +3548,7 @@ a|
 | [[K8S15-01]]K8S15-01
 | K8S15
 | https://github.com/NVIDIA/ai-cloud-validation/issues/271[#271]
-| min_req
+| kubernetes, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/271[#271]
@@ -3580,7 +3580,7 @@ a|
 | [[SEC09-01]]SEC09-01
 | SEC09
 | https://github.com/NVIDIA/ai-cloud-validation/issues/301[#301]
-| min_req
+| min_req, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/301[#301]
@@ -3594,7 +3594,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/301[#301]
 | [[SEC09-02]]SEC09-02
 | SEC09
 | https://github.com/NVIDIA/ai-cloud-validation/issues/302[#302]
-| min_req
+| min_req, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/302[#302]
@@ -3610,7 +3610,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/302[#302]
 | [[K8S-XX-08]]K8S-XX-08
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/267[#267]
-| min_req
+| kubernetes, min_req
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/267[#267]
@@ -3642,7 +3642,7 @@ a|
 | [[K8S06-01]]K8S06-01
 | K8S06
 | https://github.com/NVIDIA/ai-cloud-validation/issues/269[#269]
-| min_req
+| kubernetes, min_req, slow
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/269[#269] +
@@ -3657,7 +3657,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/221[#221]
 | [[K8S06-02]]K8S06-02
 | K8S06
 | https://github.com/NVIDIA/ai-cloud-validation/issues/270[#270]
-| min_req
+| kubernetes, min_req, slow
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/270[#270] +
@@ -3672,7 +3672,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/222[#222]
 | [[K8S06-03]]K8S06-03
 | K8S06
 | https://github.com/NVIDIA/ai-cloud-validation/issues/223[#223]
-| min_req
+| kubernetes, min_req, slow
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/223[#223]
@@ -3702,7 +3702,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/224[#224]
 | [[K8S07-01]]K8S07-01
 | K8S07
 | https://github.com/NVIDIA/ai-cloud-validation/issues/225[#225]
-| min_req
+| kubernetes, min_req
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/225[#225]
@@ -3718,7 +3718,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/225[#225]
 | [[K8S18-01]]K8S18-01
 | K8S18
 | https://github.com/NVIDIA/ai-cloud-validation/issues/226[#226]
-| min_req
+| kubernetes, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/226[#226]
@@ -3734,7 +3734,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/226[#226]
 | [[K8S20-01]]K8S20-01
 | K8S20
 | https://github.com/NVIDIA/ai-cloud-validation/issues/227[#227]
-| min_req
+| kubernetes, min_req
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/227[#227]
@@ -3766,7 +3766,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/268[#268]
 | [[K8S26-01]]K8S26-01
 | K8S26
 | https://github.com/NVIDIA/ai-cloud-validation/issues/277[#277]
-| min_req
+| kubernetes, min_req
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/277[#277]
@@ -4083,7 +4083,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/353[#353]
 | [[OBS-XX-17]]OBS-XX-17
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/354[#354]
-| min_req
+| min_req, observability, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/354[#354]
@@ -4097,7 +4097,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/354[#354]
 | [[OBS-XX-18]]OBS-XX-18
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/355[#355]
-| min_req
+| bare_metal, min_req, observability
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/355[#355]
@@ -4111,7 +4111,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/355[#355]
 | [[OBS-XX-19]]OBS-XX-19
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/356[#356]
-| min_req
+| min_req, network, observability
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/356[#356]
@@ -4172,7 +4172,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/121[#121]
 | [[TELEM-XX-04]]TELEM-XX-04
 |
 | https://github.com/NVIDIA/ai-cloud-validation/issues/362[#362]
-| min_req
+| gpu, min_req, observability, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/362[#362]
@@ -4250,7 +4250,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/366[#366]
 | [[SEC12-01]]SEC12-01
 | SEC12
 | https://github.com/NVIDIA/ai-cloud-validation/issues/306[#306]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/306[#306]
@@ -4264,7 +4264,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/306[#306]
 | [[SEC12-02]]SEC12-02
 | SEC12
 | https://github.com/NVIDIA/ai-cloud-validation/issues/307[#307]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/307[#307]
@@ -4278,7 +4278,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/307[#307]
 | [[CNP10-01]]CNP10-01
 | CNP10
 | https://github.com/NVIDIA/ai-cloud-validation/issues/260[#260]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/260[#260]
@@ -4292,7 +4292,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/260[#260]
 | [[SEC12-03]]SEC12-03
 | SEC12
 | https://github.com/NVIDIA/ai-cloud-validation/issues/308[#308]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/308[#308]
@@ -4324,7 +4324,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/309[#309]
 | [[SEC14-01]]SEC14-01
 | SEC14
 | https://github.com/NVIDIA/ai-cloud-validation/issues/311[#311]
-| min_req
+| min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/311[#311]
@@ -4338,7 +4338,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/311[#311]
 | [[SEC13-02]]SEC13-02
 | SEC13
 | https://github.com/NVIDIA/ai-cloud-validation/issues/310[#310]
-| min_req
+| min_req, network, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/310[#310]
@@ -4354,7 +4354,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/310[#310]
 | [[SDN04-04]]SDN04-04
 | SDN04
 | https://github.com/NVIDIA/ai-cloud-validation/issues/287[#287]
-| min_req
+| bare_metal, infiniband, min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/287[#287]
@@ -4368,7 +4368,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/287[#287]
 | [[SDN04-05]]SDN04-05
 | SDN04
 | https://github.com/NVIDIA/ai-cloud-validation/issues/288[#288]
-| min_req
+| bare_metal, infiniband, min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/288[#288]
@@ -4384,7 +4384,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/288[#288]
 | [[SEC11-01]]SEC11-01
 | SEC11
 | https://github.com/NVIDIA/ai-cloud-validation/issues/305[#305]
-| min_req
+| iam, min_req, network, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/305[#305]
@@ -4401,7 +4401,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/305[#305]
 | [[SEC01-01]]SEC01-01
 | SEC01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/293[#293]
-| min_req
+| iam, min_req, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/293[#293]
@@ -4417,7 +4417,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/293[#293]
 | [[SEC02-01]]SEC02-01
 | SEC02
 | https://github.com/NVIDIA/ai-cloud-validation/issues/294[#294]
-| min_req
+| iam, min_req, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/294[#294]
@@ -4433,7 +4433,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/294[#294]
 | [[SEC03-01]]SEC03-01
 | SEC03
 | https://github.com/NVIDIA/ai-cloud-validation/issues/295[#295]
-| min_req
+| iam, min_req, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/295[#295]
@@ -4449,7 +4449,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/295[#295]
 | [[SEC07-01]]SEC07-01
 | SEC07
 | https://github.com/NVIDIA/ai-cloud-validation/issues/298[#298]
-| min_req
+| iam, min_req, security
 | INFO
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/298[#298]
@@ -4466,7 +4466,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/298[#298]
 | [[SEC04-02]]SEC04-02
 | SEC04
 | https://github.com/NVIDIA/ai-cloud-validation/issues/297[#297]
-| min_req
+| iam, min_req, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/297[#297]
@@ -4483,7 +4483,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/297[#297]
 | [[SEC08-01]]SEC08-01
 | SEC08
 | https://github.com/NVIDIA/ai-cloud-validation/issues/299[#299]
-| min_req
+| min_req, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/299[#299]
@@ -4497,7 +4497,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/299[#299]
 | [[SEC08-02]]SEC08-02
 | SEC08
 | https://github.com/NVIDIA/ai-cloud-validation/issues/300[#300]
-| min_req
+| min_req, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/300[#300]
@@ -4514,7 +4514,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/300[#300]
 | [[SEC21-04]]SEC21-04
 | SEC21
 | https://github.com/NVIDIA/ai-cloud-validation/issues/312[#312]
-| min_req
+| bare_metal, min_req, sanitization, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/312[#312]
@@ -4528,7 +4528,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/312[#312]
 | [[SEC21-05]]SEC21-05
 | SEC21
 | https://github.com/NVIDIA/ai-cloud-validation/issues/313[#313]
-| min_req
+| bare_metal, gpu, min_req, sanitization, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/313[#313]
@@ -4542,7 +4542,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/313[#313]
 | [[SEC21-06]]SEC21-06
 | SEC21, SEC22
 | https://github.com/NVIDIA/ai-cloud-validation/issues/314[#314]
-| min_req
+| bare_metal, firmware, min_req, sanitization, security
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/314[#314]
@@ -4574,7 +4574,7 @@ a|
 | [[SEC09-03]]SEC09-03
 | SEC09, SEC10
 | https://github.com/NVIDIA/ai-cloud-validation/issues/303[#303]
-| min_req
+| min_req, security
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/303[#303]
@@ -4588,7 +4588,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/303[#303]
 | [[SEC09-04]]SEC09-04
 | SEC09
 | https://github.com/NVIDIA/ai-cloud-validation/issues/304[#304]
-| min_req
+| min_req, security, slow, workload
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/304[#304]
@@ -4606,7 +4606,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/304[#304]
 | [[NET01-01]]NET01-01
 | NET01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/278[#278]
-| min_req
+| min_req, network
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/278[#278]
@@ -4623,7 +4623,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/278[#278]
 | [[NET02-02]]NET02-02
 | NET02
 | https://github.com/NVIDIA/ai-cloud-validation/issues/279[#279]
-| min_req
+| min_req, network
 |
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/279[#279]
@@ -4718,7 +4718,7 @@ a|
 | [[CAP01-01]]CAP01-01
 | CAP01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/251[#251]
-| min_req
+| bare_metal, governance, min_req
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/251[#251]
@@ -4735,7 +4735,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/251[#251]
 | [[CAP04-01]]CAP04-01
 | CAP04
 | https://github.com/NVIDIA/ai-cloud-validation/issues/252[#252]
-| min_req
+| bare_metal, capacity, min_req
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/252[#252]
@@ -4749,7 +4749,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/252[#252]
 | [[CAP04-02]]CAP04-02
 | CAP04
 | https://github.com/NVIDIA/ai-cloud-validation/issues/253[#253]
-| min_req
+| bare_metal, capacity, min_req
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/253[#253]
@@ -4766,7 +4766,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/253[#253]
 | [[CAP05-01]]CAP05-01
 | CAP05
 | https://github.com/NVIDIA/ai-cloud-validation/issues/254[#254]
-| min_req
+| bare_metal, health, min_req
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/254[#254]
@@ -4780,7 +4780,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/254[#254]
 | [[CAP05-02]]CAP05-02
 | CAP05
 | https://github.com/NVIDIA/ai-cloud-validation/issues/255[#255]
-| min_req
+| bare_metal, health, min_req
 |
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/255[#255]

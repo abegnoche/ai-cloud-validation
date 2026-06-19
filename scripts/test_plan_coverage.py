@@ -150,12 +150,68 @@ def config_label_map(suites_dir: Path = SUITES_DIR) -> dict[str, list[str]]:
     out: dict[str, set[str]] = defaultdict(set)
     for path in sorted(suites_dir.glob("*.yaml")):
         for name, params in iter_config_checks(path):
-            labels = params.get("labels")
-            if isinstance(labels, str):
-                labels = [labels]
-            if isinstance(labels, list):
-                out[name].update(label for label in labels if isinstance(label, str) and label)
+            out[name].update(_normalize_labels(params.get("labels")))
     return {name: sorted(labels) for name, labels in out.items()}
+
+
+def _normalize_labels(value: Any) -> list[str]:
+    """Return sorted, non-empty label strings from YAML metadata."""
+    if isinstance(value, str):
+        value = [value]
+    if not isinstance(value, list):
+        return []
+    return sorted({label for label in value if isinstance(label, str) and label})
+
+
+def config_test_label_instances(suites_dir: Path = SUITES_DIR) -> list[tuple[str, str, str, list[str]]]:
+    """Return ``(source, check_name, test_id, labels)`` for each mapped suite check."""
+    instances: list[tuple[str, str, str, list[str]]] = []
+    for path in sorted(suites_dir.glob("*.yaml")):
+        try:
+            source = path.relative_to(REPO_ROOT).as_posix()
+        except ValueError:
+            source = path.as_posix()
+        for name, params in iter_config_checks(path):
+            tid = params.get("test_id")
+            if isinstance(tid, str) and tid and tid != UNMAPPED:
+                instances.append((source, name, tid, _normalize_labels(params.get("labels"))))
+    return instances
+
+
+def label_sync_errors(
+    plan_entries: dict[str, dict[str, Any]],
+    instances: list[tuple[str, str, str, list[str]]] | None = None,
+) -> list[str]:
+    """Errors where plan and suite labels for a test_id are not the same union.
+
+    ``docs/test-plan.yaml`` and suite check wiring both carry labels. For every
+    mapped ``test_id``, the plan item and every suite check mapped to it must all
+    carry the union of labels from both sides.
+    """
+    instances = config_test_label_instances() if instances is None else instances
+    plan_labels = {tid: set(_normalize_labels(entry.get("labels"))) for tid, entry in plan_entries.items()}
+
+    config_labels_by_id: dict[str, set[str]] = defaultdict(set)
+    for _source, _name, tid, labels in instances:
+        config_labels_by_id[tid].update(labels)
+
+    errors: list[str] = []
+    for tid, config_labels in sorted(config_labels_by_id.items()):
+        if tid not in plan_entries:
+            continue
+        required = plan_labels.get(tid, set()) | config_labels
+        actual = plan_labels.get(tid, set())
+        if actual != required:
+            errors.append(f"docs/test-plan.yaml:{tid} labels are {sorted(actual)}, expected union {sorted(required)}")
+
+    for source, name, tid, labels in instances:
+        if tid not in plan_entries:
+            continue
+        required = plan_labels.get(tid, set()) | config_labels_by_id.get(tid, set())
+        actual = set(labels)
+        if actual != required:
+            errors.append(f"{source}: {name} ({tid}) labels are {sorted(actual)}, expected union {sorted(required)}")
+    return sorted(errors)
 
 
 def _variant_base(name: str) -> str:
@@ -277,13 +333,17 @@ def consistency_errors(entries: list[dict[str, Any]]) -> list[str]:
 def run_guardrails(
     plan_ids: set[str],
     entries: list[dict[str, Any]],
+    plan_entries: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, list[str]]:
     """Return integrity and consistency errors for ``entries`` against ``plan_ids``."""
     class_map = class_test_id_map(entries)
-    return {
+    checks = {
         "integrity": integrity_errors(plan_ids, class_map),
         "consistency": consistency_errors(entries),
     }
+    if plan_entries is not None:
+        checks["label_sync"] = label_sync_errors(plan_entries)
+    return checks
 
 
 def build_coverage(
@@ -405,7 +465,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         entries = entries_from_config_maps(seed_entries=catalog_entries())
 
-    checks = run_guardrails(plan_ids, entries)
+    checks = run_guardrails(plan_ids, entries, plan_entries)
     class_map = class_test_id_map(entries)
     all_errors = [f"[{kind}] {msg}" for kind, msgs in checks.items() for msg in msgs]
 
@@ -413,7 +473,7 @@ def main(argv: list[str] | None = None) -> int:
         if all_errors:
             sys.stderr.write("test-plan coverage check failed:\n  " + "\n  ".join(all_errors) + "\n")
             return 1
-        print(f"OK: {len(class_map)} mapped classes pass integrity and consistency.")
+        print(f"OK: {len(class_map)} mapped classes pass integrity, consistency, and label sync.")
         return 0
 
     if all_errors:

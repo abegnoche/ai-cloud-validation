@@ -106,6 +106,25 @@ def test_consistency_passes_when_yaml_label_supplies_domain() -> None:
     assert test_plan_coverage.consistency_errors(merged) == []
 
 
+def test_label_sync_errors_require_plan_and_suite_union() -> None:
+    """Plan and suite wiring must both carry the union of labels for a test_id."""
+    plan = {"SEC01-01": {"labels": ["min_req"]}}
+    instances = [("suite.yaml", "SecurityCheck", "SEC01-01", ["security"])]
+
+    errors = test_plan_coverage.label_sync_errors(plan, instances)
+
+    assert any("docs/test-plan.yaml:SEC01-01" in error and "security" in error for error in errors)
+    assert any("suite.yaml: SecurityCheck" in error and "min_req" in error for error in errors)
+
+
+def test_label_sync_errors_empty_when_plan_and_suite_match() -> None:
+    """No drift when every mapped check and plan entry has the same label union."""
+    plan = {"SEC01-01": {"labels": ["min_req", "security"]}}
+    instances = [("suite.yaml", "SecurityCheck", "SEC01-01", ["min_req", "security"])]
+
+    assert test_plan_coverage.label_sync_errors(plan, instances) == []
+
+
 def test_load_plan_rejects_duplicate_test_ids(tmp_path: Path) -> None:
     """A test_id repeated in the plan is fatal, not a silent last-write-wins."""
     plan = tmp_path / "plan.yaml"
@@ -128,21 +147,24 @@ def test_repo_metadata_passes_all_guardrails() -> None:
     mapping's domain is inconsistent with the check's labels. There is no
     completeness check: a check with no test_id is allowed.
     """
-    plan_ids = set(test_plan_coverage.load_plan())
-    checks = test_plan_coverage.run_guardrails(plan_ids, test_plan_coverage.entries_from_config_maps())
+    plan_entries = test_plan_coverage.load_plan()
+    plan_ids = set(plan_entries)
+    checks = test_plan_coverage.run_guardrails(plan_ids, test_plan_coverage.entries_from_config_maps(), plan_entries)
     all_errors = [msg for msgs in checks.values() for msg in msgs]
     assert not all_errors, "\n  ".join(["test-plan coverage guardrails failed:", *all_errors])
 
 
 def test_guardrail_fast_path_matches_catalog_path() -> None:
     """YAML-only guardrail seed must agree with the catalog-backed report path."""
-    plan_ids = set(test_plan_coverage.load_plan())
+    plan_entries = test_plan_coverage.load_plan()
+    plan_ids = set(plan_entries)
     test_id_map = test_plan_coverage.config_test_id_map()
     label_map = test_plan_coverage.config_label_map()
 
     fast = test_plan_coverage.run_guardrails(
         plan_ids,
         test_plan_coverage.entries_from_config_maps(test_id_map, label_map),
+        plan_entries,
     )
     slow = test_plan_coverage.run_guardrails(
         plan_ids,
@@ -151,5 +173,6 @@ def test_guardrail_fast_path_matches_catalog_path() -> None:
             label_map,
             test_plan_coverage.catalog_entries(),
         ),
+        plan_entries,
     )
     assert fast == slow

@@ -67,7 +67,7 @@ tests:
         # "s3_object_lifecycle" section, which declares the same test_id.
         FieldValueCheck:
           test_id: "DATASVC-XX-01"
-          labels: ["control_plane"]
+          labels: ["control_plane", "min_req"]
           field: "success"
           expected: true
 
@@ -90,11 +90,11 @@ tests:
           step: test_access_key
         AccessKeyDisabledCheck:
           test_id: "CP-XX-06"
-          labels: ["control_plane", "iam"]
+          labels: ["control_plane", "iam", "min_req"]
           step: disable_access_key
         AccessKeyRejectedCheck:
           test_id: "CP-XX-06"
-          labels: ["control_plane", "iam"]
+          labels: ["control_plane", "iam", "min_req"]
           step: verify_key_rejected
 
     tenant_lifecycle:
@@ -122,7 +122,7 @@ tests:
           fields: ["bucket_name", "object_key", "operations"]
         CrudOperationsCheck:
           test_id: "DATASVC-XX-01"
-          labels: ["control_plane"]
+          labels: ["control_plane", "min_req"]
           operations: ["put", "get", "delete"]
 
     teardown_checks:

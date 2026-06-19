@@ -50,7 +50,7 @@ repos:
 
       - id: validate-suites
         name: check tests suites (test_id + labels)
-        entry: python3 scripts/validate_suite_wiring.py --check
+        entry: uv run python scripts/validate_suite_wiring.py --check
         language: system
         pass_filenames: false
         files: ^isvctl/configs/suites/.*\.yaml$

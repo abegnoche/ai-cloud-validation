@@ -25,6 +25,7 @@ domains:
             tests:
               - summary: CRUD an custom OS image (iso file) (Upload an ISO file if supported, or remote URL if supported).
                 labels:
+                  - image_registry
                   - min_req
                 priority: P0
                 dependencies:
@@ -48,6 +49,8 @@ domains:
                 test_id: BOOT01-02
                 status: approved
                 notes: ""
+                labels:
+                  - image_registry
               - summary: CRUD a custom VM image
                 labels:
                   - min_req
@@ -63,6 +66,7 @@ domains:
                 notes: ""
               - summary: CRUD (get, list, create, delete) custom OS images for fast boot (raw, qcow2, img, etc) for BM/VM
                 labels:
+                  - image_registry
                   - min_req
                 priority: P0
                 milestone: M3
@@ -74,6 +78,7 @@ domains:
                 notes: ""
               - summary: Check that an OS image can be installed on a BMaaS system
                 labels:
+                  - image_registry
                   - min_req
                 priority: P0
                 dependencies:
@@ -87,6 +92,7 @@ domains:
                 notes: ""
               - summary: Check that an OS install configuration can be installed on a BMaaS system
                 labels:
+                  - image_registry
                   - min_req
                 priority: P0
                 dependencies:
@@ -100,6 +106,7 @@ domains:
                 notes: ""
               - summary: Check that a VM image can be installed onto a VMaaS system
                 labels:
+                  - image_registry
                   - min_req
                 priority: P0
                 dependencies:
@@ -155,6 +162,8 @@ domains:
                 notes: ""
                 github_issues:
                   - "#247"
+                labels:
+                  - vm
               - summary: Access other components via a specified key as possible (SOL, Network devices)
                 milestone: M5
                 req_id: ""
@@ -171,6 +180,7 @@ domains:
             tests:
               - summary: Create user and log in as that user
                 labels:
+                  - iam
                   - min_req
                 priority: P0
                 dependencies:
@@ -204,6 +214,8 @@ domains:
                 notes: ""
                 github_issues:
                   - "#341"
+                labels:
+                  - iam
       - name: DDI
         capabilities:
           - description: core network services for name resolution, IP allocation, and address lifecycle management
@@ -220,6 +232,9 @@ domains:
                 test_id: CP-XX-01
                 status: approved
                 notes: ""
+                labels:
+                  - network
+                  - ssh
               - summary: "Check that IP addresses are managed sensibly as VPCs are configured (Move to SDN section?)"
                 priority: P0
                 dependencies:
@@ -231,6 +246,8 @@ domains:
                 test_id: CP-XX-02
                 status: approved
                 notes: ""
+                labels:
+                  - network
       - name: "Network Underlay & Mgmt"
         capabilities:
           - description: Brings up the physical network fabric for Day 0, base configuration, and network OS installation. Manages switch OS versions, compliance, and safe upgrades over time. Provides base network that overlays and tenants are built upon.
@@ -298,8 +315,13 @@ domains:
                 test_id: CP-XX-05
                 status: approved
                 notes: ""
+                labels:
+                  - control_plane
+                  - iam
               - summary: Access keys can expire or be disabled
                 labels:
+                  - control_plane
+                  - iam
                   - min_req
                 priority: P0
                 dependencies:
@@ -322,6 +344,9 @@ domains:
                 test_id: CP-XX-07
                 status: approved
                 notes: ""
+                labels:
+                  - control_plane
+                  - iam
               - summary: Retrieve list of tenants
                 priority: P0
                 dependencies:
@@ -333,6 +358,9 @@ domains:
                 test_id: CP-XX-08
                 status: approved
                 notes: ""
+                labels:
+                  - control_plane
+                  - iam
               - summary: Retrieve info about individual tenant
                 priority: P0
                 dependencies:
@@ -345,6 +373,9 @@ domains:
                 test_id: CP-XX-09
                 status: approved
                 notes: ""
+                labels:
+                  - control_plane
+                  - iam
               - summary: Delete Tenant
                 priority: P0
                 dependencies:
@@ -356,6 +387,8 @@ domains:
                 test_id: CP-XX-10
                 status: approved
                 notes: ""
+                labels:
+                  - control_plane
               - summary: Add user to tenant
                 labels:
                   - min_req
@@ -384,6 +417,9 @@ domains:
                 test_id: HWING-XX-01
                 status: approved
                 notes: ""
+                labels:
+                  - bare_metal
+                  - ingestion
               - summary: Make sure that a device can be removed from the system
                 priority: P1
                 dependencies:
@@ -408,6 +444,10 @@ domains:
                 notes: ""
                 github_issues:
                   - "#315"
+                labels:
+                  - attestation
+                  - bare_metal
+                  - security
               - summary: Check that OS is approved
                 priority: P1
                 dependencies:
@@ -455,7 +495,11 @@ domains:
                 notes: ""
               - summary: Verify all firmware is cryptographically signed and attested during boot
                 labels:
+                  - attestation
+                  - bare_metal
+                  - firmware
                   - min_req
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -515,7 +559,9 @@ domains:
                 notes: ""
               - summary: Confirm sanitization on delete - Tenant View
                 labels:
+                  - bare_metal
                   - min_req
+                  - security
                 priority: P0
                 dependencies:
                   - LimitedEnv
@@ -529,7 +575,11 @@ domains:
                 notes: ""
               - summary: Confirm sanitization on delete - Low Level
                 labels:
+                  - bare_metal
+                  - disk
                   - min_req
+                  - sanitization
+                  - security
                 priority: P0
                 dependencies:
                   - MiniCloud
@@ -542,6 +592,7 @@ domains:
                 notes: ""
               - summary: Topology-based placement
                 labels:
+                  - bare_metal
                   - min_req
                 priority: P0
                 dependencies:
@@ -580,8 +631,12 @@ domains:
                 test_id: BMAAS-XX-03
                 status: approved
                 notes: ""
+                labels:
+                  - bare_metal
+                  - ssh
               - summary: A running node can be rebooted in case of issue (Bare Metal)
                 labels:
+                  - bare_metal
                   - min_req
                 priority: P0
                 milestone: M1
@@ -594,6 +649,7 @@ domains:
                 notes: ""
               - summary: A running node can be power-cycled in case of issue
                 labels:
+                  - bare_metal
                   - min_req
                 priority: P0
                 dependencies:
@@ -619,6 +675,7 @@ domains:
                 notes: ""
               - summary: A running node can be powered off (Without being destroyed)
                 labels:
+                  - bare_metal
                   - min_req
                 notes: MinAPI
                 priority: P0
@@ -632,7 +689,9 @@ domains:
                 status: approved
               - summary: Support for cloud-init and instance metadata discovery via link-local addresses (e.g. 169.254.169.254) or virtual devices (Bare Metal)
                 labels:
+                  - bare_metal
                   - min_req
+                  - ssh
                 notes: MinAPI
                 priority: P0
                 milestone: M3
@@ -644,6 +703,7 @@ domains:
                 status: approved
               - summary: A powered off node can be powered back on
                 labels:
+                  - bare_metal
                   - min_req
                 notes: MinAPI
                 priority: P0
@@ -657,6 +717,7 @@ domains:
                 status: approved
               - summary: Support for user-defined tags/labels and cloud-init metadata on instances. (Bare Metal)
                 labels:
+                  - bare_metal
                   - min_req
                 notes: MinAPI
                 dependencies:
@@ -683,6 +744,9 @@ domains:
                 test_id: BMAAS-XX-05
                 status: approved
                 notes: ""
+                labels:
+                  - bare_metal
+                  - dpu
               - summary: Nodes can communicate across ethernet, infiniband, and NVLink (Bare Metal)
                 priority: P0
                 dependencies:
@@ -694,6 +758,11 @@ domains:
                 test_id: BMAAS-XX-06
                 status: approved
                 notes: ""
+                labels:
+                  - bare_metal
+                  - gpu
+                  - network
+                  - ssh
           - description: "Observability & Debug"
             example: AWS EC2/Forge
             tests:
@@ -706,8 +775,11 @@ domains:
                 status: approved
                 github_issues:
                   - "#250"
+                labels:
+                  - bare_metal
               - summary: Serial console access is required (read-only sufficient, interactive preferred) (Bare Metal)
                 labels:
+                  - bare_metal
                   - min_req
                 priority: P0
                 dependencies:
@@ -731,9 +803,17 @@ domains:
                 test_id: BMAAS-XX-08
                 status: approved
                 notes: ""
+                labels:
+                  - bare_metal
+                  - gpu
+                  - ssh
               - summary: GPU Stress workload (Bare Metal)
                 labels:
+                  - bare_metal
+                  - gpu
                   - min_req
+                  - ssh
+                  - workload
                 priority: P0
                 dependencies:
                   - LimitedEnv
@@ -747,7 +827,12 @@ domains:
                 notes: ""
               - summary: Nim Inference jobs (Bare Metal)
                 labels:
+                  - bare_metal
+                  - gpu
                   - min_req
+                  - slow
+                  - ssh
+                  - workload
                 notes: ""
                 priority: P0
                 dependencies:
@@ -761,7 +846,11 @@ domains:
                 status: approved
               - summary: NCCL tests
                 labels:
+                  - bare_metal
+                  - gpu
                   - min_req
+                  - ssh
+                  - workload
                 priority: P0
                 dependencies:
                   - LimitedEnv
@@ -774,7 +863,11 @@ domains:
                 notes: ""
               - summary: Training workload test
                 labels:
+                  - bare_metal
+                  - gpu
                   - min_req
+                  - ssh
+                  - workload
                 notes: ""
                 priority: P0
                 dependencies:
@@ -787,6 +880,7 @@ domains:
                 status: approved
               - summary: Verify that serial console output is logged and queryable for at least 1 month of history
                 labels:
+                  - bare_metal
                   - min_req
                 priority: P0
                 milestone: M5
@@ -800,6 +894,7 @@ domains:
             tests:
               - summary: Verify that a BM node's ID does not change after a reboot
                 labels:
+                  - bare_metal
                   - min_req
                 priority: P0
                 milestone: M5
@@ -828,6 +923,7 @@ domains:
               - summary: Create a VM node
                 labels:
                   - min_req
+                  - vm
                 priority: P0
                 dependencies:
                   - LimitedEnv
@@ -854,6 +950,7 @@ domains:
               - summary: Get a list of all VM nodes in a VPC
                 labels:
                   - min_req
+                  - vm
                 priority: P0
                 dependencies:
                   - LimitedEnv
@@ -901,6 +998,9 @@ domains:
                 test_id: VMAAS-XX-01
                 status: approved
                 notes: ""
+                labels:
+                  - ssh
+                  - vm
               - summary: A running node can be rebooted in case of issue (VM)
                 priority: P0
                 dependencies:
@@ -910,6 +1010,8 @@ domains:
                 test_id: CNP01-13
                 status: approved
                 notes: ""
+                labels:
+                  - vm
               - summary: "DEPRECATED: A node can be reinstalled from its configured stock operating system"
                 priority: P0
                 dependencies:
@@ -922,6 +1024,7 @@ domains:
               - summary: A running VM can be stopped (Without being destroyed)
                 labels:
                   - min_req
+                  - vm
                 notes: MinAPI
                 priority: P0
                 dependencies:
@@ -935,6 +1038,7 @@ domains:
               - summary: A powered off VM can be started
                 labels:
                   - min_req
+                  - vm
                 notes: MinAPI
                 priority: P0
                 dependencies:
@@ -948,6 +1052,7 @@ domains:
               - summary: Support for user-defined tags/labels and cloud-init metadata on instances. (VM)
                 labels:
                   - min_req
+                  - vm
                 notes: MinAPI
                 priority: P0
                 dependencies:
@@ -961,6 +1066,8 @@ domains:
               - summary: Support for cloud-init and instance metadata discovery via link-local addresses (e.g. 169.254.169.254) or virtual devices (VM)
                 labels:
                   - min_req
+                  - ssh
+                  - vm
                 priority: P0
                 milestone: M3
                 github_issues:
@@ -996,6 +1103,9 @@ domains:
                 test_id: VMAAS-XX-05
                 status: approved
                 notes: ""
+                labels:
+                  - ssh
+                  - vm
               - summary: Check that the GPU is visible and accessible from the VM
                 priority: P0
                 dependencies:
@@ -1007,6 +1117,10 @@ domains:
                 test_id: VMAAS-XX-06
                 status: approved
                 notes: ""
+                labels:
+                  - gpu
+                  - ssh
+                  - vm
               - summary: Check that the correct Linux Kernel, libvirt, sbios, and NVIDIA drivers are installed
                 priority: P0
                 dependencies:
@@ -1018,6 +1132,10 @@ domains:
                 test_id: VMAAS-XX-07
                 status: approved
                 notes: ""
+                labels:
+                  - gpu
+                  - ssh
+                  - vm
               - summary: Check that vEGM is configured correctly
                 priority: P0
                 dependencies:
@@ -1038,6 +1156,10 @@ domains:
                 req_id: ""
                 test_id: VMAAS-XX-09
                 status: approved
+                labels:
+                  - gpu
+                  - ssh
+                  - vm
               - summary: "TODO: More things from the \"NVIDIA Grace I/O Virtualization Guide\""
                 priority: P1
                 dependencies:
@@ -1067,6 +1189,12 @@ domains:
                 test_id: VMAAS-XX-12
                 status: approved
                 notes: ""
+                labels:
+                  - gpu
+                  - slow
+                  - ssh
+                  - vm
+                  - workload
               - summary: Run NCCL tests
                 priority: P0
                 milestone: M5
@@ -1091,6 +1219,7 @@ domains:
               - summary: Serial console access is required (read-only sufficient, interactive preferred) (VM)
                 labels:
                   - min_req
+                  - vm
                 priority: P0
                 milestone: M3
                 github_issues:
@@ -1104,6 +1233,7 @@ domains:
               - summary: Verify that a VM's ID does not change after a stop/start cycle
                 labels:
                   - min_req
+                  - vm
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -1126,7 +1256,10 @@ domains:
             tests:
               - summary: Verify console access is restricted via RBAC
                 labels:
+                  - iam
                   - min_req
+                  - security
+                  - vm
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -1138,6 +1271,8 @@ domains:
               - summary: Verify USB, clipboard, and unnecessary virtual devices are disabled
                 labels:
                   - min_req
+                  - security
+                  - vm
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -1153,6 +1288,7 @@ domains:
               - summary: Create a VPC
                 labels:
                   - min_req
+                  - network
                 priority: P0
                 dependencies:
                   - LimitedEnv
@@ -1166,6 +1302,7 @@ domains:
               - summary: Retrieve a VPC
                 labels:
                   - min_req
+                  - network
                 priority: P0
                 dependencies:
                   - LimitedEnv
@@ -1179,6 +1316,7 @@ domains:
               - summary: Update a VPC
                 labels:
                   - min_req
+                  - network
                 priority: P0
                 dependencies:
                   - LimitedEnv
@@ -1192,6 +1330,7 @@ domains:
               - summary: Delete a VPC
                 labels:
                   - min_req
+                  - network
                 priority: P0
                 dependencies:
                   - LimitedEnv
@@ -1216,6 +1355,8 @@ domains:
               - summary: Verify that nodes in two VPCs cannot communicate over the N/S (TAN) network
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P0
                 dependencies:
                   - LimitedEnv
@@ -1243,6 +1384,7 @@ domains:
               - summary: Support non-conflicting Bring-Your-Own-IP (including 7.0.0.0/8)
                 labels:
                   - min_req
+                  - network
                 priority: P0
                 milestone: M3
                 github_issues:
@@ -1254,6 +1396,7 @@ domains:
               - summary: Support Stable Private IP allocations, where if a VM crashes and restarts the same IP address remains pinned until the node is deleted
                 labels:
                   - min_req
+                  - network
                 priority: P0
                 milestone: M3
                 github_issues:
@@ -1265,6 +1408,7 @@ domains:
               - summary: "Atomically switch a floating private IP between nodes via API within <10 seconds without requiring an instance reboot."
                 labels:
                   - min_req
+                  - network
                 priority: P0
                 milestone: M3
                 github_issues:
@@ -1276,6 +1420,7 @@ domains:
               - summary: "Localized DNS: Support for custom, localized DNS settings to enable internal domain resolution to private endpoints (e.g. storage endpoints)"
                 labels:
                   - min_req
+                  - network
                 priority: P0
                 milestone: M3
                 github_issues:
@@ -1287,6 +1432,7 @@ domains:
               - summary: "Support for VPC peering with full bandwidth and no \"hairpin\" routing."
                 labels:
                   - min_req
+                  - network
                 priority: P0
                 milestone: M3
                 github_issues:
@@ -1298,6 +1444,8 @@ domains:
               - summary: Create a Security Group
                 labels:
                   - min_req
+                  - network
+                  - security
                 notes: ""
                 req_id: SDN02, SDN03
                 test_id: SDN02-01
@@ -1310,6 +1458,8 @@ domains:
               - summary: Retrieve a Security Group/list Security Groups
                 labels:
                   - min_req
+                  - network
+                  - security
                 notes: ""
                 req_id: SDN02, SDN03
                 test_id: SDN02-02
@@ -1320,6 +1470,8 @@ domains:
               - summary: Update a Security Group
                 labels:
                   - min_req
+                  - network
+                  - security
                 notes: ""
                 req_id: SDN02, SDN03
                 test_id: SDN02-03
@@ -1330,6 +1482,8 @@ domains:
               - summary: Delete a Security Group
                 labels:
                   - min_req
+                  - network
+                  - security
                 notes: ""
                 req_id: SDN02, SDN03
                 test_id: SDN02-04
@@ -1487,6 +1641,8 @@ domains:
               - summary: Verify security group rules can be scoped at workload level
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -1498,6 +1654,8 @@ domains:
               - summary: Verify security group rules can be scoped at node level
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -1509,6 +1667,8 @@ domains:
               - summary: Verify security group rules can be scoped at subnet/tenant level
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -1520,6 +1680,8 @@ domains:
               - summary: Measure and verify policy propagation timing is within acceptable bounds
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -1531,6 +1693,8 @@ domains:
               - summary: Verify security group rules can be scoped at K8s API service level
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -1544,6 +1708,7 @@ domains:
               - summary: Verify that storage hosts can route to each other with all-to-all L3 communication
                 labels:
                   - min_req
+                  - network
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -1557,6 +1722,8 @@ domains:
               - summary: Verify customizable port security policies can be applied to virtual interfaces
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -1570,6 +1737,7 @@ domains:
               - summary: Verify logging is available for network hardware faults
                 labels:
                   - min_req
+                  - network
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -1581,6 +1749,7 @@ domains:
               - summary: Verify logging captures latency/performance fluctuations
                 labels:
                   - min_req
+                  - network
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -1592,6 +1761,8 @@ domains:
               - summary: Verify a detailed audit trail exists for all configuration changes to network filtering rules
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -1981,6 +2152,7 @@ domains:
               - summary: Verify stable egress IP for allowlisting access to NVIDIA services
                 labels:
                   - min_req
+                  - network
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -2039,7 +2211,9 @@ domains:
             tests:
               - summary: Verify least-privilege access policies (resource-based, user-based, network-based)
                 labels:
+                  - iam
                   - min_req
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -2160,6 +2334,7 @@ domains:
             tests:
               - summary: Verify S3-compatible API access with authenticated endpoints
                 labels:
+                  - control_plane
                   - min_req
                 priority: P2
                 milestone: M5
@@ -2305,6 +2480,8 @@ domains:
                 req_id: ""
                 test_id: SLURM-XX-02
                 status: done
+                labels:
+                  - slurm
               - summary: SlurmPartition cpu and gpu
                 notes: ""
                 priority: P0
@@ -2314,6 +2491,8 @@ domains:
                 req_id: ""
                 test_id: SLURM-XX-03
                 status: done
+                labels:
+                  - slurm
               - summary: SlurmJobSubmission
                 notes: ""
                 priority: P0
@@ -2323,6 +2502,8 @@ domains:
                 req_id: ""
                 test_id: SLURM-XX-04
                 status: done
+                labels:
+                  - slurm
               - summary: SlurmGpuAllocation 1gpu and 2gpu
                 notes: ""
                 priority: P0
@@ -2332,6 +2513,8 @@ domains:
                 req_id: ""
                 test_id: SLURM-XX-05
                 status: done
+                labels:
+                  - slurm
               - summary: SlurmNodeJobExecution cpu and gpu
                 notes: ""
                 priority: P0
@@ -2341,6 +2524,8 @@ domains:
                 req_id: ""
                 test_id: SLURM-XX-06
                 status: done
+                labels:
+                  - slurm
               - summary: SlurmGpuStressWorkload
                 notes: ""
                 priority: P0
@@ -2350,6 +2535,11 @@ domains:
                 req_id: ""
                 test_id: SLURM-XX-07
                 status: done
+                labels:
+                  - gpu
+                  - slow
+                  - slurm
+                  - workload
               - summary: SlurmNcclMultiNodeWorkload
                 notes: ""
                 priority: P0
@@ -2359,6 +2549,11 @@ domains:
                 req_id: ""
                 test_id: SLURM-XX-08
                 status: done
+                labels:
+                  - gpu
+                  - slow
+                  - slurm
+                  - workload
               - summary: SlurmSbatchWorkload gpu and cpu
                 notes: ""
                 priority: P0
@@ -2368,6 +2563,10 @@ domains:
                 req_id: ""
                 test_id: SLURM-XX-09
                 status: done
+                labels:
+                  - slow
+                  - slurm
+                  - workload
               - summary: SlurmSbatchWorkload-inline
                 notes: ""
                 priority: P0
@@ -2384,6 +2583,7 @@ domains:
             tests:
               - summary: Create a K8s Instance using the software platform (CLI, Terraform)
                 labels:
+                  - kubernetes
                   - min_req
                 notes: ""
                 priority: P0
@@ -2450,6 +2650,11 @@ domains:
                 req_id: ""
                 test_id: K8S-XX-03
                 status: done
+                labels:
+                  - gpu
+                  - kubernetes
+                  - slow
+                  - workload
               - summary: K8s Nim Helm
                 notes: ""
                 priority: P0
@@ -2459,11 +2664,20 @@ domains:
                 req_id: ""
                 test_id: K8S-XX-04
                 status: done
+                labels:
+                  - gpu
+                  - kubernetes
+                  - slow
+                  - workload
           - description: Topology based placement
             tests:
               - summary: K8s Nccl
                 labels:
+                  - gpu
+                  - kubernetes
                   - min_req
+                  - slow
+                  - workload
                 priority: P0
                 req_id: ""
                 test_id: K8S-XX-05
@@ -2493,7 +2707,10 @@ domains:
             tests:
               - summary: "get versions, topology, core APIs by: (a) pass CNCF k8s conformance: https://github.com/cncf/k8s-conformance (b) add AI conformance: [https://github.com/cncf/k8s-ai-conformance](https://github.com/cncf/k8s-ai-conformance)"
                 labels:
+                  - kubernetes
+                  - l2
                   - min_req
+                  - slow
                 notes: k8s01
                 req_id: K8S01
                 test_id: K8S01-01
@@ -2536,6 +2753,7 @@ domains:
             tests:
               - summary: Apply a NetworkPolicy; verify pod connectivity is restricted as expected; verify IPv4 and IPv6 addresses are assigned on dual-stack nodes
                 labels:
+                  - kubernetes
                   - min_req
                 notes: K8s20
                 req_id: K8S22
@@ -2564,6 +2782,7 @@ domains:
                 priority: ""
               - summary: Verify CSI supports block, shared filesystem, and NFS storage
                 labels:
+                  - kubernetes
                   - min_req
                 priority: P0
                 milestone: M5
@@ -2575,6 +2794,7 @@ domains:
                 status: pending
               - summary: Verify CSI supports both static and dynamic provisioning via PVs and PVCs
                 labels:
+                  - kubernetes
                   - min_req
                 priority: P0
                 milestone: M5
@@ -2586,6 +2806,7 @@ domains:
                 status: pending
               - summary: Verify CSI credentials are tenant cluster scoped (no cross-cluster access)
                 labels:
+                  - kubernetes
                   - min_req
                 priority: P0
                 milestone: M5
@@ -2597,6 +2818,7 @@ domains:
                 status: pending
               - summary: Verify APIs to query storage usage against overall cluster quota with per-PVC/Volume breakdown
                 labels:
+                  - kubernetes
                   - min_req
                 priority: P0
                 milestone: M5
@@ -2610,6 +2832,7 @@ domains:
             tests:
               - summary: "TODO: Compatibility with the mainline NVIDIA GPU Operator"
                 labels:
+                  - kubernetes
                   - min_req
                 notes: K8S23
                 req_id: K8S25
@@ -2699,6 +2922,7 @@ domains:
             tests:
               - summary: Verify the K8s API endpoint has network access controls (firewall/private link)
                 labels:
+                  - kubernetes
                   - min_req
                 priority: P0
                 milestone: M5
@@ -2725,6 +2949,7 @@ domains:
               - summary: Verify certificates are rotated on a 60-day cycle
                 labels:
                   - min_req
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -2736,6 +2961,7 @@ domains:
               - summary: Verify support for both provider-managed and customer-managed keys
                 labels:
                   - min_req
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -2748,6 +2974,7 @@ domains:
             tests:
               - summary: Verify Cluster Autoscaler integration (upstream)
                 labels:
+                  - kubernetes
                   - min_req
                 priority: P1
                 milestone: M5
@@ -2773,7 +3000,9 @@ domains:
             tests:
               - summary: Create a K8s node pool via API/CLI specifying node type (CPU or GPU instance type)
                 labels:
+                  - kubernetes
                   - min_req
+                  - slow
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -2785,7 +3014,9 @@ domains:
                 status: pending
               - summary: Update a K8s node pool (e.g., scale to a target count)
                 labels:
+                  - kubernetes
                   - min_req
+                  - slow
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -2797,7 +3028,9 @@ domains:
                 status: pending
               - summary: Delete a K8s node pool
                 labels:
+                  - kubernetes
                   - min_req
+                  - slow
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -2821,6 +3054,7 @@ domains:
             tests:
               - summary: Verify API Server metrics are available in a Prometheus-scrapable format for SLO measurement
                 labels:
+                  - kubernetes
                   - min_req
                 priority: P1
                 milestone: M5
@@ -2834,6 +3068,7 @@ domains:
             tests:
               - summary: Verify the cluster exposes a cluster-specific OIDC Issuer endpoint for workload identity federation
                 labels:
+                  - kubernetes
                   - min_req
                 priority: P0
                 milestone: M5
@@ -2847,6 +3082,7 @@ domains:
             tests:
               - summary: Verify ability to view or export Kubernetes control plane logs (apiserver, kcm)
                 labels:
+                  - kubernetes
                   - min_req
                 priority: P1
                 milestone: M5
@@ -2875,6 +3111,7 @@ domains:
                 req_id: K8S26
                 test_id: K8S26-01
                 labels:
+                  - kubernetes
                   - min_req
                 priority: P0
                 milestone: M5
@@ -3114,6 +3351,8 @@ domains:
               - summary: Verify BMC SEL logs are available
                 labels:
                   - min_req
+                  - observability
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -3124,7 +3363,9 @@ domains:
                 status: pending
               - summary: Verify host syslogs are available
                 labels:
+                  - bare_metal
                   - min_req
+                  - observability
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -3136,6 +3377,8 @@ domains:
               - summary: Verify VPC Flow logs (all ingress/egress traffic) are available
                 labels:
                   - min_req
+                  - network
+                  - observability
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -3186,7 +3429,10 @@ domains:
             tests:
               - summary: Verify BMC/Redfish telemetry is accessible via API for GPU metrics not available from the host OS
                 labels:
+                  - gpu
                   - min_req
+                  - observability
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -3252,6 +3498,8 @@ domains:
               - summary: Verify BMC management is on a dedicated, restricted network (physically separate or VLAN/VRF-isolated)
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3263,6 +3511,8 @@ domains:
               - summary: Verify BMC interfaces are not reachable from tenant networks
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3274,6 +3524,8 @@ domains:
               - summary: Verify IPMI is disabled; Redfish over TLS is used with AAA
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3285,6 +3537,8 @@ domains:
               - summary: Verify BMC is only accessible via a hardened bastion (jumphost) server; direct public/corporate network access is blocked
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3311,6 +3565,8 @@ domains:
               - summary: Verify no public internet access to API endpoints by default
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3322,6 +3578,8 @@ domains:
               - summary: Verify insecure protocols (HTTP, SSLv3, TLSv1) are disabled
                 labels:
                   - min_req
+                  - network
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -3334,7 +3592,11 @@ domains:
             tests:
               - summary: Verify IB tenant isolation — compute dedicated to NVIDIA is isolated from other customers
                 labels:
+                  - bare_metal
+                  - infiniband
                   - min_req
+                  - network
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3345,7 +3607,11 @@ domains:
                 status: pending
               - summary: "Verify IB keys are configured: P_Key, Management Key, Aggregation Management Key, VendorSpecific Key, CongestionControl Key, Node2Node Key, Manager2Node Key"
                 labels:
+                  - bare_metal
+                  - infiniband
                   - min_req
+                  - network
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3360,7 +3626,10 @@ domains:
                 req_id: SEC11
                 test_id: SEC11-01
                 labels:
+                  - iam
                   - min_req
+                  - network
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3373,7 +3642,9 @@ domains:
             tests:
               - summary: Verify user authentication via OIDC for platform services
                 labels:
+                  - iam
                   - min_req
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3386,7 +3657,9 @@ domains:
             tests:
               - summary: Verify workloads and nodes receive short-lived credentials/tokens
                 labels:
+                  - iam
                   - min_req
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3399,7 +3672,9 @@ domains:
             tests:
               - summary: Verify out-of-cluster service accounts can authenticate with long-lived credentials
                 labels:
+                  - iam
                   - min_req
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3412,7 +3687,9 @@ domains:
             tests:
               - summary: Verify all administrative interfaces (UI, CLI, API) are protected by Multi-Factor Authentication
                 labels:
+                  - iam
                   - min_req
+                  - security
                 priority: P0
                 milestone: M5
                 notes: INFO
@@ -3427,7 +3704,9 @@ domains:
             tests:
               - summary: Assign a minimal role to a user; verify they cannot perform actions outside that role on Compute, Storage, and Network APIs
                 labels:
+                  - iam
                   - min_req
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -3443,6 +3722,7 @@ domains:
               - summary: Perform a management API call; verify an audit log entry is generated with correct metadata
                 labels:
                   - min_req
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -3454,6 +3734,7 @@ domains:
               - summary: Verify audit logs are retained for at least 30 days
                 labels:
                   - min_req
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -3468,7 +3749,10 @@ domains:
             tests:
               - summary: Verify memory sanitization between tenants
                 labels:
+                  - bare_metal
                   - min_req
+                  - sanitization
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3479,7 +3763,11 @@ domains:
                 status: pending
               - summary: Verify SRAM/GPU memory is sanitized between tenants
                 labels:
+                  - bare_metal
+                  - gpu
                   - min_req
+                  - sanitization
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3490,7 +3778,11 @@ domains:
                 status: pending
               - summary: Verify TPM and BIOS are reset during tenant transitions or hardware replacement
                 labels:
+                  - bare_metal
+                  - firmware
                   - min_req
+                  - sanitization
+                  - security
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3516,6 +3808,7 @@ domains:
               - summary: Verify a centralized KMS is used for all encryption keys and secrets
                 labels:
                   - min_req
+                  - security
                 priority: P1
                 milestone: M5
                 notes: ""
@@ -3527,6 +3820,9 @@ domains:
               - summary: Verify support for Customer Managed Keys (BYOK)
                 labels:
                   - min_req
+                  - security
+                  - slow
+                  - workload
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3544,6 +3840,7 @@ domains:
               - summary: Query the API for a compute node and verify it returns backend switch IDs (leaf, spine, core)
                 labels:
                   - min_req
+                  - network
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3559,6 +3856,7 @@ domains:
               - summary: Query the NVLink domain ID for a compute node supporting NVLink
                 labels:
                   - min_req
+                  - network
                 priority: P0
                 milestone: M5
                 notes: ""
@@ -3634,6 +3932,8 @@ domains:
             tests:
               - summary: Query and verify governance API returns Delivered, Healthy, Reserved, and Active metrics for nodes/GPUs
                 labels:
+                  - bare_metal
+                  - governance
                   - min_req
                 priority: P1
                 milestone: M5
@@ -3649,6 +3949,8 @@ domains:
             tests:
               - summary: Verify a set of resources can be logically grouped and pinned to an account
                 labels:
+                  - bare_metal
+                  - capacity
                   - min_req
                 priority: P1
                 milestone: M5
@@ -3660,6 +3962,8 @@ domains:
                 status: pending
               - summary: Verify atomic allocation of a topology block as a single unit
                 labels:
+                  - bare_metal
+                  - capacity
                   - min_req
                 priority: P1
                 milestone: M5
@@ -3675,6 +3979,8 @@ domains:
             tests:
               - summary: Verify per-host health API returns real-time GPU state, thermal status, memory health
                 labels:
+                  - bare_metal
+                  - health
                   - min_req
                 priority: P1
                 milestone: M5
@@ -3686,6 +3992,8 @@ domains:
                 status: pending
               - summary: Verify primitive-level health aggregation (cluster, nodegroup, or reservation level)
                 labels:
+                  - bare_metal
+                  - health
                   - min_req
                 priority: P1
                 milestone: M5

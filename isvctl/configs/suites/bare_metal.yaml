@@ -70,7 +70,7 @@ tests:
       checks:
         InstanceTagCheck:
           test_id: "CNP05-01"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "min_req"]
           required_keys: ["Name", "CreatedBy"]
 
     topology_placement:
@@ -81,24 +81,24 @@ tests:
           labels: ["bare_metal"]
         TopologyPlacementCheck:
           test_id: "CNP01-04"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "min_req"]
 
     serial_console:
       step: serial_console
       checks:
         SerialConsoleCheck:
           test_id: "CNP06-01"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "min_req"]
         SerialConsoleRetentionCheck:
           test_id: "CNP06-02"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "min_req"]
 
     cloud_init:
       step: launch_instance
       checks:
         CloudInitCheck:
           test_id: "BOOT02-01"
-          labels: ["bare_metal", "ssh"]
+          labels: ["bare_metal", "min_req", "ssh"]
 
     instance_info:
       step: describe_instance
@@ -163,7 +163,7 @@ tests:
       checks:
         GpuStressCheck:
           test_id: "BMAAS-XX-09"
-          labels: ["bare_metal", "ssh", "gpu", "workload"]
+          labels: ["bare_metal", "gpu", "min_req", "ssh", "workload"]
           runtime: 30
           memory_gb: 16
 
@@ -173,7 +173,7 @@ tests:
       checks:
         NcclCheck:
           test_id: "BMAAS-XX-11"
-          labels: ["bare_metal", "ssh", "gpu", "workload"]
+          labels: ["bare_metal", "gpu", "min_req", "ssh", "workload"]
 
     # DDP training workload - validates full training stack
     training:
@@ -181,7 +181,7 @@ tests:
       checks:
         TrainingCheck:
           test_id: "BMAAS-XX-12"
-          labels: ["bare_metal", "ssh", "gpu", "workload"]
+          labels: ["bare_metal", "gpu", "min_req", "ssh", "workload"]
           steps: 50
 
     # Network / interconnect checks
@@ -197,14 +197,14 @@ tests:
       checks:
         InfiniBandCheck:
           test_id: "BMAAS-XX-06"
-          labels: ["bare_metal", "ssh", "network"]
+          labels: ["bare_metal", "gpu", "network", "ssh"]
 
     ethernet:
       step: describe_instance
       checks:
         EthernetCheck:
           test_id: "BMAAS-XX-06"
-          labels: ["bare_metal", "ssh", "network"]
+          labels: ["bare_metal", "gpu", "network", "ssh"]
           ping_target: "8.8.8.8"
 
     driver_info:
@@ -234,17 +234,17 @@ tests:
       checks:
         InstanceStopCheck:
           test_id: "CNP01-07"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "min_req"]
 
     start_checks:
       step: start_instance
       checks:
         InstanceStartCheck:
           test_id: "CNP01-08"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "min_req"]
         StableIdentifierCheck:
           test_id: "CNP08-01"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "min_req"]
           reference_id: "{{steps.launch_instance.instance_id}}"
 
     # SSH/GPU checks bound to start_instance / reboot_instance use the IP
@@ -282,12 +282,12 @@ tests:
       checks:
         InstanceRebootCheck:
           test_id: "CNP01-05"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "min_req"]
           max_uptime: 600
         # StableIdentifierCheck -> CNP08-01 (declared in the "start_checks" section)
         StableIdentifierCheck:
           test_id: "CNP08-01"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "min_req"]
           reference_id: "{{steps.launch_instance.instance_id}}"
 
     reboot_state:
@@ -330,12 +330,12 @@ tests:
       checks:
         InstancePowerCycleCheck:
           test_id: "CNP01-06"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "min_req"]
           max_recovery_time: 900
         # StableIdentifierCheck -> CNP08-01 (declared in the "start_checks" section)
         StableIdentifierCheck:
           test_id: "CNP08-01"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "min_req"]
           reference_id: "{{steps.launch_instance.instance_id}}"
 
     power_cycle_state:
@@ -377,7 +377,7 @@ tests:
           expected_state: "running"
         StableIdentifierCheck:
           test_id: "CNP08-01"
-          labels: ["bare_metal"]
+          labels: ["bare_metal", "min_req"]
           reference_id: "{{steps.launch_instance.instance_id}}"
 
     reinstall_ssh:
@@ -405,21 +405,21 @@ tests:
       checks:
         NimHealthCheck:
           test_id: "BMAAS-XX-10"
-          labels: ["bare_metal", "ssh", "gpu"]
+          labels: ["bare_metal", "gpu", "min_req", "slow", "ssh", "workload"]
 
     nim_models:
       step: deploy_nim
       checks:
         NimModelCheck:
           test_id: "BMAAS-XX-10"
-          labels: ["bare_metal", "ssh", "gpu"]
+          labels: ["bare_metal", "gpu", "min_req", "slow", "ssh", "workload"]
 
     nim_inference:
       step: deploy_nim
       checks:
         NimInferenceCheck:
           test_id: "BMAAS-XX-10"
-          labels: ["bare_metal", "ssh", "gpu", "workload", "slow"]
+          labels: ["bare_metal", "gpu", "min_req", "slow", "ssh", "workload"]
           prompt: "What is CUDA?"
           max_tokens: 50
 
@@ -442,7 +442,7 @@ tests:
       checks:
         StepSuccessCheck:
           test_id: "SEC21-01"
-          labels: ["bare_metal", "security"]
+          labels: ["bare_metal", "min_req", "security"]
 
     # Hardware ingestion: expected-machine manifest vs discovered machines.
     # Only runs for providers that implement the verify_ingestion step.
@@ -475,7 +475,7 @@ tests:
       checks:
         GovernanceMetricsCheck:
           test_id: "CAP01-01"
-          labels: ["bare_metal", "governance"]
+          labels: ["bare_metal", "governance", "min_req"]
           min_delivered_nodes: 1
 
     # Per-host health API (CAP05-01). Asserts the API returns a report per host
@@ -489,7 +489,7 @@ tests:
       checks:
         HostHealthCheck:
           test_id: "CAP05-01"
-          labels: ["bare_metal", "health"]
+          labels: ["bare_metal", "health", "min_req"]
           require_report: true
 
     # Primitive-level health aggregation at the nodegroup/reservation level
@@ -500,7 +500,7 @@ tests:
       checks:
         HealthAggregationCheck:
           test_id: "CAP05-02"
-          labels: ["bare_metal", "health"]
+          labels: ["bare_metal", "health", "min_req"]
           min_groups: 1
 
     # InfiniBand tenant isolation (SDN04-04). Verifies each tenant's IB
@@ -513,7 +513,7 @@ tests:
       checks:
         IbTenantIsolationCheck:
           test_id: "SDN04-04"
-          labels: ["bare_metal", "security", "network", "infiniband"]
+          labels: ["bare_metal", "infiniband", "min_req", "network", "security"]
           min_partitions: 1
 
     # InfiniBand security keys (SDN04-05). The full requirement covers the
@@ -529,7 +529,7 @@ tests:
       checks:
         IbKeysConfiguredCheck:
           test_id: "SDN04-05"
-          labels: ["bare_metal", "security", "network", "infiniband"]
+          labels: ["bare_metal", "infiniband", "min_req", "network", "security"]
           required_keys: ["p_key", "management_key"]
 
     # Tenant-transition data sanitization (SEC21 / SEC22). Each check asserts
@@ -545,21 +545,21 @@ tests:
       checks:
         MemorySanitizationCheck:
           test_id: "SEC21-04"
-          labels: ["bare_metal", "security", "sanitization"]
+          labels: ["bare_metal", "min_req", "sanitization", "security"]
 
     gpu_memory_sanitization:
       step: query_sanitization
       checks:
         GpuMemorySanitizationCheck:
           test_id: "SEC21-05"
-          labels: ["bare_metal", "security", "sanitization", "gpu"]
+          labels: ["bare_metal", "gpu", "min_req", "sanitization", "security"]
 
     firmware_reset:
       step: query_sanitization
       checks:
         FirmwareResetCheck:
           test_id: "SEC21-06"
-          labels: ["bare_metal", "security", "sanitization", "firmware"]
+          labels: ["bare_metal", "firmware", "min_req", "sanitization", "security"]
 
     # SEC21-02: confirm storage is sanitized on delete. Gates on the same
     # sanitizing lifecycle stage as the memory check, because that stage also
@@ -570,7 +570,7 @@ tests:
       checks:
         DiskSanitizationCheck:
           test_id: "SEC21-02"
-          labels: ["bare_metal", "security", "sanitization", "disk"]
+          labels: ["bare_metal", "disk", "min_req", "sanitization", "security"]
 
     # Hardware/firmware attestation (SEC22 / CNP09). Each check asserts a host
     # establishes a hardware root of trust. Only runs for providers that
@@ -591,7 +591,7 @@ tests:
       checks:
         FirmwareAttestationCheck:
           test_id: "CNP09-02"
-          labels: ["bare_metal", "security", "attestation", "firmware"]
+          labels: ["attestation", "bare_metal", "firmware", "min_req", "security"]
 
   exclude:
     labels: []

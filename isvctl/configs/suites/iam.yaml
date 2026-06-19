@@ -53,7 +53,7 @@ tests:
       checks:
         FieldExistsCheck:
           test_id: "IAM-XX-01"
-          labels: ["iam"]
+          labels: ["iam", "min_req"]
           fields: ["username", "access_key_id"]
         StepSuccessCheck:
           test_id: "N/A"

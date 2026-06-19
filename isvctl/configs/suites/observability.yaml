@@ -34,28 +34,28 @@ tests:
       checks:
         VpcFlowLogsCheck:
           test_id: "OBS-XX-19"
-          labels: ["observability", "network"]
+          labels: ["min_req", "network", "observability"]
           step: vpc_flow_logs
 
     host_logs:
       checks:
         HostSyslogCheck:
           test_id: "OBS-XX-18"
-          labels: ["observability", "bare_metal"]
+          labels: ["bare_metal", "min_req", "observability"]
           step: host_syslogs
 
     bmc_logs:
       checks:
         BmcSelLogsCheck:
           test_id: "OBS-XX-17"
-          labels: ["observability", "security"]
+          labels: ["min_req", "observability", "security"]
           step: bmc_sel_logs
 
     bmc_telemetry:
       checks:
         BmcGpuTelemetryCheck:
           test_id: "TELEM-XX-04"
-          labels: ["observability", "security", "gpu"]
+          labels: ["gpu", "min_req", "observability", "security"]
           step: bmc_gpu_telemetry
 
   exclude:

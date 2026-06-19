@@ -74,14 +74,14 @@ tests:
       checks:
         InstanceCreatedCheck:
           test_id: "CNP01-09"
-          labels: ["vm"]
+          labels: ["min_req", "vm"]
 
     list_instances:
       step: list_instances
       checks:
         InstanceListCheck:
           test_id: "CNP01-11"
-          labels: ["vm"]
+          labels: ["min_req", "vm"]
           min_count: 1
 
     tag_checks:
@@ -89,7 +89,7 @@ tests:
       checks:
         InstanceTagCheck:
           test_id: "CNP05-02"
-          labels: ["vm"]
+          labels: ["min_req", "vm"]
           required_keys: ["Name", "CreatedBy"]
 
     serial_console:
@@ -97,28 +97,28 @@ tests:
       checks:
         SerialConsoleCheck:
           test_id: "CNP06-03"
-          labels: ["vm"]
+          labels: ["min_req", "vm"]
 
     console_rbac:
       step: console_rbac
       checks:
         ConsoleRbacCheck:
           test_id: "CNP01-16"
-          labels: ["vm", "security", "iam"]
+          labels: ["iam", "min_req", "security", "vm"]
 
     virtual_device_hardening:
       step: virtual_device_hardening
       checks:
         VirtualDeviceHardeningCheck:
           test_id: "CNP01-17"
-          labels: ["vm", "security"]
+          labels: ["min_req", "security", "vm"]
 
     cloud_init:
       step: launch_instance
       checks:
         CloudInitCheck:
           test_id: "BOOT02-02"
-          labels: ["vm", "ssh"]
+          labels: ["min_req", "ssh", "vm"]
 
     # ─── Host-level validations anchored to describe_instance ────────
     # describe_instance runs AFTER reboot, so these checks prove the
@@ -155,14 +155,14 @@ tests:
       checks:
         VcpuPinningCheck:
           test_id: "VMAAS-XX-09"
-          labels: ["vm", "ssh"]
+          labels: ["gpu", "ssh", "vm"]
         PciBusCheck:
           test_id: "VMAAS-XX-09"
           labels: ["vm", "ssh", "gpu"]
           expected_gpus: 1
         HostSoftwareCheck:
           test_id: "VMAAS-XX-07"
-          labels: ["vm", "ssh"]
+          labels: ["gpu", "ssh", "vm"]
 
     driver_info:
       step: describe_instance
@@ -191,17 +191,17 @@ tests:
       checks:
         InstanceStopCheck:
           test_id: "CNP01-14"
-          labels: ["vm"]
+          labels: ["min_req", "vm"]
 
     start_checks:
       step: start_instance
       checks:
         InstanceStartCheck:
           test_id: "CNP01-15"
-          labels: ["vm"]
+          labels: ["min_req", "vm"]
         StableIdentifierCheck:
           test_id: "CNP08-03"
-          labels: ["vm"]
+          labels: ["min_req", "vm"]
           reference_id: "{{steps.launch_instance.instance_id}}"
 
     start_ssh:
@@ -235,7 +235,7 @@ tests:
         # StableIdentifierCheck -> CNP08-03 (declared in the "start_checks" section)
         StableIdentifierCheck:
           test_id: "CNP08-03"
-          labels: ["vm"]
+          labels: ["min_req", "vm"]
           reference_id: "{{steps.launch_instance.instance_id}}"
 
     reboot_state:
@@ -273,14 +273,14 @@ tests:
       checks:
         NimHealthCheck:
           test_id: "VMAAS-XX-12"
-          labels: ["vm", "ssh", "gpu"]
+          labels: ["gpu", "slow", "ssh", "vm", "workload"]
 
     nim_models:
       step: deploy_nim
       checks:
         NimModelCheck:
           test_id: "VMAAS-XX-12"
-          labels: ["vm", "ssh", "gpu"]
+          labels: ["gpu", "slow", "ssh", "vm", "workload"]
 
     nim_inference:
       step: deploy_nim

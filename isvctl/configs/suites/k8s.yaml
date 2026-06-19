@@ -79,7 +79,7 @@ tests:
           # Create (CPU pool): pool reaches desired replica count with its
           # specified CPU instance type.
           test_id: "K8S06-01"
-          labels: ["kubernetes", "slow"]
+          labels: ["kubernetes", "min_req", "slow"]
           step: create_test_node_pool
           label_selector: "{{ steps.create_test_node_pool.label_selector }}"
           expected_replicas: "{{ steps.create_test_node_pool.expected_replicas | default(1, true) }}"
@@ -93,7 +93,7 @@ tests:
           # Create (GPU pool): a separate pool reaches its own node count with
           # its specified GPU instance type, coexisting with the CPU pool.
           test_id: "K8S06-01"
-          labels: ["kubernetes", "slow"]
+          labels: ["kubernetes", "min_req", "slow"]
           step: create_test_gpu_node_pool
           label_selector: "{{ steps.create_test_gpu_node_pool.label_selector }}"
           expected_replicas: "{{ steps.create_test_gpu_node_pool.expected_replicas | default(1, true) }}"
@@ -106,7 +106,7 @@ tests:
       - K8sNodePoolCheck:
           # Update (scale): same pool converges to the new count.
           test_id: "K8S06-02"
-          labels: ["kubernetes", "slow"]
+          labels: ["kubernetes", "min_req", "slow"]
           step: update_test_node_pool
           label_selector: "{{ steps.update_test_node_pool.label_selector }}"
           expected_replicas: "{{ steps.update_test_node_pool.expected_replicas | default(2, true) }}"
@@ -121,7 +121,7 @@ tests:
           # delete step. Selector comes from its create step; the label/taint/
           # instance-type assertions are omitted (no nodes to check).
           test_id: "K8S06-03"
-          labels: ["kubernetes", "slow"]
+          labels: ["kubernetes", "min_req", "slow"]
           step: delete_test_node_pool
           label_selector: "{{ steps.create_test_delete_node_pool.label_selector }}"
           expected_replicas: 0
@@ -135,7 +135,7 @@ tests:
       checks:
         K8sMultiClusterSameVpcCheck:
           test_id: "K8S26-01"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
           step: create_test_shared_vpc_cluster
 
     kubernetes:
@@ -150,7 +150,7 @@ tests:
           names: []
         K8sNodeReadyCheck:
           test_id: "K8S05-01"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
           require_all_ready: true
         K8sNvidiaSmiCheck:
           test_id: "N/A"
@@ -179,11 +179,11 @@ tests:
           expected_total: "{{ steps.setup.kubernetes.total_gpus | default(16, true) }}"
         K8sGpuOperatorNamespaceCheck:
           test_id: "K8S25-01"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
           namespace: "{{ steps.setup.kubernetes.gpu_operator_namespace | default('nvidia-gpu-operator') }}"
         K8sGpuOperatorPodsCheck:
           test_id: "K8S25-01"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
           namespace: "{{ steps.setup.kubernetes.gpu_operator_namespace | default('nvidia-gpu-operator') }}"
         K8sGpuLabelsCheck:
           test_id: "N/A"
@@ -209,11 +209,11 @@ tests:
             "nvidia.com/mig.strategy": "single"
         K8sDualStackNodeCheck:
           test_id: "K8S22-01"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
           require_dual_stack: "auto" # true | false | "auto"
         K8sClusterAutoscalerCheck:
           test_id: "K8S-XX-08"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
           require_autoscaler: false
           namespace: "{{ steps.setup.kubernetes.cluster_autoscaler_namespace | default('kube-system', true) }}"
           deployment_names:
@@ -224,7 +224,7 @@ tests:
             - "k8s-app=cluster-autoscaler"
         K8sNetworkPolicyCheck:
           test_id: "K8S22-01"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
           image: "registry.k8s.io/e2e-test-images/agnhost:2.47"
           probe_port: 8080
           probe_timeout_s: 10
@@ -236,7 +236,7 @@ tests:
       checks:
         K8sCsiStorageTypesCheck:
           test_id: "K8S23-04"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
           # StorageClass names by type; omit (or leave empty) to skip that type.
           # Env overrides: K8S_CSI_BLOCK_SC, K8S_CSI_SHARED_FS_SC, K8S_CSI_NFS_SC.
           block_storage_class: "{{ steps.setup.csi.block_storage_class | default('', true) }}"
@@ -247,7 +247,7 @@ tests:
           namespace_prefix: "isvtest-csi-types"
         K8sCsiStorageQuotaApiCheck:
           test_id: "K8S23-07"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
           # Uses the block StorageClass by default; skips entirely when unset.
           # per_sc_quota must exceed pvc_request so the usage PVC fits, and
           # over_quota_request must exceed per_sc_quota so admission rejects it.
@@ -261,7 +261,7 @@ tests:
           namespace_prefix: "isvtest-csi-quota"
         K8sCsiTenantScopedCredentialsCheck:
           test_id: "K8S23-06"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
           # Pure read-only check: verifies CSI credentials are tenant-scoped
           # by construction (Secret namespaces, labels/annotations, RBAC,
           # and node-plugin volume topology). Skipped entirely when no
@@ -273,7 +273,7 @@ tests:
             - "shared-across-clusters=true"
         K8sCsiProvisioningModesCheck:
           test_id: "K8S23-05"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
           # Exercises dynamic and static CSI provisioning end-to-end with a
           # BusyBox mount + canary-file write/read. Skipped entirely when
           # dynamic_storage_class is unset. The static subtest is skipped
@@ -294,13 +294,13 @@ tests:
       checks:
         K8sOidcIssuerCheck:
           test_id: "K8S18-01"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
 
     k8s_conformance:
       checks:
         K8sCncfConformanceCheck:
           test_id: "K8S01-01"
-          labels: ["kubernetes", "l2", "slow"]
+          labels: ["kubernetes", "l2", "min_req", "slow"]
           # Valid `mode` values (see docs/guides/configuration.md#kubernetes-conformance-modes):
           #   - "certified-conformance": full [Conformance] suite, serial. Required
           #     for CNCF certification; expect multi-hour runtime.
@@ -318,12 +318,12 @@ tests:
       checks:
         K8sNcclWorkload:
           test_id: "K8S-XX-05"
-          labels: ["kubernetes", "gpu", "workload", "slow"]
+          labels: ["gpu", "kubernetes", "min_req", "slow", "workload"]
           min_bus_bw_gbps: 100
           timeout: 600
         K8sNcclMultiNodeWorkload:
           test_id: "K8S-XX-05"
-          labels: ["kubernetes", "gpu", "workload", "slow"]
+          labels: ["gpu", "kubernetes", "min_req", "slow", "workload"]
           nodes: "{{ steps.setup.kubernetes.gpu_node_count | default(2, true) }}"
           min_bus_bw_gbps: 100
           quick_mode: false
@@ -362,10 +362,10 @@ tests:
       checks:
         K8sApiServerMetricsCheck:
           test_id: "K8S07-01"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
         K8sControlPlaneLogsCheck:
           test_id: "K8S20-01"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
           # mode=auto resolves each component independently: kubectl when a
           # control-plane pod exists in `namespace`, else `commands[component]`.
           # This covers hybrid clusters (some components as static pods, others
@@ -397,7 +397,7 @@ tests:
       checks:
         K8sApiNetworkAclCheck:
           test_id: "K8S15-01"
-          labels: ["kubernetes"]
+          labels: ["kubernetes", "min_req"]
           # Probe-based, provider-agnostic: verifies the reviewed cluster's
           # Kubernetes API endpoint refuses connections from a source that
           # should be blocked. By default the validation uses the configured

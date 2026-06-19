@@ -59,7 +59,7 @@ tests:
           labels: ["image_registry"]
         FieldExistsCheck:
           test_id: "BOOT01-01"
-          labels: ["image_registry"]
+          labels: ["image_registry", "min_req"]
           fields: ["image_id", "storage_bucket", "disk_ids"]
 
     # --- Image CRUD ---
@@ -75,7 +75,7 @@ tests:
           fields: ["image_id", "operations"]
         CrudOperationsCheck:
           test_id: "BOOT03-02"
-          labels: ["image_registry"]
+          labels: ["image_registry", "min_req"]
           operations: ["get", "list", "create", "delete"]
 
     # --- VM Launch from Image ---
@@ -84,7 +84,7 @@ tests:
       checks:
         StepSuccessCheck:
           test_id: "BOOT01-05"
-          labels: ["image_registry"]
+          labels: ["image_registry", "min_req"]
         FieldExistsCheck:
           test_id: "N/A"
           labels: ["image_registry"]
@@ -123,7 +123,7 @@ tests:
       checks:
         StepSuccessCheck:
           test_id: "BOOT01-03"
-          labels: ["image_registry"]
+          labels: ["image_registry", "min_req"]
         FieldExistsCheck:
           test_id: "N/A"
           labels: ["image_registry"]
@@ -139,7 +139,7 @@ tests:
       checks:
         StepSuccessCheck:
           test_id: "BOOT01-04"
-          labels: ["image_registry"]
+          labels: ["image_registry", "min_req"]
         FieldExistsCheck:
           test_id: "N/A"
           labels: ["image_registry"]
