@@ -195,19 +195,24 @@ def label_sync_errors(
     for _source, _name, tid, labels in instances:
         config_labels_by_id[tid].update(labels)
 
+    required_by_id = {
+        tid: plan_labels.get(tid, set()) | config_labels for tid, config_labels in config_labels_by_id.items()
+    }
+
     errors: list[str] = []
-    for tid, config_labels in sorted(config_labels_by_id.items()):
+    for tid in sorted(required_by_id):
         if tid not in plan_entries:
             continue
-        required = plan_labels.get(tid, set()) | config_labels
         actual = plan_labels.get(tid, set())
-        if actual != required:
-            errors.append(f"docs/test-plan.yaml:{tid} labels are {sorted(actual)}, expected union {sorted(required)}")
+        if actual != required_by_id[tid]:
+            errors.append(
+                f"docs/test-plan.yaml:{tid} labels are {sorted(actual)}, expected union {sorted(required_by_id[tid])}"
+            )
 
     for source, name, tid, labels in instances:
         if tid not in plan_entries:
             continue
-        required = plan_labels.get(tid, set()) | config_labels_by_id.get(tid, set())
+        required = required_by_id.get(tid, set())
         actual = set(labels)
         if actual != required:
             errors.append(f"{source}: {name} ({tid}) labels are {sorted(actual)}, expected union {sorted(required)}")
