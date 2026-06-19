@@ -160,7 +160,7 @@ def _normalize_labels(value: Any) -> list[str]:
         value = [value]
     if not isinstance(value, list):
         return []
-    return sorted({label for label in value if isinstance(label, str) and label})
+    return sorted({label.strip() for label in value if isinstance(label, str) and label.strip()})
 
 
 def config_test_label_instances(suites_dir: Path = SUITES_DIR) -> list[tuple[str, str, str, list[str]]]:
@@ -340,7 +340,11 @@ def run_guardrails(
     entries: list[dict[str, Any]],
     plan_entries: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, list[str]]:
-    """Return integrity and consistency errors for ``entries`` against ``plan_ids``."""
+    """Return guardrail errors for ``entries`` against ``plan_ids``.
+
+    Always returns ``integrity`` and ``consistency`` keys; includes ``label_sync``
+    when ``plan_entries`` is provided.
+    """
     class_map = class_test_id_map(entries)
     checks = {
         "integrity": integrity_errors(plan_ids, class_map),
