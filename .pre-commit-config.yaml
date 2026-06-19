@@ -29,14 +29,14 @@ repos:
     hooks:
       - id: check-md-links
         name: check markdown relative links
-        entry: python3 scripts/check_md_links.py
+        entry: uv run python scripts/check_md_links.py
         language: system
         pass_filenames: false
         types: [markdown]
 
       - id: check-spdx-headers
         name: check SPDX license headers
-        entry: python3 scripts/add_spdx_headers.py --check
+        entry: uv run python scripts/add_spdx_headers.py --check
         language: system
         pass_filenames: false
         types_or: [python, shell, yaml]
