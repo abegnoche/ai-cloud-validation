@@ -23,7 +23,7 @@ import logging
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated, TextIO
+from typing import Annotated, Any, TextIO
 
 import typer
 import yaml
@@ -38,6 +38,7 @@ from isvctl.cli.common import (
     print_progress,
     print_warning,
 )
+from isvctl.config.label_discovery import ProviderConfigMatch, discover_provider_label_configs
 from isvctl.config.merger import merge_yaml_files
 from isvctl.config.schema import RunConfig
 from isvctl.orchestrator.loop import Orchestrator, Phase
@@ -45,6 +46,7 @@ from isvctl.redaction import redact_dict
 from isvctl.reporting import check_upload_credentials, create_test_run, get_environment_config, update_test_run
 
 logger = logging.getLogger(__name__)
+CONFIGS_ROOT = Path(__file__).resolve().parents[3] / "configs"
 
 
 class TeeWriter:
@@ -78,11 +80,40 @@ app = typer.Typer(
 )
 
 
+def _provider_discovery_plan(provider: str, labels: list[str], matches: list[ProviderConfigMatch]) -> dict[str, Any]:
+    """Return a JSON-serializable provider label discovery plan."""
+    return {
+        "provider": provider,
+        "labels": labels,
+        "configs": [
+            {
+                "config": str(match.config_path),
+                "matched_checks": [
+                    {
+                        "category": check.category,
+                        "name": check.name,
+                        "labels": list(check.labels),
+                    }
+                    for check in match.matched_checks
+                ],
+            }
+            for match in matches
+        ],
+    }
+
+
+def _junitxml_for_discovered_config(junitxml: Path, match: ProviderConfigMatch, total: int) -> Path:
+    """Return a non-overlapping JUnit path for a discovered config run."""
+    if total <= 1:
+        return junitxml
+    return junitxml.with_name(f"{junitxml.stem}-{match.config_path.stem}{junitxml.suffix}")
+
+
 @app.command("run", context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
 def run(
     ctx: typer.Context,
     config_files: Annotated[
-        list[Path],
+        list[Path] | None,
         typer.Option(
             "--config",
             "-f",
@@ -92,7 +123,14 @@ def run(
             dir_okay=False,
             readable=True,
         ),
-    ],
+    ] = None,
+    provider: Annotated[
+        str | None,
+        typer.Option(
+            "--provider",
+            help="Provider name for label discovery when no --config/-f files are supplied.",
+        ),
+    ] = None,
     set_values: Annotated[
         list[str] | None,
         typer.Option(
@@ -207,6 +245,48 @@ def run(
     """
     setup_logging(verbose)
     apply_user_config(no_user_config)
+
+    if provider:
+        if config_files:
+            print_error("--provider discovery cannot be combined with --config/-f.")
+            raise typer.Exit(code=1)
+        if not labels:
+            print_error("--provider requires at least one --label/-l for discovery.")
+            raise typer.Exit(code=1)
+
+        matches = discover_provider_label_configs(provider, labels, configs_root=CONFIGS_ROOT)
+        if not matches:
+            print_error(f"No {provider!r} provider configs match labels: {', '.join(labels)}")
+            raise typer.Exit(code=1)
+
+        if dry_run:
+            typer.echo(json.dumps(_provider_discovery_plan(provider, labels, matches), indent=2))
+            return
+
+        print_progress(
+            f"Discovered {len(matches)} {provider!r} provider config(s) matching labels: {', '.join(labels)}"
+        )
+        for match in matches:
+            print_progress(f"\n--- Running {match.config_path} ---")
+            run(
+                ctx,
+                config_files=[match.config_path],
+                provider=None,
+                set_values=set_values,
+                phase=phase,
+                labels=labels,
+                dry_run=False,
+                working_dir=working_dir,
+                verbose=verbose,
+                no_user_config=no_user_config,
+                junitxml=_junitxml_for_discovered_config(junitxml, match, len(matches)),
+                color=color,
+                no_upload=no_upload,
+                lab_id=lab_id,
+                tags=tags,
+                isv_software_version=isv_software_version,
+            )
+        return
 
     # Validate at least one config file is provided
     if not config_files:
