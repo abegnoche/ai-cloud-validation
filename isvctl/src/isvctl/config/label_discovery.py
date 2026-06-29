@@ -5,12 +5,20 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
-from isvtest.core.resolution import parse_validations, resolve_class_key
+from isvtest.core.resolution import ValidationEntry, parse_validations, resolve_class_key
 
 from isvctl.config.merger import merge_yaml_files
+
+
+def _iter_config_validations(config_path: Path) -> Iterator[ValidationEntry]:
+    """Yield the validation entries of a config with its imports resolved."""
+    merged = merge_yaml_files([config_path])
+    raw_validations = (merged.get("tests") or {}).get("validations") or {}
+    yield from parse_validations(raw_validations)
 
 
 @dataclass(frozen=True)
@@ -47,9 +55,7 @@ def available_labels(provider: str, *, configs_root: Path) -> set[str]:
     provider_config_dir = configs_root / "providers" / provider / "config"
     labels: set[str] = set()
     for config_path in provider_config_dir.glob("*.yaml"):
-        merged = merge_yaml_files([config_path])
-        raw_validations = (merged.get("tests") or {}).get("validations") or {}
-        for entry in parse_validations(raw_validations):
+        for entry in _iter_config_validations(config_path):
             labels.update(entry.labels)
     return labels
 
@@ -74,11 +80,9 @@ def discover_provider_label_configs(
     matches: list[ProviderConfigMatch] = []
 
     for config_path in sorted(provider_config_dir.glob("*.yaml")):
-        merged = merge_yaml_files([config_path])
-        raw_validations = (merged.get("tests") or {}).get("validations") or {}
         matched_checks = tuple(
             MatchedCheck(category=entry.category, name=entry.name, labels=entry.labels)
-            for entry in parse_validations(raw_validations)
+            for entry in _iter_config_validations(config_path)
             if requested.issubset(entry.labels)
             and (released_tests is None or resolve_class_key(entry.name, released_tests) is not None)
         )

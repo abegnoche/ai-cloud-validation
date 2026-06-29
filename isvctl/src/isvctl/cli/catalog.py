@@ -121,9 +121,10 @@ def labels_cmd(
         ISVTEST_INCLUDE_UNRELEASED=1 isvctl catalog labels
     """
     counts = Counter(label for entry in build_catalog() for label in (entry.get("labels") or []))
+    sorted_counts = sorted(counts.items())
 
     if json_output:
-        labels = [{"label": label, "tests": count} for label, count in sorted(counts.items())]
+        labels = [{"label": label, "tests": count} for label, count in sorted_counts]
         typer.echo(json.dumps({"labels": labels}, indent=2))
         return
 
@@ -137,7 +138,7 @@ def labels_cmd(
     table.add_column("Label", style="green", no_wrap=True)
     table.add_column("Tests", style="cyan", justify="right")
 
-    for label, count in sorted(counts.items()):
+    for label, count in sorted_counts:
         table.add_row(label, str(count))
 
     console.print(table)

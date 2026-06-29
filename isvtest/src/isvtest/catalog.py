@@ -29,7 +29,7 @@ in provider configs (e.g. Bm* checks that run on-host, not via SSH).
 """
 
 import logging
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
 
@@ -156,55 +156,51 @@ def _extract_check_test_ids_from_config(config_path: Path) -> dict[str, set[str]
     return result
 
 
-def build_test_id_map() -> dict[str, set[str]]:
-    """Map check name -> test_ids declared on its suite/provider YAML wiring.
+def _build_check_attribute_map(
+    extract_fn: Callable[[Path], dict[str, set[str]]],
+) -> dict[str, set[str]]:
+    """Map check name -> a per-check attribute unioned across all config wiring.
 
-    test_ids live on the per-check YAML wiring, so this scans every config and
-    unions the ``test_id`` declared on each check (excluding the ``"N/A"``
-    sentinel). A variant's test_ids propagate up to its base name so the base
-    entry is not left bare, mirroring ``build_label_map``.
+    Scans every config (suites AND providers, not just the canonical suites:
+    on-host ``bm_*`` checks are wired only in provider configs), unions the
+    values ``extract_fn`` pulls from each, then propagates a variant's values up
+    to its base name (``Foo-bar`` -> ``Foo``) so the base entry is not left bare.
+    Shared by ``build_label_map`` and ``build_test_id_map``.
     """
     configs_dir = _find_configs_dir()
     if not configs_dir:
         return {}
 
-    test_id_map: dict[str, set[str]] = {}
+    attribute_map: dict[str, set[str]] = {}
     for config_path in sorted(configs_dir.rglob("*.yaml")):
-        for name, test_ids in _extract_check_test_ids_from_config(config_path).items():
-            test_id_map.setdefault(name, set()).update(test_ids)
+        for name, values in extract_fn(config_path).items():
+            attribute_map.setdefault(name, set()).update(values)
 
-    for name, test_ids in list(test_id_map.items()):
+    for name, values in list(attribute_map.items()):
         base = name.split("-")[0]
         if base != name:
-            test_id_map.setdefault(base, set()).update(test_ids)
-    return test_id_map
+            attribute_map.setdefault(base, set()).update(values)
+    return attribute_map
+
+
+def build_test_id_map() -> dict[str, set[str]]:
+    """Map check name -> test_ids declared on its suite/provider YAML wiring.
+
+    test_ids live on the per-check YAML wiring, so every config is scanned and
+    the ``test_id`` declared on each check is unioned (excluding the ``"N/A"``
+    sentinel), mirroring ``build_label_map``.
+    """
+    return _build_check_attribute_map(_extract_check_test_ids_from_config)
 
 
 def build_label_map() -> dict[str, set[str]]:
     """Map check name -> labels declared on its suite/provider YAML wiring.
 
-    Labels live on the per-check YAML wiring, so this scans every config and
-    unions the ``labels:`` declared on each check. A variant's labels propagate
-    up to its base name so the base entry is not left bare. Shared by the
-    catalog and ``isvctl docs`` so both report the same labels.
+    Labels live on the per-check YAML wiring, so every config is scanned and the
+    ``labels:`` declared on each check is unioned. Shared by the catalog and
+    ``isvctl docs`` so both report the same labels.
     """
-    configs_dir = _find_configs_dir()
-    if not configs_dir:
-        return {}
-
-    # Scan every config (suites AND providers), not just the canonical suites:
-    # on-host checks (bm_*) are wired only in provider configs, so their labels
-    # live there. Per-check ``labels:`` declared anywhere in YAML are unioned.
-    label_map: dict[str, set[str]] = {}
-    for config_path in sorted(configs_dir.rglob("*.yaml")):
-        for name, labels in _extract_check_labels_from_config(config_path).items():
-            label_map.setdefault(name, set()).update(labels)
-
-    for name, labels in list(label_map.items()):
-        base = name.split("-")[0]
-        if base != name:
-            label_map.setdefault(base, set()).update(labels)
-    return label_map
+    return _build_check_attribute_map(_extract_check_labels_from_config)
 
 
 def _build_platform_map() -> dict[str, set[str]]:
