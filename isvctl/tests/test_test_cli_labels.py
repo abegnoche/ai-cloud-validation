@@ -96,10 +96,12 @@ class _FakeOrchestrator:
     calls: ClassVar[list[dict[str, Any]]] = []
 
     def __init__(self, config: Any, **kwargs: Any) -> None:
+        """Store constructor inputs so tests can assert CLI wiring."""
         self.config = config
         self.kwargs = kwargs
 
     def run(self, **kwargs: Any) -> OrchestratorResult:
+        """Record a synthetic orchestration call and return a successful result."""
         type(self).captured.update(kwargs)
         type(self).calls.append(
             {

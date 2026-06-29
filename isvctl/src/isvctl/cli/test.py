@@ -453,8 +453,11 @@ def run(
     # Update test run after tests complete
     if upload_results and test_run_id and lab_id:
         print_progress("Uploading test results to ISV Lab Service...")
-        # Look for junit XML in _output, working directory, or current directory
-        junit_path = output_dir / "junit-validation.xml"
+        # Prefer the requested --junitxml (provider discovery gives each config
+        # its own report name), then fall back to _output, working dir, or cwd.
+        junit_path = junitxml
+        if not junit_path.exists():
+            junit_path = output_dir / "junit-validation.xml"
         if not junit_path.exists():
             junit_path = effective_working_dir / "junit-validation.xml"
         if not junit_path.exists():

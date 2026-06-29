@@ -92,7 +92,10 @@ def list_cmd(
     for entry in sorted(catalog_entries, key=lambda e: e["name"]):
         labels = ", ".join(entry.get("labels") or [])
         platforms = ", ".join(entry.get("platforms") or [])
-        labels_platforms = f"{labels} ({platforms})" if platforms else labels
+        if labels and platforms:
+            labels_platforms = f"{labels} ({platforms})"
+        else:
+            labels_platforms = labels or platforms
         table.add_row(
             entry["name"],
             ", ".join(entry.get("test_ids") or []) or "-",
