@@ -129,7 +129,7 @@ tests:
       checks:
         StepSuccessCheck-delete_access_key:
           # No dedicated "delete access key" plan item; access-key lifecycle is
-          # CP-XX-05 (create) and CP-XX-06 (disable).
+          # CP05-01 (create) and CP06-01 (disable).
           test_id: "N/A"
           labels: ["control_plane"]
           step: delete_access_key

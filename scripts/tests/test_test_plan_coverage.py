@@ -79,7 +79,7 @@ def test_consistency_errors_allows_cross_domain_and_unknown_prefix() -> None:
     """Cross-domain labels pass; prefixes without a rule are ignored."""
     entries = [
         {"name": "SgCheck", "labels": ["network", "security"], "test_ids": ["SDN02-05"]},
-        {"name": "TenantCheck", "labels": ["iam"], "test_ids": ["CP-XX-07"]},  # CP has no rule
+        {"name": "TenantCheck", "labels": ["iam"], "test_ids": ["CP07-01"]},  # CP has no rule
     ]
     assert test_plan_coverage.consistency_errors(entries) == []
 
