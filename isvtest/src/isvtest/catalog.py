@@ -203,6 +203,25 @@ def build_label_map() -> dict[str, set[str]]:
     return _build_check_attribute_map(_extract_check_labels_from_config)
 
 
+def build_label_file_map() -> dict[str, set[str]]:
+    """Map label -> config files (relative to ``isvctl/configs``) that declare it.
+
+    Unlike the catalog this is a raw config scan (not release-gated): it records
+    every suite/provider YAML where a label appears on a check's wiring.
+    """
+    configs_dir = _find_configs_dir()
+    if not configs_dir:
+        return {}
+
+    label_files: dict[str, set[str]] = {}
+    for config_path in sorted(configs_dir.rglob("*.yaml")):
+        rel = config_path.relative_to(configs_dir).as_posix()
+        for labels in _extract_check_labels_from_config(config_path).values():
+            for label in labels:
+                label_files.setdefault(label, set()).add(rel)
+    return label_files
+
+
 def _build_platform_map() -> dict[str, set[str]]:
     """Build a mapping from test name to set of platform strings.
 
