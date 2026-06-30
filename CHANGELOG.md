@@ -30,6 +30,31 @@ Workflow:
 > attached to a milestone. The file you are reading now is the canonical
 > per-tag changelog.
 
+## [0.8.1] - 2026-06-30
+
+### Added
+
+- **NICo inventory and readiness validations** ([#452](https://github.com/NVIDIA/ai-cloud-validation/pull/452))
+  Adds read-only NICo checks for control-plane access, IAM credentials, network inventory, and bare-metal instances, with optional resource targeting and clean skips when no matching inventory exists.
+- **Kubernetes CRD admission webhook validation (K8S21-01)** ([#479](https://github.com/NVIDIA/ai-cloud-validation/pull/479))
+  Adds `K8sCrdWebhookCheck` to verify that Kubernetes clusters enforce CRD schemas and admission webhook mutation and rejection behavior using temporary, automatically cleaned-up resources.
+- **Persistent user configuration with `isvctl configure`** ([#477](https://github.com/NVIDIA/ai-cloud-validation/pull/477))
+  Adds commands to securely set, show, unset, and locate persisted provider settings, plus `--no-user-config` for runs that should ignore saved values; exported environment variables continue to take precedence.
+- **Provider-scoped label discovery and catalog metadata** ([#485](https://github.com/NVIDIA/ai-cloud-validation/pull/485))
+  Adds `isvctl test run --provider <name> --label <label>` to discover and run matching provider configs, and exposes catalog labels and test IDs through the CLI and reporter uploads.
+
+### Changed
+
+- **Stable validation IDs and YAML-owned labels** ([#449](https://github.com/NVIDIA/ai-cloud-validation/pull/449), [#475](https://github.com/NVIDIA/ai-cloud-validation/pull/475), [#480](https://github.com/NVIDIA/ai-cloud-validation/pull/480), [#483](https://github.com/NVIDIA/ai-cloud-validation/pull/483))
+  Moves validation IDs and labels into suite and provider wiring, replaces placeholder IDs with stable identifiers while retaining legacy mappings, and keeps catalog filtering and generated test-plan metadata aligned.
+
+### Fixed
+
+- **CUDA UMD version detection** ([#473](https://github.com/NVIDIA/ai-cloud-validation/pull/473))
+  Updates GPU and host software validations to recognize both current `CUDA UMD Version` and legacy `CUDA Version` fields from `nvidia-smi` output.
+- **Configured skip behavior** ([#476](https://github.com/NVIDIA/ai-cloud-validation/pull/476))
+  Preserves step- and platform-level `skip: true` settings so intentional skips complete successfully and remain visible in phase summaries.
+
 ## [0.8.0] - 2026-06-15
 
 ### Added
