@@ -386,7 +386,7 @@ class Orchestrator:
                   (labels are mirrored as pytest marks)
             include_labels: Labels that selected validations must all contain.
             exclude_labels: Labels that exclude a validation (any intersection).
-                These come from the CLI (e.g. capability-scoped exclusion) and are
+                These come from the CLI (e.g. platform-scoped exclusion) and are
                 always applied, unlike config `tests.exclude.labels` which is
                 bypassed when include/pytest selection is present.
             verbose: Enable verbose output for validations
@@ -525,7 +525,7 @@ class Orchestrator:
             self._extra_pytest_args
         )
         # Config `tests.exclude.labels` is bypassed when the user narrows selection
-        # (include labels or pytest -k/-m). CLI excludes (e.g. capability-scoping)
+        # (include labels or pytest -k/-m). CLI excludes (e.g. platform-scoping)
         # are authoritative and always union in after that gate.
         config_exclude_labels = [] if skip_config_label_exclusions else exclude_labels
         resolution_exclude_labels = list(dict.fromkeys([*config_exclude_labels, *self._exclude_labels]))

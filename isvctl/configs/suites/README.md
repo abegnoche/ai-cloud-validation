@@ -24,56 +24,56 @@ Suites:
 For the domain / script-count / AWS-reference overview see the
 [my-isv scaffold README](../providers/my-isv/scripts/README.md#domains).
 
-## Capabilities, modules, and labels
+## Platforms, modules, and labels
 
-Test selection is a **matrix**: capabilities (service lines / environments) are
+Test selection is a **matrix**: platforms (service lines / environments) are
 the columns, operational concerns (modules) are the rows. A run targets exactly
 one environment - the orchestrator runs a single `commands[platform]` block and
 validations read its step outputs via `{{ steps.<name>.<field> }}` - so the
-capability is the natural run unit and modules are label-selected slices.
+platform is the natural run unit and modules are label-selected slices.
 
-### The `capability:` / `module:` axis key
+### The `platform:` / `module:` axis key
 
-Every suite declares exactly one axis key in its `tests:` block - its value is
-also the runtime platform (the `commands[...]` group to run), so there is no
-separate `platform:` line to keep in sync:
+Every suite declares exactly one axis key in its `tests:` block:
 
-- **`capability: <name>`** - `vm`, `bare_metal`, `kubernetes`, `slurm`. Owns a
-  run's setup/test/teardown lifecycle.
-- **`module: <name>`** - `iam`, `network`, `security`, `observability`,
-  `control_plane`, `image_registry`. An operational concern.
+- **`platform: <name>`** - a **service-line platform**: `vm`, `bare_metal`,
+  `kubernetes`, `slurm`. Owns a run's setup/test/teardown lifecycle. (`platform`
+  is the long-standing runtime term - the `commands[...]` group to run and the
+  upload/report key.)
+- **`module: <name>`** - an operational concern: `iam`, `network`, `security`,
+  `observability`, `control_plane`, `image_registry`. Its value is also the
+  runtime platform (derived), so a module suite needs no separate `platform:`.
 
 Provider configs inherit the axis key through `import:` (an `aws/config/eks.yaml`
-that imports `k8s.yaml` is a capability config automatically - classification is
-by the key, never by filename or directory). The capability and module **label
-axes are derived** from the suites' `capability:`/`module:` values, so adding a
-suite extends the axes without editing a central list. (`platform` remains a
-valid explicit field for provider configs read raw by import-skipping upload
-paths; when a suite declares an axis key, `platform` is derived from it.)
+that imports `k8s.yaml` is a platform config automatically - classification is
+by the key, never by filename or directory): a config that declares `module:` is
+a module, otherwise its `platform:` marks a platform suite. The platform and module
+**label axes are derived** from these keys, so adding a suite extends the axes
+without editing a central list.
 
 ### Where a check lives (the placement rule)
 
-- Needs a capability's **live host/infra** to run against -> **inline in that
-  capability suite** ("piggyback"), tagged with the concern label too. Examples:
+- Needs a platform's **live host/infra** to run against -> **inline in that
+  platform suite** ("piggyback"), tagged with the concern label too. Examples:
   the `security`-labeled `virtual_device_hardening`/`ConsoleRbacCheck` in
   `vm.yaml`; the `storage`-labeled `K8sCsi*` checks in `k8s.yaml` reading
   `{{ steps.setup.csi.* }}`; BM sanitization/attestation in `bare_metal.yaml`.
 - **Provisions its own test subject** or hits an **API** -> **its own
-  `module:` suite**, running once per lab, capability-agnostic. Examples:
+  `module:` suite**, running once per lab, platform-agnostic. Examples:
   `network.yaml` (creates its own VPC), `iam.yaml`, `control-plane.yaml`,
   `image-registry.yaml` (boots a VM *from the uploaded image* - the VM is the
   subject, not a borrowed host).
 
-The distinguishing test: infra as **host** for the check -> capability suite;
+The distinguishing test: infra as **host** for the check -> platform suite;
 infra as the **test subject** -> module suite. A single concern (label) commonly
 has checks in both places; the shared **label** is the matrix row, placement per
 check follows infra need.
 
-### A concern that spans capabilities
+### A concern that spans platforms
 
-Model "storage on K8s *and* BM" (or any cross-capability concern) as **one
-check-set per capability, each carrying its own single capability label plus the
-shared concern label** - never one check with two capability labels:
+Model "storage on K8s *and* BM" (or any cross-platform concern) as **one
+check-set per platform, each carrying its own single platform label plus the
+shared concern label** - never one check with two platform labels:
 
 ```yaml
 # k8s.yaml           labels: ["kubernetes", "storage"]   reads {{steps.setup.csi.*}}
@@ -81,46 +81,46 @@ shared concern label** - never one check with two capability labels:
 ```
 
 The catalog then shows the `storage` row under both columns automatically. Do
-**not** put both in one `storage.yaml` imported by both capabilities: a plain
+**not** put both in one `storage.yaml` imported by both platforms: a plain
 `-f eks.yaml` run would drag the BM checks in and they would SKIP (no
 `launch_instance` step), polluting the report. Keep them inline, or use one
-validation-only fragment per capability.
+validation-only fragment per platform.
 
 ### Label governance
 
 `scripts/validate_suite_wiring.py` (run via `make validate-suites`) enforces:
 
-- every suite declares exactly one of `capability:` / `module:`;
-- every wiring label is a known **capability**, **module**, or **modifier**
+- every suite declares exactly one of `platform:` / `module:`;
+- every wiring label is a known **platform**, **module**, or **modifier**
   label (`MODIFIER_LABELS`: `min_req`, `slow`, `gpu`, `ssh`, `workload`, and the
   hardware traits) - typos and ungoverned label growth fail the check;
-- a check carries **at most one capability label** (capability-scoped exclusion
-  is any-intersection, so two capability labels would skip the check under every
+- a check carries **at most one platform label** (platform-scoped exclusion
+  is any-intersection, so two platform labels would skip the check under every
   column).
 
 Provider configs are governed for labels too (they inherit the axis key/`test_id`).
 
 ### Composition pattern (future env-dependent modules)
 
-A future module that needs a capability's infra may land as a **validation-only
+A future module that needs a platform's infra may land as a **validation-only
 fragment** (`tests.validations` only, *no* `commands:` and *no* `tests.platform`)
-that a capability suite `import:`s. Because YAML merge combines the `validations`
-dict but the capability owns the single `commands.<platform>.steps` list, the
-fragment's checks join the capability's orchestration and read its step outputs -
+that a platform suite `import:`s. Because YAML merge combines the `validations`
+dict but the platform owns the single `commands.<platform>.steps` list, the
+fragment's checks join the platform's orchestration and read its step outputs -
 browsable in its own file, executed in one run. Existing inline piggyback checks
 are not retro-carved.
 
 ### How selection works (CLI)
 
 ```bash
-# Run the whole VMaaS column: the vm capability config + every module config.
+# Run the whole VMaaS column: the vm platform config + every module config.
 # Each runs as its own orchestration (own JUnit); a combined summary prints and
 # the process exits 1 if any config failed. Module checks tagged for a different
-# capability (e.g. security's bare_metal-only CAP04 checks) are auto-excluded.
-isvctl test run --provider aws --capability vm
+# platform (e.g. security's bare_metal-only CAP04 checks) are auto-excluded.
+isvctl test run --provider aws --platform vm
 
 # Min Req preset is just a label filter on the column.
-isvctl test run --provider aws --capability vm --label min_req
+isvctl test run --provider aws --platform vm --label min_req
 
 # Run one module suite (path-free). Repeatable: --module iam --module network.
 isvctl test run --provider aws --module iam
@@ -129,32 +129,32 @@ isvctl test run --provider aws --module iam
 isvctl test run --provider aws --label iam
 
 # The storage row lives under the kubernetes column today (K8s CSI checks).
-isvctl test run --provider aws --capability kubernetes --label storage
+isvctl test run --provider aws --platform kubernetes --label storage
 
 # -f is the override escape hatch (unchanged).
 isvctl test run -f isvctl/configs/providers/aws/config/vm.yaml -f overrides.yaml
 ```
 
-The intended ISV journey: **`--capability <env>` first** (run everything for the
+The intended ISV journey: **`--platform <env>` first** (run everything for the
 environment you are on), then **`--module`/`--label` to rerun a slice** after a
 failure, with **`-f`** as the power-user override. There is no `--all` flag:
-capability runs are environment-bound, so "run everything" is one `--capability`
+platform runs are environment-bound, so "run everything" is one `--platform`
 command per environment.
 
-`--capability`/`--module` resolve by the effective `capability:`/`module:` key (never by filename):
+`--platform`/`--module` resolve by the effective `platform:`/`module:` key (never by filename):
 `isvctl` classifies each `providers/<p>/config/*.yaml` by the suite it imports.
-An `aws/config/eks.yaml` importing `k8s.yaml` is the `kubernetes` capability.
-`--capability k8s` is accepted as an alias for `kubernetes`.
+An `aws/config/eks.yaml` importing `k8s.yaml` is the `kubernetes` platform.
+`--platform k8s` is accepted as an alias for `kubernetes`.
 
 ### Run-all vs run-a-slice: worked examples
 
-- **Host is VM, run everything:** `--provider aws --capability vm` runs
-  `vm.yaml` (capability) then `network`/`iam`/`security`/`control-plane`/
+- **Host is VM, run everything:** `--provider aws --platform vm` runs
+  `vm.yaml` (platform) then `network`/`iam`/`security`/`control-plane`/
   `image-registry`/`observability` (modules), each with `exclude_labels =
   {bare_metal, kubernetes, slurm}` so a differently-scoped module check skips.
 - **Host is VM, run only storage:** storage is K8s-only today, so run it under
-  the kubernetes column (`--provider aws --capability kubernetes --label
-  storage` or `--provider aws --label storage`). `--capability vm --label
+  the kubernetes column (`--provider aws --platform kubernetes --label
+  storage` or `--provider aws --label storage`). `--platform vm --label
   storage` runs nothing until a VM storage check is authored (inline in
   `vm.yaml` or an imported fragment), at which point the same command runs it
   inside the VM orchestration.

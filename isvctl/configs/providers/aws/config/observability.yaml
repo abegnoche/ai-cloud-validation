@@ -19,7 +19,7 @@
 # AWS wires the VPC Flow Logs check plus the network/fabric/storage telemetry
 # checks here. Host syslog and BMC SEL/telemetry observability checks moved to
 # providers/aws/config/bare_metal.yaml (they need a live host/BMC and now
-# piggyback on the bare_metal capability run).
+# piggyback on the bare_metal platform run).
 #
 # Required IAM permissions:
 #   - Permissions required by providers/aws/config/network.yaml create/teardown
@@ -187,7 +187,7 @@ commands:
         timeout: 120
 
       # Host syslog + BMC SEL/telemetry checks moved to the bare_metal config -
-      # they piggyback on that capability's launched host instead of a dedicated
+      # they piggyback on that platform's launched host instead of a dedicated
       # observability host.
 
       - name: storage_capacity_telemetry

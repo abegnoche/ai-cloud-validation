@@ -47,7 +47,7 @@ def test_wiring_errors_rejects_scalar_labels(tmp_path: Path) -> None:
     suite.write_text(
         """\
 tests:
-  capability: kubernetes
+  platform: kubernetes
   validations:
     example:
       checks:
@@ -66,7 +66,7 @@ def test_wiring_errors_require_canonical_suite_label(tmp_path: Path) -> None:
     suite.write_text(
         """\
 tests:
-  capability: kubernetes
+  platform: kubernetes
   validations:
     example:
       checks:
@@ -84,11 +84,11 @@ tests:
 
 
 def test_wiring_errors_flags_missing_or_conflicting_axis_key(tmp_path: Path) -> None:
-    """A suite must declare exactly one of tests.capability / tests.module."""
+    """A suite must declare exactly one of tests.platform / tests.module."""
     (tmp_path / "no_axis.yaml").write_text(
         """\
 tests:
-  platform: vm
+  cluster_name: no-axis
   validations:
     example:
       checks:
@@ -100,7 +100,7 @@ tests:
     (tmp_path / "both_axes.yaml").write_text(
         """\
 tests:
-  capability: vm
+  platform: vm
   module: iam
   validations:
     example:
@@ -112,11 +112,11 @@ tests:
     )
     errors = validate_suite_wiring.wiring_errors(tmp_path)
     assert any("no_axis.yaml" in err and "missing axis key" in err for err in errors)
-    assert any("both_axes.yaml" in err and "both tests.capability and tests.module" in err for err in errors)
+    assert any("both_axes.yaml" in err and "both tests.platform and tests.module" in err for err in errors)
 
 
 def test_wiring_errors_flags_unknown_label(tmp_path: Path) -> None:
-    """A typo'd label that is neither capability, module, nor modifier fails."""
+    """A typo'd label that is neither platform, module, nor modifier fails."""
     suite = tmp_path / "network.yaml"
     suite.write_text(
         """\
@@ -134,12 +134,12 @@ tests:
     assert any("TypoCheck" in err and "unknown label 'netwrok'" in err for err in errors)
 
 
-def test_wiring_errors_flags_multiple_capability_labels(tmp_path: Path) -> None:
-    """A check may carry at most one capability-axis label."""
+def test_wiring_errors_flags_multiple_platform_labels(tmp_path: Path) -> None:
+    """A check may carry at most one platform-axis label."""
     (tmp_path / "bare_metal.yaml").write_text(
         """\
 tests:
-  capability: bare_metal
+  platform: bare_metal
   validations:
     example:
       checks:
@@ -151,7 +151,7 @@ tests:
     (tmp_path / "vm.yaml").write_text(
         """\
 tests:
-  capability: vm
+  platform: vm
   validations:
     example:
       checks:
@@ -162,7 +162,7 @@ tests:
     )
     errors = validate_suite_wiring.wiring_errors(tmp_path)
     assert any(
-        "DualCapability" in err and "multiple capability labels" in err and "bare_metal, vm" in err for err in errors
+        "DualCapability" in err and "multiple platform labels" in err and "bare_metal, vm" in err for err in errors
     )
 
 
@@ -203,8 +203,8 @@ def test_derive_axis_labels_covers_platform_labels() -> None:
     """Guardrail: derived axis labels cover every catalog platform-ownership label."""
     from isvtest.catalog import LABEL_TO_PLATFORM
 
-    capability_labels, module_labels = validate_suite_wiring.derive_axis_labels()
-    assert set(LABEL_TO_PLATFORM).issubset(capability_labels | module_labels)
+    platform_labels, module_labels = validate_suite_wiring.derive_axis_labels()
+    assert set(LABEL_TO_PLATFORM).issubset(platform_labels | module_labels)
 
 
 def test_wiring_errors_reports_yaml_parse_failures(tmp_path: Path) -> None:

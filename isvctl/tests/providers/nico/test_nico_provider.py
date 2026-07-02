@@ -659,8 +659,8 @@ def test_nico_bare_metal_config_platform_matches_command_group() -> None:
     """The orchestrator uses tests.platform to look up the bare-metal commands group."""
     merged, _steps = _merged_nico_config_steps("bare_metal.yaml", "bare_metal")
 
-    # bare_metal imports the capability suite, so the axis key is inherited.
-    assert merged["tests"]["capability"] == "bare_metal"
+    # bare_metal imports the platform suite (declares platform, no module).
+    assert merged["tests"]["platform"] == "bare_metal"
     assert RunConfig.model_validate(merged).tests.platform == "bare_metal"
 
 

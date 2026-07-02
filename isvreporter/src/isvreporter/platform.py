@@ -92,8 +92,8 @@ def get_platform_from_config(config_path: Path | str) -> str:
     """Extract and normalize platform from a config file.
 
     Reads the file raw (imports are not resolved), so it prefers an explicit
-    ``tests.platform`` and falls back to the ``tests.capability`` /
-    ``tests.module`` axis key (whose value is the platform). Configs that inherit
+    ``tests.platform`` (platform suites) and falls back to ``tests.module``
+    (module suites, whose module value is the platform). Configs that inherit
     their axis key only via ``import:`` still need an explicit value here.
 
     Args:
@@ -106,7 +106,7 @@ def get_platform_from_config(config_path: Path | str) -> str:
         with open(config_path) as f:
             config_data = yaml.safe_load(f)
         tests = config_data.get("tests", {}) or {}
-        platform = tests.get("platform") or tests.get("capability") or tests.get("module") or ""
+        platform = tests.get("platform") or tests.get("module") or ""
         return normalize_platform(platform)
     except Exception:
         return DEFAULT_PLATFORM

@@ -234,21 +234,8 @@
             }
           ],
           "default": null,
-          "description": "Runtime platform (the commands[...] group to run and the upload/report key). Derived from 'capability'/'module' when not set explicitly.",
+          "description": "Service-line platform (the commands[...] group to run and the upload/report key): vm, bare_metal, kubernetes, slurm. A suite that declares 'platform' is a platform suite; one that declares 'module' is an operational concern.",
           "title": "Platform"
-        },
-        "capability": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Capability (service line) this suite validates: vm, bare_metal, kubernetes, slurm. Its value is also the runtime platform. Mutually exclusive with 'module'.",
-          "title": "Capability"
         },
         "module": {
           "anyOf": [
@@ -260,7 +247,7 @@
             }
           ],
           "default": null,
-          "description": "Operational-concern module this suite validates: iam, network, security, observability, control_plane, image_registry, ... Its value is also the runtime platform. Mutually exclusive with 'capability'.",
+          "description": "Operational-concern module this suite validates: iam, network, security, observability, control_plane, image_registry, ... Its value is also the runtime platform (derived below). Mutually exclusive with 'platform'.",
           "title": "Module"
         },
         "settings": {

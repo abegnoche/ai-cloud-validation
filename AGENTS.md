@@ -25,16 +25,16 @@ make format            # ruff format
 make plan              # render docs/test-plan.yaml to AsciiDoc + interactive HTML
 uv run isvctl test run -f isvctl/configs/suites/k8s.yaml          # canonical invocation
 uv run isvctl test run -f config.yaml -- -v -s -k "test_name"     # forward pytest args
-uv run isvctl test run --provider aws --capability vm            # run a whole capability column (vm config + all module configs)
+uv run isvctl test run --provider aws --platform vm              # run a whole platform column (vm config + all module configs)
 uv run isvctl test run --provider aws --module iam               # run a single module suite
 uv run isvctl test run --provider aws --label storage            # cross-file label discovery (PR 485)
 ```
 
-Selection: `--capability <env>` runs the environment's config plus every module
-config (module checks tagged for a different capability are auto-excluded);
+Selection: `--platform <env>` runs the environment's config plus every module
+config (module checks tagged for a different platform are auto-excluded);
 `--module <mod>` runs one module suite; `--label` filters within a run or drives
 cross-file discovery with `--provider`. `-f` is the override escape hatch. All
-are mutually exclusive with `-f`; `--capability`/`--module` require `--provider`.
+are mutually exclusive with `-f`; `--platform`/`--module` require `--provider`.
 
 ## Step-Based Execution Model
 
@@ -114,18 +114,21 @@ exception: the single-node local providers
 `isvctl/configs/providers/{k3s,microk8s,minikube}.yaml`, which wire host-level
 checks that exist in no suite.
 
-Suites are classified by a single axis key in `tests:` - `capability: <name>`
-(`vm`, `bare_metal`, `kubernetes`, `slurm`) or `module: <name>` (`iam`,
-`network`, `security`, `observability`, `control_plane`, `image_registry`, ...);
-its value is also the runtime `platform` (derived when not set explicitly).
-Provider configs inherit it via `import:`. The capability/module label axes are
-*derived* from these keys. `scripts/validate_suite_wiring.py` governs labels:
-every suite declares exactly one axis key, every wiring label must be a
-capability, module, or `MODIFIER_LABELS` label, and a check may carry at most one
-capability label (capability-scoped exclusion is any-intersection). A check that
-needs a capability's live host lives inline in that capability suite
-("piggyback"); a concern that provisions its own subject or hits an API stays in
-its own `module:` suite. See `isvctl/configs/suites/README.md`.
+Suites are classified by a single axis key in `tests:` - `platform: <name>`
+marks a service-line platform (`vm`, `bare_metal`, `kubernetes`, `slurm`;
+`platform` is the long-standing runtime + upload key), while `module: <name>`
+marks an operational concern (`iam`, `network`, `security`, `observability`,
+`control_plane`, `image_registry`, ...) whose value is also the runtime platform
+(derived). A config that declares `module:` is a module; otherwise its
+`platform:` marks a platform suite. Provider configs inherit the key via `import:`.
+The platform/module label axes are *derived* from these keys.
+`scripts/validate_suite_wiring.py` governs labels: every suite declares exactly
+one axis key, every wiring label must be a platform, module, or
+`MODIFIER_LABELS` label, and a check may carry at most one platform label
+(platform-scoped exclusion is any-intersection). A check that needs a
+platform's live host lives inline in that platform suite ("piggyback"); a
+concern that provisions its own subject or hits an API stays in its own `module:`
+suite. See `isvctl/configs/suites/README.md`.
 
 Workloads (`isvtest/src/isvtest/workloads/`) are long-running tests (NIM, NCCL,
 stress) labelled `("workload", "slow", ...)` with manifests and helper scripts

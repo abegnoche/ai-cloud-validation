@@ -708,7 +708,7 @@ class TestLabelFiltering:
         assert check["message"] == "excluded by pytest -k/-m filter"
 
     def test_cli_exclude_labels_skip_validation(self) -> None:
-        """A CLI ``exclude_labels`` (e.g. capability-scoping) skips a matching check."""
+        """A CLI ``exclude_labels`` (e.g. platform-scoping) skips a matching check."""
         config = self._config()
 
         result = Orchestrator(config).run(phases=[Phase.TEST], exclude_labels=["kubernetes"])

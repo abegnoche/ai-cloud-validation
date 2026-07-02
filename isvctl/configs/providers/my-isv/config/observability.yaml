@@ -113,7 +113,7 @@ commands:
 
       # host_syslogs / bmc_sel_logs / bmc_gpu_telemetry moved to
       # providers/my-isv/config/bare_metal.yaml (they piggyback on the launched
-      # host in the bare_metal capability run).
+      # host in the bare_metal platform run).
 
       - name: storage_capacity_telemetry
         phase: test

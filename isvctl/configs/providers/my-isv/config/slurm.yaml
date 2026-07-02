@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# my-isv Slurm capability wrapper
+# my-isv Slurm platform wrapper
 #
 # Imports the canonical slurm suite and re-declares the setup/teardown commands
 # with paths relative to THIS file (providers/my-isv/config/). The suite embeds
 # `../providers/my-isv/scripts/...`-style paths that resolve from suites/; when
 # imported here the working dir becomes this config's directory, so the command
-# paths must be re-declared relative to it. This makes the slurm capability
-# selectable via `--provider my-isv --capability slurm`.
+# paths must be re-declared relative to it. This makes the slurm platform
+# selectable via `--provider my-isv --platform slurm`.
 #
 # Note: not wired into `make demo-test` (MY_ISV_DOMAINS) - the slurm setup/teardown
 # scripts have no ISVCTL_DEMO_MODE gate and expect a real cluster.
@@ -45,4 +45,4 @@ commands:
 
 tests:
   cluster_name: "my-isv-slurm-validation"
-  description: "my-isv Slurm capability validation"
+  description: "my-isv Slurm platform validation"

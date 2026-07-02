@@ -35,7 +35,7 @@
 version: "1.0"
 
 tests:
-  capability: bare_metal
+  platform: bare_metal
   cluster_name: "bm-validation"
   description: "Bare metal (BMaaS) GPU validation tests"
 
@@ -667,7 +667,7 @@ tests:
           labels: ["bare_metal", "iam", "security", "vm"]
 
     # ─── Observability (host syslog + BMC), moved from observability.yaml ──────
-    # These need a live host/BMC, so they piggyback on the bare_metal capability
+    # These need a live host/BMC, so they piggyback on the bare_metal platform
     # run. They keep the "observability" label so the observability row spans the
     # BMaaS column. Providers that do not configure these steps skip them
     # (STEP_NOT_CONFIGURED).

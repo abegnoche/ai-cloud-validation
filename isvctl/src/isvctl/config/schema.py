@@ -361,15 +361,9 @@ class ValidationConfig(BaseModel):
     platform: str | None = Field(
         default=None,
         description=(
-            "Runtime platform (the commands[...] group to run and the upload/report key). "
-            "Derived from 'capability'/'module' when not set explicitly."
-        ),
-    )
-    capability: str | None = Field(
-        default=None,
-        description=(
-            "Capability (service line) this suite validates: vm, bare_metal, kubernetes, slurm. "
-            "Its value is also the runtime platform. Mutually exclusive with 'module'."
+            "Service-line platform (the commands[...] group to run and the "
+            "upload/report key): vm, bare_metal, kubernetes, slurm. A suite that declares "
+            "'platform' is a platform suite; one that declares 'module' is an operational concern."
         ),
     )
     module: str | None = Field(
@@ -377,30 +371,25 @@ class ValidationConfig(BaseModel):
         description=(
             "Operational-concern module this suite validates: iam, network, security, "
             "observability, control_plane, image_registry, ... Its value is also the runtime "
-            "platform. Mutually exclusive with 'capability'."
+            "platform (derived below). Mutually exclusive with 'platform'."
         ),
     )
 
     @model_validator(mode="after")
-    def _derive_platform_from_axis(self) -> "ValidationConfig":
-        """Fold 'capability'/'module' into the runtime 'platform'.
+    def _derive_platform_from_module(self) -> "ValidationConfig":
+        """A module suite's 'module' value is its runtime 'platform'.
 
-        A suite declares exactly one of 'capability' or 'module'; its value is
-        the runtime platform (the commands[...] key). 'platform' may still be set
-        explicitly (provider configs read raw for import-skipping upload paths)
-        and, when present, must not contradict the declared axis.
+        Platform suites declare 'platform' directly; module suites declare
+        'module' (and inherit no separate 'platform'). The two are mutually
+        exclusive, and a module's value becomes the runtime platform (the
+        commands[...] key).
         """
-        if self.capability and self.module:
-            raise ValueError("declare only one of 'capability' or 'module', not both")
-        axis_platform = self.capability or self.module
-        if axis_platform:
-            if self.platform and self.platform != axis_platform:
-                raise ValueError(
-                    f"platform {self.platform!r} contradicts "
-                    f"{'capability' if self.capability else 'module'} {axis_platform!r}"
-                )
-            self.platform = axis_platform
+        if self.platform and self.module:
+            raise ValueError("declare only one of 'platform' or 'module', not both")
+        if self.module:
+            self.platform = self.module
         return self
+
     settings: dict[str, Any] = Field(default_factory=dict, description="Test settings")
     validations: dict[str, list[dict[str, Any]] | dict[str, Any]] = Field(
         default_factory=dict,

@@ -1,21 +1,21 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Capability/module resolution for ``--capability`` and ``--module`` selection.
+"""Platform/module resolution for ``--platform`` and ``--module`` selection.
 
 Sibling of :mod:`isvctl.config.label_discovery`. Classifies a provider's configs
-by their effective ``tests.capability`` / ``tests.module`` key (inherited through
-``import:``) and plans which configs to run:
+by their effective ``tests`` axis key (inherited through ``import:``): a config
+that declares ``module:`` is an operational concern; otherwise its ``platform:``
+marks a platform suite (service line). Plans which configs to run:
 
-* ``--capability <cap>`` runs the whole matrix column: the one config declaring
-  ``capability: <cap>`` first, then every ``module:`` config, each with
-  capability-scoped exclude labels so checks tagged with a *different* capability
-  are skipped.
+* ``--platform <platform>`` runs the whole matrix column: the one config whose
+  ``platform`` is ``<platform>`` (and which declares no ``module``) first, then
+  every ``module:`` config, each with platform-scoped exclude labels so checks
+  tagged with a *different* platform are skipped.
 * ``--module <mod>`` runs a single config declaring ``module: <mod>``.
 
-Classification is by the ``capability``/``module`` key, never by filename: an
-``aws/config/eks.yaml`` that imports ``k8s.yaml`` inherits ``capability:
-kubernetes``.
+Classification is by the axis key, never by filename: an ``aws/config/eks.yaml``
+that imports ``k8s.yaml`` inherits ``platform: kubernetes`` and is a platform suite.
 """
 
 from __future__ import annotations
@@ -27,15 +27,15 @@ import yaml
 
 from isvctl.config.merger import merge_yaml_files
 
-CAPABILITY_KIND = "capability"
+PLATFORM_SUITE_KIND = "platform"
 MODULE_KIND = "module"
-# CLI aliases accepted for capability names, mirroring the orchestrator's
+# CLI aliases accepted for platform names, mirroring the orchestrator's
 # ``k8s`` -> ``kubernetes`` normalization.
-CAPABILITY_ALIASES = {"k8s": "kubernetes"}
+PLATFORM_ALIASES = {"k8s": "kubernetes"}
 
 
-class CapabilityResolutionError(Exception):
-    """Raised when a capability/module selection cannot be resolved."""
+class PlatformResolutionError(Exception):
+    """Raised when a platform/module selection cannot be resolved."""
 
 
 @dataclass(frozen=True)
@@ -49,10 +49,10 @@ class ClassifiedConfig:
 
 @dataclass(frozen=True)
 class PlannedRun:
-    """A single config to run as part of a ``--capability``/``--module`` selection."""
+    """A single config to run as part of a ``--platform``/``--module`` selection."""
 
     config_path: Path
-    role: str  # "capability" or "module"
+    role: str  # "platform" or "module"
     platform: str
     exclude_labels: tuple[str, ...] = ()
 
@@ -60,27 +60,28 @@ class PlannedRun:
 def _effective_kind_and_platform(config_path: Path) -> tuple[str | None, str | None]:
     """Return the ``(kind, platform)`` a config resolves to after imports.
 
-    ``kind`` is ``"capability"`` or ``"module"`` depending on which axis key the
-    config declares; ``platform`` is that key's value (the commands[...] key).
+    A config that declares ``tests.module`` is a module (its module value is the
+    platform); otherwise ``tests.platform`` marks it a platform suite.
     """
     merged = merge_yaml_files([config_path])
     tests = merged.get("tests") or {}
     if not isinstance(tests, dict):
         return None, None
-    capability = tests.get("capability")
     module = tests.get("module")
-    if isinstance(capability, str) and capability:
-        return CAPABILITY_KIND, capability
     if isinstance(module, str) and module:
         return MODULE_KIND, module
+    platform = tests.get("platform")
+    if isinstance(platform, str) and platform:
+        return PLATFORM_SUITE_KIND, platform
     return None, None
 
 
-def capability_label_universe(configs_root: Path) -> frozenset[str]:
-    """Return every capability label defined by the shipped capability suites.
+def platform_label_universe(configs_root: Path) -> frozenset[str]:
+    """Return every platform label defined by the shipped platform suites.
 
     Derived from ``configs_root/suites`` (not the provider's configs) so exclusion
-    is stable even when a provider is missing a capability config.
+    is stable even when a provider is missing a platform config. A platform suite
+    is one that declares ``platform`` and no ``module``.
     """
     suites_dir = configs_root / "suites"
     universe: set[str] = set()
@@ -92,9 +93,11 @@ def capability_label_universe(configs_root: Path) -> frozenset[str]:
         tests = (data or {}).get("tests", {})
         if not isinstance(tests, dict):
             continue
-        capability = tests.get("capability")
-        if isinstance(capability, str) and capability:
-            universe.add(capability)
+        if tests.get("module"):
+            continue
+        platform = tests.get("platform")
+        if isinstance(platform, str) and platform:
+            universe.add(platform)
     return frozenset(universe)
 
 
@@ -102,7 +105,7 @@ def _provider_config_dir(provider: str, configs_root: Path) -> Path:
     """Return a provider's config directory, erroring if it is absent."""
     provider_config_dir = configs_root / "providers" / provider / "config"
     if not provider_config_dir.is_dir():
-        raise CapabilityResolutionError(f"Provider {provider!r} has no config directory at {provider_config_dir}.")
+        raise PlatformResolutionError(f"Provider {provider!r} has no config directory at {provider_config_dir}.")
     return provider_config_dir
 
 
@@ -110,25 +113,25 @@ def classify_provider_configs(provider: str, *, configs_root: Path) -> list[Clas
     """Classify every config under a provider by its effective kind + platform.
 
     Raises:
-        CapabilityResolutionError: If a config declares no (or an invalid) kind.
+        PlatformResolutionError: If a config declares no (or an invalid) kind.
     """
     provider_config_dir = _provider_config_dir(provider, configs_root)
     classified: list[ClassifiedConfig] = []
     for config_path in sorted(provider_config_dir.glob("*.yaml")):
         kind, platform = _effective_kind_and_platform(config_path)
-        if kind not in (CAPABILITY_KIND, MODULE_KIND) or not platform:
-            raise CapabilityResolutionError(
-                f"Config {config_path} declares neither tests.capability nor tests.module; "
-                f"every provider config must inherit a capability/module suite via import "
-                f"(or declare one of these keys directly)."
+        if kind not in (PLATFORM_SUITE_KIND, MODULE_KIND) or not platform:
+            raise PlatformResolutionError(
+                f"Config {config_path} declares neither tests.platform nor tests.module; "
+                f"every provider config must inherit a platform or module suite "
+                f"via import (or declare one of these keys directly)."
             )
         classified.append(ClassifiedConfig(config_path=config_path, kind=kind, platform=platform))
     return classified
 
 
-def _available_capabilities(classified: list[ClassifiedConfig]) -> list[str]:
-    """Return the sorted capability platforms a provider exposes."""
-    return sorted({c.platform for c in classified if c.kind == CAPABILITY_KIND})
+def _available_platforms(classified: list[ClassifiedConfig]) -> list[str]:
+    """Return the sorted platform values a provider exposes."""
+    return sorted({c.platform for c in classified if c.kind == PLATFORM_SUITE_KIND})
 
 
 def _available_modules(classified: list[ClassifiedConfig]) -> list[str]:
@@ -136,40 +139,40 @@ def _available_modules(classified: list[ClassifiedConfig]) -> list[str]:
     return sorted({c.platform for c in classified if c.kind == MODULE_KIND})
 
 
-def plan_capability_run(provider: str, capability: str, *, configs_root: Path) -> list[PlannedRun]:
-    """Plan the configs to run for ``--capability <capability>``.
+def plan_platform_run(provider: str, platform: str, *, configs_root: Path) -> list[PlannedRun]:
+    """Plan the configs to run for ``--platform <platform>``.
 
-    The capability config runs first (no excludes); each module config follows
-    with ``exclude_labels`` = every *other* capability label, so module checks
-    tagged for a different capability are skipped under this column.
+    The platform config runs first (no excludes); each module config follows
+    with ``exclude_labels`` = every *other* platform label, so module checks
+    tagged for a different platform are skipped under this column.
 
     Raises:
-        CapabilityResolutionError: On unknown/duplicate capability configs.
+        PlatformResolutionError: On unknown/duplicate platform configs.
     """
-    normalized = CAPABILITY_ALIASES.get(capability, capability)
+    normalized = PLATFORM_ALIASES.get(platform, platform)
     classified = classify_provider_configs(provider, configs_root=configs_root)
 
-    capability_configs = [c for c in classified if c.kind == CAPABILITY_KIND and c.platform == normalized]
-    if not capability_configs:
-        available = _available_capabilities(classified)
-        raise CapabilityResolutionError(
-            f"Provider {provider!r} has no {normalized!r} capability config. "
-            f"Available capabilities: {', '.join(available) or '(none)'}."
+    platform_configs = [c for c in classified if c.kind == PLATFORM_SUITE_KIND and c.platform == normalized]
+    if not platform_configs:
+        available = _available_platforms(classified)
+        raise PlatformResolutionError(
+            f"Provider {provider!r} has no {normalized!r} platform config. "
+            f"Available platforms: {', '.join(available) or '(none)'}."
         )
-    if len(capability_configs) > 1:
-        paths = ", ".join(str(c.config_path) for c in capability_configs)
-        raise CapabilityResolutionError(
-            f"Provider {provider!r} has multiple {normalized!r} capability configs ({paths}). "
+    if len(platform_configs) > 1:
+        paths = ", ".join(str(c.config_path) for c in platform_configs)
+        raise PlatformResolutionError(
+            f"Provider {provider!r} has multiple {normalized!r} platform configs ({paths}). "
             f"Disambiguate with --config/-f."
         )
 
-    universe = capability_label_universe(configs_root)
+    universe = platform_label_universe(configs_root)
     exclude_labels = tuple(sorted(universe - {normalized}))
 
     runs: list[PlannedRun] = [
         PlannedRun(
-            config_path=capability_configs[0].config_path,
-            role=CAPABILITY_KIND,
+            config_path=platform_configs[0].config_path,
+            role=PLATFORM_SUITE_KIND,
             platform=normalized,
         )
     ]
@@ -188,22 +191,22 @@ def plan_capability_run(provider: str, capability: str, *, configs_root: Path) -
 def resolve_module_config(provider: str, module: str, *, configs_root: Path) -> PlannedRun:
     """Resolve the single ``kind: module`` config for ``--module <module>``.
 
-    Runs standalone (no capability context), so no capability excludes apply.
+    Runs standalone (no platform context), so no platform excludes apply.
 
     Raises:
-        CapabilityResolutionError: On unknown/duplicate module configs.
+        PlatformResolutionError: On unknown/duplicate module configs.
     """
     classified = classify_provider_configs(provider, configs_root=configs_root)
     module_configs = [c for c in classified if c.kind == MODULE_KIND and c.platform == module]
     if not module_configs:
         available = _available_modules(classified)
-        raise CapabilityResolutionError(
+        raise PlatformResolutionError(
             f"Provider {provider!r} has no {module!r} module config. "
             f"Available modules: {', '.join(available) or '(none)'}."
         )
     if len(module_configs) > 1:
         paths = ", ".join(str(c.config_path) for c in module_configs)
-        raise CapabilityResolutionError(
+        raise PlatformResolutionError(
             f"Provider {provider!r} has multiple {module!r} module configs ({paths}). Disambiguate with --config/-f."
         )
     return PlannedRun(config_path=module_configs[0].config_path, role=MODULE_KIND, platform=module)

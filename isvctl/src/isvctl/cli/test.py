@@ -39,12 +39,6 @@ from isvctl.cli.common import (
     print_progress,
     print_warning,
 )
-from isvctl.config.capability_resolution import (
-    CapabilityResolutionError,
-    PlannedRun,
-    plan_capability_run,
-    resolve_module_config,
-)
 from isvctl.config.label_discovery import (
     ProviderConfigMatch,
     available_labels,
@@ -52,6 +46,12 @@ from isvctl.config.label_discovery import (
     list_providers,
 )
 from isvctl.config.merger import merge_yaml_files
+from isvctl.config.platform_resolution import (
+    PlannedRun,
+    PlatformResolutionError,
+    plan_platform_run,
+    resolve_module_config,
+)
 from isvctl.config.schema import RunConfig
 from isvctl.orchestrator.loop import Orchestrator, Phase
 from isvctl.redaction import redact_dict
@@ -129,7 +129,7 @@ def _junitxml_for_config(junitxml: Path, config_path: Path, total: int) -> Path:
 
 
 def _planned_run_plan(provider: str, selection: dict[str, Any], runs: list[PlannedRun]) -> dict[str, Any]:
-    """Return a JSON-serializable plan for a capability/module selection dry-run."""
+    """Return a JSON-serializable plan for a platform/module selection dry-run."""
     return {
         "provider": provider,
         **selection,
@@ -165,7 +165,7 @@ def _execute_planned_runs(
 ) -> None:
     """Run each planned config as its own orchestration, continuing past failures.
 
-    Each config's capability-scoped excludes are unioned with any user
+    Each config's platform-scoped excludes are unioned with any user
     ``--exclude-label`` values. A combined pass/fail summary is printed and the
     process exits 1 if any config failed.
     """
@@ -182,7 +182,7 @@ def _execute_planned_runs(
                 set_values=set_values,
                 phase=phase,
                 labels=labels,
-                capability=None,
+                platform=None,
                 modules=None,
                 exclude_labels=combined_excludes or None,
                 dry_run=False,
@@ -201,7 +201,7 @@ def _execute_planned_runs(
             outcomes.append((planned.config_path, exc.exit_code == 0))
 
     typer.echo("\n" + "=" * 60)
-    typer.echo("CAPABILITY/MODULE RUN SUMMARY")
+    typer.echo("PLATFORM/MODULE RUN SUMMARY")
     typer.echo("=" * 60)
     for config_path, ok in outcomes:
         status = typer.style("[PASS]", fg=typer.colors.GREEN) if ok else typer.style("[FAIL]", fg=typer.colors.RED)
@@ -255,11 +255,11 @@ def run(
             help="Label to filter validations (can be repeated; all selected labels must match)",
         ),
     ] = None,
-    capability: Annotated[
+    platform: Annotated[
         str | None,
         typer.Option(
-            "--capability",
-            help="Run a whole capability column (its config + every module config) for --provider.",
+            "--platform",
+            help="Run a whole platform column (its config + every module config) for --provider.",
         ),
     ] = None,
     modules: Annotated[
@@ -368,14 +368,14 @@ def run(
     setup_logging(verbose)
     apply_user_config(no_user_config)
 
-    if capability and modules:
-        print_error("--capability and --module are mutually exclusive.")
+    if platform and modules:
+        print_error("--platform and --module are mutually exclusive.")
         raise typer.Exit(code=1)
-    if (capability or modules) and config_files:
-        print_error("--capability/--module cannot be combined with --config/-f.")
+    if (platform or modules) and config_files:
+        print_error("--platform/--module cannot be combined with --config/-f.")
         raise typer.Exit(code=1)
-    if (capability or modules) and not provider:
-        print_error("--capability/--module require --provider.")
+    if (platform or modules) and not provider:
+        print_error("--platform/--module require --provider.")
         raise typer.Exit(code=1)
 
     if provider:
@@ -388,17 +388,17 @@ def run(
             print_error(f"Unknown provider {provider!r}. Available providers: {', '.join(known_providers)}")
             raise typer.Exit(code=1)
 
-        if capability or modules:
+        if platform or modules:
             try:
-                if capability:
-                    runs = plan_capability_run(provider, capability, configs_root=CONFIGS_ROOT)
-                    selection: dict[str, Any] = {"capability": capability}
+                if platform:
+                    runs = plan_platform_run(provider, platform, configs_root=CONFIGS_ROOT)
+                    selection: dict[str, Any] = {"platform": platform}
                 else:
                     runs = [
                         resolve_module_config(provider, module, configs_root=CONFIGS_ROOT) for module in (modules or [])
                     ]
                     selection = {"modules": modules}
-            except CapabilityResolutionError as exc:
+            except PlatformResolutionError as exc:
                 print_error(str(exc))
                 raise typer.Exit(code=1)
 
@@ -426,7 +426,7 @@ def run(
             return
 
         if not labels:
-            print_error("--provider requires --label, --capability, or --module.")
+            print_error("--provider requires --label, --platform, or --module.")
             raise typer.Exit(code=1)
 
         matches = discover_provider_label_configs(

@@ -498,7 +498,7 @@ class TestImportEndToEnd:
         assert "bmc_telemetry" not in validations
 
     def test_aws_bare_metal_hosts_observability_checks(self) -> None:
-        """The host/BMC observability checks now piggyback on the bare_metal capability."""
+        """The host/BMC observability checks now piggyback on the bare_metal platform."""
         result = merge_yaml_files([self.CONFIGS_DIR / "providers" / "aws" / "config" / "bare_metal.yaml"])
 
         step_names = {step["name"] for step in result["commands"]["bare_metal"]["steps"]}
@@ -593,8 +593,9 @@ class TestImportEndToEnd:
         assert context.render_string(exclude_selector) == "isv.ncp.validation/pool=test"
         assert context.render_string(total_gpu_count) == "2"
         assert context.render_string(expected_total) == "2"
-        # The k8s suite declares the capability axis key; platform is derived at model-validation.
-        assert result["tests"]["capability"] == "kubernetes"
+        # A platform suite declares platform directly (no module key).
+        assert result["tests"]["platform"] == "kubernetes"
+        assert "module" not in result["tests"]
         assert config.tests.platform == "kubernetes"
 
     def test_aws_eks_does_not_hardcode_world_open_endpoint_allowlist(self) -> None:
