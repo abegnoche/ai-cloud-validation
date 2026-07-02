@@ -39,6 +39,12 @@ from isvctl.cli.common import (
     print_progress,
     print_warning,
 )
+from isvctl.config.capability_resolution import (
+    CapabilityResolutionError,
+    PlannedRun,
+    plan_capability_run,
+    resolve_module_config,
+)
 from isvctl.config.label_discovery import (
     ProviderConfigMatch,
     available_labels,
@@ -115,6 +121,95 @@ def _junitxml_for_discovered_config(junitxml: Path, match: ProviderConfigMatch, 
     return junitxml.with_name(f"{junitxml.stem}-{match.config_path.stem}{junitxml.suffix}")
 
 
+def _junitxml_for_config(junitxml: Path, config_path: Path, total: int) -> Path:
+    """Return a non-overlapping JUnit path for one planned config run."""
+    if total <= 1:
+        return junitxml
+    return junitxml.with_name(f"{junitxml.stem}-{config_path.stem}{junitxml.suffix}")
+
+
+def _planned_run_plan(provider: str, selection: dict[str, Any], runs: list[PlannedRun]) -> dict[str, Any]:
+    """Return a JSON-serializable plan for a capability/module selection dry-run."""
+    return {
+        "provider": provider,
+        **selection,
+        "runs": [
+            {
+                "config": str(run.config_path),
+                "role": run.role,
+                "platform": run.platform,
+                "exclude_labels": list(run.exclude_labels),
+            }
+            for run in runs
+        ],
+    }
+
+
+def _execute_planned_runs(
+    ctx: typer.Context,
+    runs: list[PlannedRun],
+    *,
+    set_values: list[str] | None,
+    phase: Phase,
+    labels: list[str] | None,
+    user_exclude_labels: list[str] | None,
+    working_dir: Path | None,
+    verbose: bool,
+    no_user_config: bool,
+    junitxml: Path,
+    color: str | None,
+    no_upload: bool,
+    lab_id: int | None,
+    tags: list[str] | None,
+    isv_software_version: str | None,
+) -> None:
+    """Run each planned config as its own orchestration, continuing past failures.
+
+    Each config's capability-scoped excludes are unioned with any user
+    ``--exclude-label`` values. A combined pass/fail summary is printed and the
+    process exits 1 if any config failed.
+    """
+    total = len(runs)
+    outcomes: list[tuple[Path, bool]] = []
+    for planned in runs:
+        combined_excludes = list(dict.fromkeys([*planned.exclude_labels, *(user_exclude_labels or [])]))
+        print_progress(f"\n--- Running {planned.config_path} ({planned.role}) ---")
+        try:
+            run(
+                ctx,
+                config_files=[planned.config_path],
+                provider=None,
+                set_values=set_values,
+                phase=phase,
+                labels=labels,
+                capability=None,
+                modules=None,
+                exclude_labels=combined_excludes or None,
+                dry_run=False,
+                working_dir=working_dir,
+                verbose=verbose,
+                no_user_config=no_user_config,
+                junitxml=_junitxml_for_config(junitxml, planned.config_path, total),
+                color=color,
+                no_upload=no_upload,
+                lab_id=lab_id,
+                tags=tags,
+                isv_software_version=isv_software_version,
+            )
+            outcomes.append((planned.config_path, True))
+        except typer.Exit as exc:
+            outcomes.append((planned.config_path, exc.exit_code == 0))
+
+    typer.echo("\n" + "=" * 60)
+    typer.echo("CAPABILITY/MODULE RUN SUMMARY")
+    typer.echo("=" * 60)
+    for config_path, ok in outcomes:
+        status = typer.style("[PASS]", fg=typer.colors.GREEN) if ok else typer.style("[FAIL]", fg=typer.colors.RED)
+        typer.echo(f"{status} {config_path}")
+    if not all(ok for _, ok in outcomes):
+        raise typer.Exit(code=1)
+
+
 @app.command("run", context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
 def run(
     ctx: typer.Context,
@@ -158,6 +253,27 @@ def run(
             "--label",
             "-l",
             help="Label to filter validations (can be repeated; all selected labels must match)",
+        ),
+    ] = None,
+    capability: Annotated[
+        str | None,
+        typer.Option(
+            "--capability",
+            help="Run a whole capability column (its config + every module config) for --provider.",
+        ),
+    ] = None,
+    modules: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--module",
+            help="Run a single module suite for --provider (can be repeated).",
+        ),
+    ] = None,
+    exclude_labels: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--exclude-label",
+            help="Label to exclude validations (can be repeated; any match excludes).",
         ),
     ] = None,
     dry_run: Annotated[
@@ -252,17 +368,65 @@ def run(
     setup_logging(verbose)
     apply_user_config(no_user_config)
 
+    if capability and modules:
+        print_error("--capability and --module are mutually exclusive.")
+        raise typer.Exit(code=1)
+    if (capability or modules) and config_files:
+        print_error("--capability/--module cannot be combined with --config/-f.")
+        raise typer.Exit(code=1)
+    if (capability or modules) and not provider:
+        print_error("--capability/--module require --provider.")
+        raise typer.Exit(code=1)
+
     if provider:
         if config_files:
             print_error("--provider discovery cannot be combined with --config/-f.")
-            raise typer.Exit(code=1)
-        if not labels:
-            print_error("--provider requires at least one --label/-l for discovery.")
             raise typer.Exit(code=1)
 
         known_providers = list_providers(CONFIGS_ROOT)
         if provider not in known_providers:
             print_error(f"Unknown provider {provider!r}. Available providers: {', '.join(known_providers)}")
+            raise typer.Exit(code=1)
+
+        if capability or modules:
+            try:
+                if capability:
+                    runs = plan_capability_run(provider, capability, configs_root=CONFIGS_ROOT)
+                    selection: dict[str, Any] = {"capability": capability}
+                else:
+                    runs = [
+                        resolve_module_config(provider, module, configs_root=CONFIGS_ROOT) for module in (modules or [])
+                    ]
+                    selection = {"modules": modules}
+            except CapabilityResolutionError as exc:
+                print_error(str(exc))
+                raise typer.Exit(code=1)
+
+            if dry_run:
+                typer.echo(json.dumps(_planned_run_plan(provider, selection, runs), indent=2))
+                return
+
+            _execute_planned_runs(
+                ctx,
+                runs,
+                set_values=set_values,
+                phase=phase,
+                labels=labels,
+                user_exclude_labels=exclude_labels,
+                working_dir=working_dir,
+                verbose=verbose,
+                no_user_config=no_user_config,
+                junitxml=junitxml,
+                color=color,
+                no_upload=no_upload,
+                lab_id=lab_id,
+                tags=tags,
+                isv_software_version=isv_software_version,
+            )
+            return
+
+        if not labels:
+            print_error("--provider requires --label, --capability, or --module.")
             raise typer.Exit(code=1)
 
         matches = discover_provider_label_configs(
@@ -292,6 +456,7 @@ def run(
                 set_values=set_values,
                 phase=phase,
                 labels=labels,
+                exclude_labels=exclude_labels,
                 dry_run=False,
                 working_dir=working_dir,
                 verbose=verbose,
@@ -432,6 +597,7 @@ def run(
                 phases=phases,
                 extra_pytest_args=extra_pytest_args,
                 include_labels=labels,
+                exclude_labels=exclude_labels,
                 verbose=verbose,
                 junitxml=str(junitxml),
             )

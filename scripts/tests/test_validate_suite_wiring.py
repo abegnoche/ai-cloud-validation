@@ -22,6 +22,8 @@ def test_wiring_errors_flags_missing_metadata(tmp_path: Path) -> None:
     suite.write_text(
         """\
 tests:
+  platform: security
+  kind: module
   validations:
     example:
       checks:
@@ -35,7 +37,7 @@ tests:
 """
     )
     errors = validate_suite_wiring.wiring_errors(tmp_path)
-    assert any("demo.yaml:8" in err and "BadCheck" in err and "missing test_id" in err for err in errors)
+    assert any("demo.yaml:10" in err and "BadCheck" in err and "missing test_id" in err for err in errors)
     assert any("demo.yaml:" in err and "AlsoBad" in err and "missing labels" in err for err in errors)
     assert not any("GoodCheck" in err for err in errors)
 
@@ -46,6 +48,8 @@ def test_wiring_errors_rejects_scalar_labels(tmp_path: Path) -> None:
     suite.write_text(
         """\
 tests:
+  platform: kubernetes
+  kind: capability
   validations:
     example:
       checks:
@@ -64,6 +68,8 @@ def test_wiring_errors_require_canonical_suite_label(tmp_path: Path) -> None:
     suite.write_text(
         """\
 tests:
+  platform: kubernetes
+  kind: capability
   validations:
     example:
       checks:
@@ -78,6 +84,134 @@ tests:
     errors = validate_suite_wiring.wiring_errors(tmp_path)
     assert any("MissingSuiteLabel" in err and "missing suite label 'kubernetes'" in err for err in errors)
     assert not any("GoodCheck" in err for err in errors)
+
+
+def test_wiring_errors_flags_missing_or_invalid_kind(tmp_path: Path) -> None:
+    """A suite without a valid tests.kind is reported."""
+    (tmp_path / "no_kind.yaml").write_text(
+        """\
+tests:
+  platform: vm
+  validations:
+    example:
+      checks:
+        GoodCheck:
+          test_id: "VM01-01"
+          labels: ["vm"]
+"""
+    )
+    (tmp_path / "bad_kind.yaml").write_text(
+        """\
+tests:
+  platform: vm
+  kind: bogus
+  validations:
+    example:
+      checks:
+        GoodCheck:
+          test_id: "VM01-02"
+          labels: ["vm"]
+"""
+    )
+    errors = validate_suite_wiring.wiring_errors(tmp_path)
+    assert any("no_kind.yaml" in err and "tests.kind" in err and "none" in err for err in errors)
+    assert any("bad_kind.yaml" in err and "tests.kind" in err and "'bogus'" in err for err in errors)
+
+
+def test_wiring_errors_flags_unknown_label(tmp_path: Path) -> None:
+    """A typo'd label that is neither capability, module, nor modifier fails."""
+    suite = tmp_path / "network.yaml"
+    suite.write_text(
+        """\
+tests:
+  platform: network
+  kind: module
+  validations:
+    example:
+      checks:
+        TypoCheck:
+          test_id: "NET01-01"
+          labels: ["network", "netwrok"]
+"""
+    )
+    errors = validate_suite_wiring.wiring_errors(tmp_path)
+    assert any("TypoCheck" in err and "unknown label 'netwrok'" in err for err in errors)
+
+
+def test_wiring_errors_flags_multiple_capability_labels(tmp_path: Path) -> None:
+    """A check may carry at most one capability-axis label."""
+    (tmp_path / "bare_metal.yaml").write_text(
+        """\
+tests:
+  platform: bare_metal
+  kind: capability
+  validations:
+    example:
+      checks:
+        BmOnly:
+          test_id: "BM01-01"
+          labels: ["bare_metal"]
+"""
+    )
+    (tmp_path / "vm.yaml").write_text(
+        """\
+tests:
+  platform: vm
+  kind: capability
+  validations:
+    example:
+      checks:
+        DualCapability:
+          test_id: "VM01-01"
+          labels: ["vm", "bare_metal"]
+"""
+    )
+    errors = validate_suite_wiring.wiring_errors(tmp_path)
+    assert any(
+        "DualCapability" in err and "multiple capability labels" in err and "bare_metal, vm" in err for err in errors
+    )
+
+
+def test_wiring_errors_flags_provider_config_label_typo(tmp_path: Path) -> None:
+    """Provider configs are governed for labels even though they inherit kind."""
+    suites_dir = tmp_path / "suites"
+    suites_dir.mkdir()
+    (suites_dir / "network.yaml").write_text(
+        """\
+tests:
+  platform: network
+  kind: module
+  validations:
+    example:
+      checks:
+        GoodCheck:
+          test_id: "NET01-01"
+          labels: ["network"]
+"""
+    )
+    provider_config = tmp_path / "providers" / "acme" / "config" / "network.yaml"
+    provider_config.parent.mkdir(parents=True)
+    provider_config.write_text(
+        """\
+tests:
+  validations:
+    example:
+      checks:
+        ProviderCheck:
+          test_id: "NET01-02"
+          labels: ["netwrok"]
+"""
+    )
+    errors = validate_suite_wiring.wiring_errors(suites_dir, tmp_path / "providers")
+    assert any("ProviderCheck" in err and "unknown label 'netwrok'" in err for err in errors)
+
+
+def test_derive_axis_labels_covers_platform_labels() -> None:
+    """Guardrail: derived axis labels cover every catalog platform-ownership label."""
+    from isvtest.catalog import LABEL_TO_PLATFORM
+
+    capability_labels, module_labels = validate_suite_wiring.derive_axis_labels()
+    assert set(LABEL_TO_PLATFORM).issubset(capability_labels | module_labels)
 
 
 def test_wiring_errors_reports_yaml_parse_failures(tmp_path: Path) -> None:

@@ -36,6 +36,7 @@ version: "1.0"
 
 tests:
   platform: bare_metal
+  kind: capability
   cluster_name: "bm-validation"
   description: "Bare metal (BMaaS) GPU validation tests"
 
@@ -665,6 +666,32 @@ tests:
         SpecifiedKeyAccessCheck:
           test_id: "AUTH03-01"
           labels: ["bare_metal", "iam", "security", "vm"]
+
+    # ─── Observability (host syslog + BMC), moved from observability.yaml ──────
+    # These need a live host/BMC, so they piggyback on the bare_metal capability
+    # run. They keep the "observability" label so the observability row spans the
+    # BMaaS column. Providers that do not configure these steps skip them
+    # (STEP_NOT_CONFIGURED).
+    host_logs:
+      checks:
+        HostSyslogCheck:
+          test_id: "OBS18-01"
+          labels: ["bare_metal", "min_req", "observability"]
+          step: host_syslogs
+
+    bmc_logs:
+      checks:
+        BmcSelLogsCheck:
+          test_id: "OBS17-01"
+          labels: ["bare_metal", "min_req", "observability", "security"]
+          step: bmc_sel_logs
+
+    bmc_telemetry:
+      checks:
+        BmcGpuTelemetryCheck:
+          test_id: "TELEM04-01"
+          labels: ["bare_metal", "gpu", "min_req", "observability", "security"]
+          step: bmc_gpu_telemetry
 
   exclude:
     labels: []

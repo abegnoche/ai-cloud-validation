@@ -22,7 +22,7 @@ The key validation point is the command output schema - ISV stubs must return
 JSON that matches these schemas, which then become the inventory for tests.
 """
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -361,6 +361,15 @@ class ValidationConfig(BaseModel):
     platform: str | None = Field(
         default=None,
         description="Platform type: KUBERNETES, SLURM, BARE_METAL, CONTROL_PLANE, IAM, NETWORK, SECURITY, VM, IMAGE_REGISTRY, OBSERVABILITY",
+    )
+    kind: Literal["capability", "module"] | None = Field(
+        default=None,
+        description=(
+            "Suite classification for the capability x module matrix. "
+            "'capability' suites (vm, bare_metal, kubernetes, slurm) own a run's lifecycle; "
+            "'module' suites (iam, network, security, ...) are operational concerns. "
+            "Provider configs inherit this from the suite they import."
+        ),
     )
     settings: dict[str, Any] = Field(default_factory=dict, description="Test settings")
     validations: dict[str, list[dict[str, Any]] | dict[str, Any]] = Field(

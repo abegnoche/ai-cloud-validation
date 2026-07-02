@@ -232,6 +232,45 @@ commands:
           - "5"
         timeout: 300
 
+      # Observability: host syslog + BMC SEL/telemetry (moved from
+      # observability.yaml). These piggyback on the launched host - SSH uses the
+      # post-lifecycle IP from describe_instance and the launch_instance key.
+      - name: host_syslogs
+        phase: test
+        command: "python3 ../scripts/observability/log_availability_test.py"
+        args:
+          - "--region"
+          - "{{region}}"
+          - "--aspect"
+          - "host_syslogs"
+          - "--host"
+          - "{{steps.describe_instance.public_ip}}"
+          - "--key-file"
+          - "{{steps.launch_instance.key_file}}"
+          - "--ssh-user"
+          - "{{ssh_user}}"
+        timeout: 600
+
+      - name: bmc_sel_logs
+        phase: test
+        command: "python3 ../scripts/observability/log_availability_test.py"
+        args:
+          - "--region"
+          - "{{region}}"
+          - "--aspect"
+          - "bmc_sel_logs"
+        timeout: 60
+
+      - name: bmc_gpu_telemetry
+        phase: test
+        command: "python3 ../scripts/observability/log_availability_test.py"
+        args:
+          - "--region"
+          - "{{region}}"
+          - "--aspect"
+          - "bmc_gpu_telemetry"
+        timeout: 60
+
       # Reinstall instance from stock OS (stop + swap root volume + start)
       # Expected duration: ~30-45 min on AWS metal. CreateReplaceRootVolumeTask
       # is not supported, so the script performs a manual root volume swap.
@@ -312,6 +351,7 @@ tests:
   settings:
     region: "us-west-2"
     instance_type: "g4dn.metal"
+    ssh_user: "ubuntu"
     teardown_flag: "{{(env.AWS_BM_SKIP_TEARDOWN == 'true') | ternary('--skip-destroy', '')}}"
 
   # Overrides only - all other validations inherited from ../bare_metal.yaml

@@ -46,6 +46,7 @@ commands:
 
 tests:
   platform: control_plane
+  kind: module
   cluster_name: "nico-control-plane-validation"
   description: "Verify NICo API health"
 

@@ -628,7 +628,7 @@ class TestLabelFiltering:
     """
 
     @staticmethod
-    def _config(*, exclude_labels: list[str] | None = None) -> RunConfig:
+    def _config(*, exclude_labels: list[str] | None = None, check_labels: list[str] | None = None) -> RunConfig:
         """Build a minimal config with one labeled validation.
 
         ``K8sNodeCountCheck`` is wired with ``labels: ["kubernetes"]`` (the
@@ -644,7 +644,7 @@ class TestLabelFiltering:
             },
             tests=ValidationConfig(
                 platform="kubernetes",
-                validations={"cluster": {"checks": {"K8sNodeCountCheck": {"labels": ["kubernetes"]}}}},
+                validations={"cluster": {"checks": {"K8sNodeCountCheck": {"labels": check_labels or ["kubernetes"]}}}},
                 exclude={"labels": exclude_labels} if exclude_labels else {},
             ),
         )
@@ -706,6 +706,46 @@ class TestLabelFiltering:
         assert check["state"] == "skipped"
         assert check["skip_reason"] == "test_excluded"
         assert check["message"] == "excluded by pytest -k/-m filter"
+
+    def test_cli_exclude_labels_skip_validation(self) -> None:
+        """A CLI ``exclude_labels`` (e.g. capability-scoping) skips a matching check."""
+        config = self._config()
+
+        result = Orchestrator(config).run(phases=[Phase.TEST], exclude_labels=["kubernetes"])
+        check = result.phases[0].details["validations"][0]
+        assert check["state"] == "skipped"
+        assert check["skip_reason"] == "test_excluded"
+        assert "excluded by label" in check["message"]
+
+    def test_cli_exclude_labels_apply_even_with_include_present(self) -> None:
+        """CLI excludes are authoritative: they apply on top of an include filter.
+
+        Unlike config ``exclude.labels`` (bypassed once ``--label`` is present),
+        a CLI exclude must still skip a check the include filter admitted.
+        """
+        config = self._config()
+
+        result = Orchestrator(config).run(
+            phases=[Phase.TEST],
+            include_labels=["kubernetes"],
+            exclude_labels=["kubernetes"],
+        )
+        check = result.phases[0].details["validations"][0]
+        assert check["state"] == "skipped"
+        assert check["skip_reason"] == "test_excluded"
+        assert "excluded by label" in check["message"]
+
+    def test_cli_exclude_labels_union_with_config_excludes(self) -> None:
+        """With no include filter, CLI and config excludes union together."""
+        config = self._config(exclude_labels=["gpu"], check_labels=["kubernetes", "gpu"])
+
+        result = Orchestrator(config).run(phases=[Phase.TEST], exclude_labels=["kubernetes"])
+        check = result.phases[0].details["validations"][0]
+        assert check["state"] == "skipped"
+        assert check["skip_reason"] == "test_excluded"
+        # both the config exclude (gpu) and the CLI exclude (kubernetes) matched
+        assert "gpu" in check["message"]
+        assert "kubernetes" in check["message"]
 
 
 class TestTeardownOnlyPhase:

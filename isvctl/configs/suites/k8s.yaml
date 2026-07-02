@@ -54,6 +54,7 @@ tests:
   cluster_name: "{{steps.setup.cluster_name}}"
   description: "Kubernetes cluster validation"
   platform: kubernetes
+  kind: capability
 
   settings:
     show_skipped_tests: false
@@ -243,7 +244,7 @@ tests:
       checks:
         K8sCsiStorageTypesCheck:
           test_id: "K8S23-04"
-          labels: ["kubernetes", "min_req"]
+          labels: ["kubernetes", "min_req", "storage"]
           # StorageClass names by type; omit (or leave empty) to skip that type.
           # Env overrides: K8S_CSI_BLOCK_SC, K8S_CSI_SHARED_FS_SC, K8S_CSI_NFS_SC.
           block_storage_class: "{{ steps.setup.csi.block_storage_class | default('', true) }}"
@@ -254,7 +255,7 @@ tests:
           namespace_prefix: "isvtest-csi-types"
         K8sCsiStorageQuotaApiCheck:
           test_id: "K8S23-07"
-          labels: ["kubernetes", "min_req"]
+          labels: ["kubernetes", "min_req", "storage"]
           # Uses the block StorageClass by default; skips entirely when unset.
           # per_sc_quota must exceed pvc_request so the usage PVC fits, and
           # over_quota_request must exceed per_sc_quota so admission rejects it.
@@ -268,7 +269,7 @@ tests:
           namespace_prefix: "isvtest-csi-quota"
         K8sCsiTenantScopedCredentialsCheck:
           test_id: "K8S23-06"
-          labels: ["kubernetes", "min_req"]
+          labels: ["kubernetes", "min_req", "storage"]
           # Pure read-only check: verifies CSI credentials are tenant-scoped
           # by construction (Secret namespaces, labels/annotations, RBAC,
           # and node-plugin volume topology). Skipped entirely when no
@@ -280,7 +281,7 @@ tests:
             - "shared-across-clusters=true"
         K8sCsiProvisioningModesCheck:
           test_id: "K8S23-05"
-          labels: ["kubernetes", "min_req"]
+          labels: ["kubernetes", "min_req", "storage"]
           # Exercises dynamic and static CSI provisioning end-to-end with a
           # BusyBox mount + canary-file write/read. Skipped entirely when
           # dynamic_storage_class is unset. The static subtest is skipped

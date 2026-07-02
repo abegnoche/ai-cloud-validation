@@ -38,6 +38,7 @@ tests:
   cluster_name: "iam-validation"
   description: "IAM user lifecycle validation"
   platform: iam
+  kind: module
 
   settings:
     # Provider-specific - override in your provider config

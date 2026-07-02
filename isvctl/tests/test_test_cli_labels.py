@@ -89,6 +89,55 @@ tests:
     )
 
 
+def _write_kind_suite(root: Path, name: str, platform: str, kind: str) -> None:
+    """Write a suite declaring kind + platform for capability/module resolution."""
+    suite_path = root / "suites" / name
+    suite_path.parent.mkdir(parents=True, exist_ok=True)
+    suite_path.write_text(
+        f"""\
+tests:
+  platform: {platform}
+  kind: {kind}
+  validations: {{}}
+""",
+        encoding="utf-8",
+    )
+
+
+def _write_kind_provider_config(root: Path, provider: str, name: str, suite: str, platform: str) -> Path:
+    """Write a provider config importing a kind-bearing suite with a runnable step."""
+    config_path = root / "providers" / provider / "config" / name
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(
+        f"""\
+import:
+  - ../../../suites/{suite}
+commands:
+  {platform}:
+    phases: [test]
+    steps:
+      - name: test_step
+        command: echo
+        args: ['{{"success": true}}']
+        phase: test
+""",
+        encoding="utf-8",
+    )
+    return config_path
+
+
+def _build_capability_provider(configs_root: Path) -> None:
+    """Build an ``acme`` provider with vm/bare_metal capabilities + iam/network modules."""
+    _write_kind_suite(configs_root, "vm.yaml", "vm", "capability")
+    _write_kind_suite(configs_root, "bare_metal.yaml", "bare_metal", "capability")
+    _write_kind_suite(configs_root, "iam.yaml", "iam", "module")
+    _write_kind_suite(configs_root, "network.yaml", "network", "module")
+    _write_kind_provider_config(configs_root, "acme", "vm.yaml", "vm.yaml", "vm")
+    _write_kind_provider_config(configs_root, "acme", "bare_metal.yaml", "bare_metal.yaml", "bare_metal")
+    _write_kind_provider_config(configs_root, "acme", "iam.yaml", "iam.yaml", "iam")
+    _write_kind_provider_config(configs_root, "acme", "network.yaml", "network.yaml", "network")
+
+
 class _FakeOrchestrator:
     """Capture orchestrator options passed by the CLI for assertion in tests."""
 
@@ -258,3 +307,126 @@ def test_provider_label_discovery_dry_run_prints_plan_without_running(
     assert plan["labels"] == ["network"]
     assert [Path(item["config"]).name for item in plan["configs"]] == ["network.yaml", "observability.yaml"]
     assert [item["matched_checks"][0]["name"] for item in plan["configs"]] == ["NetworkCheck", "VpcFlowLogsCheck"]
+
+
+def test_capability_dispatches_capability_then_modules(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """`--capability vm` runs the vm config first, then each module with capability excludes."""
+    configs_root = tmp_path / "configs"
+    _build_capability_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(test_cli.app, ["run", "--provider", "acme", "--capability", "vm", "--no-upload"])
+
+    assert result.exit_code == 0, result.output
+    assert [call["platform"] for call in _FakeOrchestrator.calls] == ["vm", "iam", "network"]
+    # capability run has no excludes; modules exclude the other capability labels
+    assert [call["run_kwargs"].get("exclude_labels") for call in _FakeOrchestrator.calls] == [
+        None,
+        ["bare_metal"],
+        ["bare_metal"],
+    ]
+
+
+def test_capability_composes_include_labels(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """`--capability vm --label min_req` forwards the include filter into every sub-run."""
+    configs_root = tmp_path / "configs"
+    _build_capability_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "acme", "--capability", "vm", "--label", "min_req", "--no-upload"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert all(call["run_kwargs"]["include_labels"] == ["min_req"] for call in _FakeOrchestrator.calls)
+
+
+def test_capability_dry_run_prints_plan(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """A capability dry-run emits the JSON plan and runs nothing."""
+    configs_root = tmp_path / "configs"
+    _build_capability_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "acme", "--capability", "vm", "--dry-run", "--no-upload"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert _FakeOrchestrator.calls == []
+    plan = json.loads(result.output)
+    assert plan["provider"] == "acme"
+    assert plan["capability"] == "vm"
+    assert [r["platform"] for r in plan["runs"]] == ["vm", "iam", "network"]
+    assert plan["runs"][0]["exclude_labels"] == []
+    assert plan["runs"][1]["exclude_labels"] == ["bare_metal"]
+
+
+def test_module_dispatches_single_config(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """`--module iam` runs only the iam module config, no capability excludes."""
+    configs_root = tmp_path / "configs"
+    _build_capability_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(test_cli.app, ["run", "--provider", "acme", "--module", "iam", "--no-upload"])
+
+    assert result.exit_code == 0, result.output
+    assert [call["platform"] for call in _FakeOrchestrator.calls] == ["iam"]
+    assert _FakeOrchestrator.calls[0]["run_kwargs"].get("exclude_labels") is None
+
+
+def test_capability_and_module_mutually_exclusive(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """`--capability` and `--module` cannot be combined."""
+    configs_root = tmp_path / "configs"
+    _build_capability_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "acme", "--capability", "vm", "--module", "iam", "--no-upload"],
+    )
+
+    assert result.exit_code == 1, result.output
+    assert "mutually exclusive" in result.output
+    assert _FakeOrchestrator.calls == []
+
+
+def test_capability_requires_provider(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """`--capability` without `--provider` is rejected."""
+    config = _write_config(tmp_path)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(test_cli.app, ["run", "--capability", "vm", "-f", str(config), "--no-upload"])
+
+    assert result.exit_code == 1, result.output
+    assert "--capability/--module cannot be combined with --config/-f." in result.output
+    assert _FakeOrchestrator.calls == []
+
+
+def test_provider_alone_requires_selection(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """`--provider` with no label/capability/module names all three selectors."""
+    configs_root = tmp_path / "configs"
+    _build_capability_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(test_cli.app, ["run", "--provider", "acme", "--no-upload"])
+
+    assert result.exit_code == 1, result.output
+    assert "--label" in result.output
+    assert "--capability" in result.output
+    assert "--module" in result.output
+    assert _FakeOrchestrator.calls == []

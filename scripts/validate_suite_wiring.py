@@ -14,16 +14,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Require ``test_id`` and ``labels`` on every check wired in suite YAML.
+"""Govern the capability x module taxonomy wired in suite YAML.
 
 Suite configs under ``isvctl/configs/suites/`` are the source of truth for
-validation metadata on this branch. Each wired check must declare:
+validation metadata on this branch. This validator enforces:
 
+* ``tests.kind`` - every suite declares ``capability`` or ``module``. The
+  capability/module *label* axes are derived from the ``kind`` + ``platform`` of
+  the suites themselves (so adding a suite extends the axes automatically).
 * ``test_id`` - a plan id from ``docs/test-plan.yaml``, or ``"N/A"`` when the
   check is generic plumbing with no plan item.
 * ``labels`` - a non-empty list used for pytest selection and catalog reporting.
   Each canonical suite check must include its suite label, for example checks in
   ``bare_metal.yaml`` must include ``bare_metal``.
+* label governance - every label used in wiring must be a known capability,
+  module, or modifier label (kills typos and ungoverned growth), and a check
+  may carry at most one capability-axis label (capability-scoped exclusion is
+  any-intersection, so two capability labels would skip the check under every
+  column).
+
+Provider configs under ``isvctl/configs/providers/`` are scanned for the label
+governance rules only (they inherit ``kind``/``test_id`` from the suites they
+import).
 
 Usage:
     python3 scripts/validate_suite_wiring.py
@@ -45,6 +57,9 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SUITES_DIR = REPO_ROOT / "isvctl" / "configs" / "suites"
 _NEXT_CATEGORY_LINE = re.compile(r"^    \S")
+CAPABILITY_KIND = "capability"
+MODULE_KIND = "module"
+VALID_KINDS = (CAPABILITY_KIND, MODULE_KIND)
 SUITE_REQUIRED_LABELS: dict[str, str] = {
     "bare_metal": "bare_metal",
     "control-plane": "control_plane",
@@ -58,6 +73,37 @@ SUITE_REQUIRED_LABELS: dict[str, str] = {
     "storage": "storage",
     "vm": "vm",
 }
+
+# Labels that are neither capability nor module axes: hardware/trait attributes
+# and selection presets. Authoritative list generated from
+# ``ISVTEST_INCLUDE_UNRELEASED=1 uv run isvctl catalog labels --json`` minus the
+# derived axis labels. Any new label must be added here (a modifier) or become a
+# capability/module suite platform, otherwise wiring validation fails.
+MODIFIER_LABELS: frozenset[str] = frozenset(
+    {
+        "min_req",
+        "slow",
+        "workload",
+        "gpu",
+        "ssh",
+        "sanitization",
+        "attestation",
+        "firmware",
+        "disk",
+        "infiniband",
+        "ingestion",
+        "dpu",
+        "governance",
+        "health",
+        "capacity",
+        "l2",
+    }
+)
+
+# Module-axis labels with no dedicated ``kind: module`` suite yet: their checks
+# piggyback on a capability suite (e.g. K8s CSI ``storage`` checks live inline in
+# ``k8s.yaml``). Allowlisted so wiring can select them by label.
+EXTRA_MODULE_LABELS: frozenset[str] = frozenset({"storage"})
 
 
 def _check_line_patterns(check_name: str) -> tuple[re.Pattern[str], ...]:
@@ -138,6 +184,67 @@ def iter_suite_checks(config_path: Path) -> Iterator[tuple[str, str, dict[str, A
                 yield from _from_mapping(category, check)
 
 
+def _suite_kind_and_platform(config_path: Path) -> tuple[Any, Any]:
+    """Return the ``(kind, platform)`` declared in a suite's ``tests:`` block."""
+    try:
+        data = yaml.safe_load(config_path.read_text())
+    except (OSError, yaml.YAMLError) as exc:
+        raise ValueError(f"failed to read/parse {config_path}: {exc}") from exc
+    tests = (data or {}).get("tests", {})
+    if not isinstance(tests, dict):
+        return None, None
+    return tests.get("kind"), tests.get("platform")
+
+
+def derive_axis_labels(suites_dir: Path = SUITES_DIR) -> tuple[frozenset[str], frozenset[str]]:
+    """Derive the (capability, module) label axes from the suites' kind + platform.
+
+    Capability labels are the platforms of ``kind: capability`` suites; module
+    labels are the platforms of ``kind: module`` suites plus the piggyback
+    allowlist (:data:`EXTRA_MODULE_LABELS`). Malformed suites are skipped here;
+    :func:`wiring_errors` reports them separately.
+    """
+    capability: set[str] = set()
+    module: set[str] = set()
+    for path in sorted(suites_dir.glob("*.yaml")):
+        try:
+            kind, platform = _suite_kind_and_platform(path)
+        except ValueError:
+            continue
+        if not isinstance(platform, str) or not platform:
+            continue
+        if kind == CAPABILITY_KIND:
+            capability.add(platform)
+        elif kind == MODULE_KIND:
+            module.add(platform)
+    return frozenset(capability), frozenset(module | EXTRA_MODULE_LABELS)
+
+
+def _iter_provider_configs(providers_dir: Path) -> Iterator[Path]:
+    """Yield provider config YAML files (``providers/*/config/*.yaml`` + ``providers/*.yaml``)."""
+    if not providers_dir.is_dir():
+        return
+    yield from sorted(providers_dir.glob("*/config/*.yaml"))
+    yield from sorted(providers_dir.glob("*.yaml"))
+
+
+def _label_governance_errors(
+    location: str,
+    labels: list[str],
+    capability_labels: frozenset[str],
+    known_labels: frozenset[str],
+) -> list[str]:
+    """Return unknown-label and multiple-capability-label errors for one check."""
+    errors: list[str] = []
+    unknown = [label for label in labels if label not in known_labels]
+    for label in unknown:
+        errors.append(f"{location}: unknown label {label!r} (not a capability, module, or modifier label)")
+    capability_hits = sorted({label for label in labels if label in capability_labels})
+    if len(capability_hits) > 1:
+        errors.append(f"{location}: multiple capability labels ({', '.join(capability_hits)}); at most one is allowed")
+    return errors
+
+
 def _format_location(config_path: Path, category: str, check_name: str, line_number: int | None) -> str:
     """Return a stable location string for error messages."""
     try:
@@ -149,8 +256,29 @@ def _format_location(config_path: Path, category: str, check_name: str, line_num
     return f"{rel_path}:{line_number} → {category} → {check_name}"
 
 
-def wiring_errors(suites_dir: Path = SUITES_DIR) -> list[str]:
-    """Return human-readable errors for incomplete suite check wiring."""
+def _relative(path: Path) -> Path | str:
+    """Return a repo-relative path for messages, or the path when outside the repo."""
+    try:
+        return path.relative_to(REPO_ROOT)
+    except ValueError:
+        return path
+
+
+def wiring_errors(suites_dir: Path = SUITES_DIR, providers_dir: Path | None = None) -> list[str]:
+    """Return human-readable errors for incomplete/ungoverned suite check wiring.
+
+    Validates suite files under ``suites_dir`` (kind, test_id, labels, suite
+    label, and label governance) and then applies the label governance rules to
+    provider configs under ``providers_dir`` (defaults to the ``providers``
+    directory beside ``suites_dir``), which inherit kind/test_id via ``import:``.
+    The capability/module label axes are derived from ``suites_dir``.
+    """
+    if providers_dir is None:
+        providers_dir = suites_dir.parent / "providers"
+
+    capability_labels, module_labels = derive_axis_labels(suites_dir)
+    known_labels = capability_labels | module_labels | MODIFIER_LABELS
+
     errors: list[str] = []
     occurrence: dict[tuple[Path, str, str], int] = defaultdict(int)
 
@@ -158,9 +286,18 @@ def wiring_errors(suites_dir: Path = SUITES_DIR) -> list[str]:
         try:
             lines = path.read_text().splitlines()
             checks = list(iter_suite_checks(path))
+            kind, _platform = _suite_kind_and_platform(path)
         except ValueError as exc:
             errors.append(str(exc))
             continue
+
+        if kind not in VALID_KINDS:
+            declared = f"{kind!r}" if kind is not None else "none"
+            errors.append(
+                f"{_relative(path)}: missing/invalid tests.kind (declared {declared}; "
+                f"expected one of {', '.join(VALID_KINDS)})"
+            )
+
         for category, name, params in checks:
             key = (path, category, name)
             line_numbers = find_check_line_numbers(lines, category, name)
@@ -177,6 +314,24 @@ def wiring_errors(suites_dir: Path = SUITES_DIR) -> list[str]:
                 errors.append(f"{location}: missing labels (non-empty list required)")
             elif required_label and required_label not in labels:
                 errors.append(f"{location}: missing suite label {required_label!r}")
+            errors.extend(_label_governance_errors(location, labels, capability_labels, known_labels))
+
+    for path in _iter_provider_configs(providers_dir):
+        try:
+            lines = path.read_text().splitlines()
+            checks = list(iter_suite_checks(path))
+        except ValueError as exc:
+            errors.append(str(exc))
+            continue
+        for category, name, params in checks:
+            key = (path, category, name)
+            line_numbers = find_check_line_numbers(lines, category, name)
+            line_number = line_numbers[occurrence[key]] if occurrence[key] < len(line_numbers) else None
+            occurrence[key] += 1
+            location = _format_location(path, category, name, line_number)
+            labels = _normalize_labels(params.get("labels"))
+            errors.extend(_label_governance_errors(location, labels, capability_labels, known_labels))
+
     return errors
 
 

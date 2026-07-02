@@ -93,6 +93,7 @@ commands:
 
 tests:
   platform: network
+  kind: module
   cluster_name: "nico-network-validation"
   description: "Verify NICo VPC and subnet inventory"
 

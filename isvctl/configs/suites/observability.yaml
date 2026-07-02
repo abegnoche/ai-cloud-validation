@@ -24,6 +24,7 @@ tests:
   cluster_name: "observability-validation"
   description: "Observability collector validation tests"
   platform: observability
+  kind: module
 
   settings:
     region: ""
@@ -73,26 +74,11 @@ tests:
           labels: ["min_req", "network", "observability"]
           step: vpc_flow_logs
 
-    host_logs:
-      checks:
-        HostSyslogCheck:
-          test_id: "OBS18-01"
-          labels: ["bare_metal", "min_req", "observability"]
-          step: host_syslogs
-
-    bmc_logs:
-      checks:
-        BmcSelLogsCheck:
-          test_id: "OBS17-01"
-          labels: ["min_req", "observability", "security"]
-          step: bmc_sel_logs
-
-    bmc_telemetry:
-      checks:
-        BmcGpuTelemetryCheck:
-          test_id: "TELEM04-01"
-          labels: ["gpu", "min_req", "observability", "security"]
-          step: bmc_gpu_telemetry
+    # Host syslog + BMC SEL/telemetry observability checks moved to the
+    # bare_metal suite: they need a live host/BMC, so they piggyback on the
+    # bare_metal capability run rather than launching a dedicated host here.
+    # They keep the "observability" label so the observability row still spans
+    # the BMaaS column in the matrix.
 
     storage_capacity_telemetry:
       checks:

@@ -361,6 +361,7 @@ class Orchestrator:
         self._results: list[PhaseResult] = []
         self._extra_pytest_args: list[str] | None = None
         self._include_labels: list[str] = []
+        self._exclude_labels: list[str] = []
         self._verbose: bool = False
         self._junitxml: str | None = None
 
@@ -370,6 +371,7 @@ class Orchestrator:
         teardown_on_failure: bool = True,
         extra_pytest_args: list[str] | None = None,
         include_labels: list[str] | None = None,
+        exclude_labels: list[str] | None = None,
         verbose: bool = False,
         junitxml: str | None = None,
     ) -> OrchestratorResult:
@@ -383,6 +385,10 @@ class Orchestrator:
                 - `-m kubernetes`: Run only validations whose labels include "kubernetes"
                   (labels are mirrored as pytest marks)
             include_labels: Labels that selected validations must all contain.
+            exclude_labels: Labels that exclude a validation (any intersection).
+                These come from the CLI (e.g. capability-scoped exclusion) and are
+                always applied, unlike config `tests.exclude.labels` which is
+                bypassed when include/pytest selection is present.
             verbose: Enable verbose output for validations
             junitxml: Path to write JUnit XML report for validations
 
@@ -395,6 +401,7 @@ class Orchestrator:
         self._results = []
         self._extra_pytest_args = extra_pytest_args
         self._include_labels = include_labels or []
+        self._exclude_labels = exclude_labels or []
         self._verbose = verbose
         self._junitxml = junitxml
 
@@ -517,7 +524,11 @@ class Orchestrator:
         skip_config_label_exclusions = bool(self._include_labels) or _has_explicit_pytest_selection(
             self._extra_pytest_args
         )
-        resolution_exclude_labels = [] if skip_config_label_exclusions else exclude_labels
+        # Config `tests.exclude.labels` is bypassed when the user narrows selection
+        # (include labels or pytest -k/-m). CLI excludes (e.g. capability-scoping)
+        # are authoritative and always union in after that gate.
+        config_exclude_labels = [] if skip_config_label_exclusions else exclude_labels
+        resolution_exclude_labels = list(dict.fromkeys([*config_exclude_labels, *self._exclude_labels]))
 
         phase_results: list[PhaseResult] = []
         overall_success = True

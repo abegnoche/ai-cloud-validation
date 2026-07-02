@@ -45,6 +45,7 @@ commands:
 
 tests:
   platform: iam
+  kind: module
   cluster_name: "nico-iam-validation"
   description: "Verify NICo credential readiness"
 

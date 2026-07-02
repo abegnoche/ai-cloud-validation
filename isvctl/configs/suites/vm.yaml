@@ -36,6 +36,7 @@ version: "1.0"
 
 tests:
   platform: vm
+  kind: capability
   cluster_name: "vm-validation"
   description: "VM (virtual machine) GPU validation tests"
 

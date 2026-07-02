@@ -202,6 +202,39 @@ commands:
           - "5"
         timeout: 60
 
+      # Observability: host syslog + BMC SEL/telemetry (moved from
+      # observability.yaml). Demo stubs emit dummy-success evidence; these checks
+      # carry no `ssh` label so the exclusion below does not skip them.
+      - name: host_syslogs
+        phase: test
+        command: "python ../scripts/observability/log_availability_test.py"
+        args:
+          - "--region"
+          - "{{region}}"
+          - "--aspect"
+          - "host_syslogs"
+        timeout: 60
+
+      - name: bmc_sel_logs
+        phase: test
+        command: "python ../scripts/observability/log_availability_test.py"
+        args:
+          - "--region"
+          - "{{region}}"
+          - "--aspect"
+          - "bmc_sel_logs"
+        timeout: 60
+
+      - name: bmc_gpu_telemetry
+        phase: test
+        command: "python ../scripts/observability/log_availability_test.py"
+        args:
+          - "--region"
+          - "{{region}}"
+          - "--aspect"
+          - "bmc_gpu_telemetry"
+        timeout: 60
+
       - name: reinstall_instance
         phase: test
         skip: true

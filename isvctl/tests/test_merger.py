@@ -450,7 +450,7 @@ class TestImportEndToEnd:
         assert result["tests"]["platform"] == "observability"
 
     def test_aws_observability_inherits_supported_validations(self) -> None:
-        """AWS observability imports the canonical suite and wires supported steps."""
+        """AWS observability keeps network/telemetry checks; host/BMC checks moved to bare_metal."""
         result = merge_yaml_files([self.CONFIGS_DIR / "providers" / "aws" / "config" / "observability.yaml"])
 
         assert result["tests"]["platform"] == "observability"
@@ -463,27 +463,19 @@ class TestImportEndToEnd:
             "enable_vpc_flow_logs",
             "launch_host",
             "vpc_flow_logs",
-            "host_syslogs",
-            "bmc_sel_logs",
-            "bmc_gpu_telemetry",
             "storage_capacity_telemetry",
             "storage_performance_telemetry",
             "gpu_nvlink_telemetry",
             "switch_nvlink_telemetry",
         } <= step_names
+        # Host syslog / BMC observability steps moved to the bare_metal config.
+        assert not ({"host_syslogs", "bmc_sel_logs", "bmc_gpu_telemetry"} & step_names)
 
         steps_by_name = {step["name"]: step for step in steps}
-        assert steps_by_name["host_syslogs"]["timeout"] >= 600
         assert "{{steps.enable_vpc_flow_logs.flow_log_id}}" in steps_by_name["vpc_flow_logs"]["args"]
-        launch_host_args = steps_by_name["launch_host"]["args"]
-        key_name_arg = launch_host_args[launch_host_args.index("--key-name") + 1]
-        assert key_name_arg == "isv-observability-host-key-{{steps.create_network.network_id}}"
 
         validations = result["tests"]["validations"]
         assert validations["network_logs"]["checks"]["VpcFlowLogsCheck"]["step"] == "vpc_flow_logs"
-        assert validations["host_logs"]["checks"]["HostSyslogCheck"]["step"] == "host_syslogs"
-        assert validations["bmc_logs"]["checks"]["BmcSelLogsCheck"]["step"] == "bmc_sel_logs"
-        assert validations["bmc_telemetry"]["checks"]["BmcGpuTelemetryCheck"]["step"] == "bmc_gpu_telemetry"
         assert validations["storage_capacity_telemetry"]["checks"]["StorageCapacityTelemetryCheck"]["step"] == (
             "storage_capacity_telemetry"
         )
@@ -496,6 +488,25 @@ class TestImportEndToEnd:
         assert validations["switch_nvlink_telemetry"]["checks"]["SwitchNvlinkTelemetryCheck"]["step"] == (
             "switch_nvlink_telemetry"
         )
+        # Host/BMC checks are no longer part of the observability module.
+        assert "host_logs" not in validations
+        assert "bmc_logs" not in validations
+        assert "bmc_telemetry" not in validations
+
+    def test_aws_bare_metal_hosts_observability_checks(self) -> None:
+        """The host/BMC observability checks now piggyback on the bare_metal capability."""
+        result = merge_yaml_files([self.CONFIGS_DIR / "providers" / "aws" / "config" / "bare_metal.yaml"])
+
+        step_names = {step["name"] for step in result["commands"]["bare_metal"]["steps"]}
+        assert {"host_syslogs", "bmc_sel_logs", "bmc_gpu_telemetry"} <= step_names
+
+        validations = result["tests"]["validations"]
+        assert validations["host_logs"]["checks"]["HostSyslogCheck"]["step"] == "host_syslogs"
+        assert validations["bmc_logs"]["checks"]["BmcSelLogsCheck"]["step"] == "bmc_sel_logs"
+        assert validations["bmc_telemetry"]["checks"]["BmcGpuTelemetryCheck"]["step"] == "bmc_gpu_telemetry"
+        # The two BMC checks gained the bare_metal label required by the suite.
+        assert "bare_metal" in validations["bmc_logs"]["checks"]["BmcSelLogsCheck"]["labels"]
+        assert "bare_metal" in validations["bmc_telemetry"]["checks"]["BmcGpuTelemetryCheck"]["labels"]
 
         excluded = set(result["tests"].get("exclude", {}).get("tests", []))
         assert "BmcSelLogsCheck" not in excluded
