@@ -76,8 +76,9 @@ def test_catalog_list_json() -> None:
     assert payload["schemaVersion"] == 1
     assert payload["isvTestVersion"] == "1.2.3"
     assert payload["entries"] == _FAKE_ENTRIES
-    # The platform axis is derived from the real configs and drives the UI matrix.
-    assert "KUBERNETES" in payload["platforms"]
+    # Axis lists are derived from the real suites and drive the UI matrix.
+    assert payload["platforms"] == ["bare_metal", "kubernetes", "slurm", "vm"]
+    assert "storage" in payload["modules"]
 
 
 def test_catalog_labels_table() -> None:

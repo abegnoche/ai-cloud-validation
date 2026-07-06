@@ -284,6 +284,7 @@ def upload_test_catalog(
     *,
     schema_version: int = 1,
     platforms: list[str] | None = None,
+    modules: list[str] | None = None,
 ) -> bool:
     """Upload test catalog for a suite version (idempotent per version).
 
@@ -298,8 +299,10 @@ def upload_test_catalog(
         entries: List of catalog entry dicts with keys:
             name, description, labels, module, platforms, test_ids
         schema_version: Catalog document schema version.
-        platforms: Platform axis labels (e.g. ["KUBERNETES", "VM"]) - the
+        platforms: Capability axis labels (e.g. ["bare_metal", "vm"]) - the
             matrix columns; empty list when unknown.
+        modules: Module axis labels (e.g. ["iam", "network"]) - the matrix
+            rows; empty list when unknown.
 
     Returns:
         True if catalog was uploaded or already exists, False on error
@@ -322,6 +325,7 @@ def upload_test_catalog(
         "schemaVersion": schema_version,
         "isvTestVersion": isv_test_version,
         "platforms": platforms or [],
+        "modules": modules or [],
         "entries": [
             {
                 "name": e["name"],

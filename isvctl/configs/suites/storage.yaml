@@ -53,7 +53,7 @@
 version: "1.0"
 
 tests:
-  platform: storage
+  module: storage
   cluster_name: "storage-validation"
   description: "Storage: block volumes and high-speed / parallel filesystem services"
 

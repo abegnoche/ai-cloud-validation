@@ -228,6 +228,7 @@ def push(
         entries=catalog_entries,
         schema_version=document["schemaVersion"],
         platforms=document["platforms"],
+        modules=document["modules"],
     ):
         print_progress(typer.style("[OK]", fg=typer.colors.GREEN) + " Catalog push complete")
     else:

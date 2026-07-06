@@ -78,6 +78,12 @@ LABEL_TO_PLATFORM: dict[str, str] = {
 # (isvTestVersion), which tracks the test content.
 CATALOG_SCHEMA_VERSION = 1
 
+# Module-axis labels with no dedicated ``module:`` suite: their checks piggyback
+# on a platform suite (e.g. the K8s CSI ``storage`` checks live inline in
+# ``k8s.yaml``). Mirrors ``EXTRA_MODULE_LABELS`` in
+# ``scripts/validate_suite_wiring.py`` (the wiring-governance authority).
+EXTRA_MODULE_LABELS: frozenset[str] = frozenset({"storage"})
+
 
 def _find_configs_dir() -> Path | None:
     """Locate the isvctl/configs/ directory."""
@@ -363,29 +369,56 @@ def build_catalog(*, released_only: bool = True) -> list[dict[str, Any]]:
     return catalog
 
 
-def build_platform_axis() -> list[str]:
-    """Return the sorted platform-axis labels (the catalog's capability columns).
+def build_axis_taxonomy() -> tuple[list[str], list[str]]:
+    """Return ``(platforms, modules)``: the capability and concern axis labels.
 
-    Derived from :data:`PLATFORM_CONFIGS`, the canonical per-platform suite
-    mapping, so adding a platform there extends the axis automatically. The
-    values match each entry's ``platforms`` field (e.g. ``KUBERNETES``), so a
-    consumer can build the platform matrix straight from the catalog.
+    Derived from the suite axis keys (``tests.platform`` / ``tests.module``)
+    under ``isvctl/configs/suites``, so adding a suite extends the axes
+    automatically. A suite that declares ``module:`` contributes a module label;
+    otherwise its ``platform:`` contributes a platform (capability) label. Module
+    labels also include the piggyback extras (:data:`EXTRA_MODULE_LABELS`, e.g.
+    ``storage``) that have no dedicated ``module:`` suite. Mirrors
+    ``derive_axis_labels`` in ``scripts/validate_suite_wiring.py``.
+
+    Both lists are label-form (lowercase, matching each entry's ``labels``) and
+    sorted, so a consumer can build the capability x module matrix directly.
     """
-    return sorted(PLATFORM_CONFIGS.keys())
+    configs_dir = _find_configs_dir()
+    platforms: set[str] = set()
+    modules: set[str] = set()
+    if configs_dir:
+        for path in sorted((configs_dir / "suites").glob("*.yaml")):
+            try:
+                data = yaml.safe_load(path.read_text())
+            except (OSError, yaml.YAMLError):
+                continue
+            tests = (data or {}).get("tests", {})
+            if not isinstance(tests, dict):
+                continue
+            module = tests.get("module")
+            if isinstance(module, str) and module:
+                modules.add(module)
+                continue
+            platform = tests.get("platform")
+            if isinstance(platform, str) and platform:
+                platforms.add(platform)
+    return sorted(platforms), sorted(modules | EXTRA_MODULE_LABELS)
 
 
 def catalog_document(entries: list[dict[str, Any]], version: str) -> dict[str, Any]:
     """Wrap catalog ``entries`` in the versioned upload/artifact envelope.
 
-    Adds the schema version, the isvtest package version, and the platform axis
-    list (see :func:`build_platform_axis`). The per-entry ``labels`` are
-    intentionally not summarized at the top level - a consumer can derive the
-    label universe from the entries when needed.
+    Adds the schema version, the isvtest package version, and the platform and
+    module axis lists (see :func:`build_axis_taxonomy`). The per-entry ``labels``
+    are intentionally not summarized at the top level - a consumer can derive
+    the label universe from the entries when needed.
     """
+    platforms, modules = build_axis_taxonomy()
     return {
         "schemaVersion": CATALOG_SCHEMA_VERSION,
         "isvTestVersion": version,
-        "platforms": build_platform_axis(),
+        "platforms": platforms,
+        "modules": modules,
         "entries": entries,
     }
 

@@ -19,8 +19,8 @@ from unittest.mock import patch
 
 from isvtest.catalog import (
     CATALOG_SCHEMA_VERSION,
+    build_axis_taxonomy,
     build_catalog,
-    build_platform_axis,
     catalog_document,
     get_catalog_version,
 )
@@ -37,32 +37,32 @@ class ExplicitLabelCatalogCheck(BaseValidation):
         self.set_passed()
 
 
-class TestCatalogDocument:
-    """Tests for the platform axis and the versioned catalog envelope."""
+class TestAxisTaxonomy:
+    """Tests for the platform/module axis taxonomy and the catalog envelope."""
 
-    def test_derives_platform_axis_from_configs(self) -> None:
-        """The platform axis lists every platform in PLATFORM_CONFIGS, sorted."""
-        assert build_platform_axis() == [
-            "BARE_METAL",
-            "CONTROL_PLANE",
-            "IAM",
-            "IMAGE_REGISTRY",
-            "KUBERNETES",
-            "NETWORK",
-            "OBSERVABILITY",
-            "SECURITY",
-            "SLURM",
-            "VM",
+    def test_derives_platform_and_module_axes_from_suites(self) -> None:
+        """Platforms come from platform suites; modules from module suites + extras."""
+        platforms, modules = build_axis_taxonomy()
+        assert platforms == ["bare_metal", "kubernetes", "slurm", "vm"]
+        assert modules == [
+            "control_plane",
+            "iam",
+            "image_registry",
+            "network",
+            "observability",
+            "security",
+            "storage",
         ]
 
     def test_catalog_document_wraps_entries_with_metadata(self) -> None:
-        """The envelope carries schema version, package version, and the platform axis."""
+        """The envelope carries schema version, package version, and both axes."""
         entries = [{"name": "X", "labels": ["iam"]}]
         doc = catalog_document(entries, "1.2.3")
         assert doc["schemaVersion"] == CATALOG_SCHEMA_VERSION
         assert doc["isvTestVersion"] == "1.2.3"
         assert doc["entries"] == entries
-        assert doc["platforms"] == build_platform_axis()
+        assert doc["platforms"] == ["bare_metal", "kubernetes", "slurm", "vm"]
+        assert "storage" in doc["modules"]
         # The label universe is intentionally not summarized at the top level.
         assert "labels" not in doc
 
