@@ -46,11 +46,18 @@ class TestUploadTestCatalog:
             {
                 "name": "TestA",
                 "description": "Test A",
-                "labels": ["k8s"],
-                "module": "mod.a",
+                "labels": ["kubernetes"],
+                "platforms": ["kubernetes"],
+                "modules": [],
                 "test_ids": ["K8S06-01"],
             },
-            {"name": "TestB", "description": "Test B", "labels": [], "module": "mod.b"},
+            {
+                "name": "TestB",
+                "description": "Test B",
+                "labels": ["iam"],
+                "platforms": [],
+                "modules": ["iam"],
+            },
         ]
 
         result = upload_test_catalog(
@@ -76,10 +83,14 @@ class TestUploadTestCatalog:
         assert payload["modules"] == []
         assert len(payload["entries"]) == 2
         assert payload["entries"][0]["name"] == "TestA"
-        assert payload["entries"][0]["labels"] == ["k8s"]
+        assert payload["entries"][0]["labels"] == ["kubernetes"]
+        assert payload["entries"][0]["platforms"] == ["kubernetes"]
+        assert payload["entries"][0]["modules"] == []
         assert payload["entries"][0]["test_ids"] == ["K8S06-01"]
         assert "markers" not in payload["entries"][0]
-        assert payload["entries"][1]["labels"] == []
+        assert payload["entries"][1]["labels"] == ["iam"]
+        assert payload["entries"][1]["platforms"] == []
+        assert payload["entries"][1]["modules"] == ["iam"]
         assert payload["entries"][1]["test_ids"] == []
 
     @patch("isvreporter.client.urlopen")
@@ -181,8 +192,9 @@ class TestUploadTestCatalog:
         assert entry["name"] == "TestA"
         assert entry["description"] == ""
         assert entry["labels"] == []
+        assert entry["platforms"] == []
+        assert entry["modules"] == []
         assert "markers" not in entry
-        assert entry["module"] == ""
         assert entry["test_ids"] == []
 
     @patch("isvreporter.client.urlopen")

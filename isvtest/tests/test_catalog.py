@@ -85,7 +85,9 @@ class TestBuildCatalog:
             assert "description" in entry
             assert "labels" in entry
             assert "test_ids" in entry
-            assert "module" in entry
+            assert "platforms" in entry
+            assert "modules" in entry
+            assert "module" not in entry
             assert "markers" not in entry
 
     def test_entries_have_correct_types(self) -> None:
@@ -95,7 +97,8 @@ class TestBuildCatalog:
             assert isinstance(entry["name"], str)
             assert isinstance(entry["description"], str)
             assert isinstance(entry["labels"], list)
-            assert isinstance(entry["module"], str)
+            assert isinstance(entry["platforms"], list)
+            assert isinstance(entry["modules"], list)
 
     def test_no_duplicate_names(self) -> None:
         """Test that there are no duplicate test names in the catalog."""
@@ -203,7 +206,7 @@ tests:
         """Per-wiring YAML labels are surfaced as catalog tag metadata."""
         with (
             patch("isvtest.catalog.discover_all_tests", return_value=[ExplicitLabelCatalogCheck]),
-            patch("isvtest.catalog._build_platform_map", return_value={}),
+            patch("isvtest.catalog._build_axis_maps", return_value=({}, {})),
             patch(
                 "isvtest.catalog.build_label_map",
                 return_value={"ExplicitLabelCatalogCheck": {"accelerator", "long_running"}},
@@ -219,66 +222,78 @@ tests:
                 "description": "Explicit labels",
                 "labels": ["accelerator", "long_running"],
                 "test_ids": [],
-                "module": __name__,
                 "platforms": [],
+                "modules": [],
             }
         ]
 
-    def test_modules_are_valid_python_paths(self) -> None:
-        """Test that module paths look like valid Python module paths."""
-        catalog = build_catalog()
-        for entry in catalog:
-            assert "." in entry["module"]
-            assert entry["module"].startswith("isvtest.")
+    def test_module_suite_checks_use_modules_axis(self) -> None:
+        """Checks wired in a module suite land on modules, not platforms."""
+        catalog = build_catalog(released_only=False)
+        by_name = {e["name"]: e for e in catalog}
+        entry = by_name["AccessKeyAuthenticatedCheck"]
+        assert entry["modules"] == ["control_plane"]
+        assert entry["platforms"] == []
 
-    def test_suite_membership_overrides_label_platforms(self) -> None:
-        """Regression: trait labels must not add extra platform ownership.
+    def test_platform_suite_checks_use_platforms_axis(self) -> None:
+        """Checks wired in a platform suite land on platforms, not modules."""
+        catalog = build_catalog(released_only=False)
+        by_name = {e["name"]: e for e in catalog}
+        entry = by_name["GpuCheck"]
+        assert "bare_metal" in entry["platforms"]
+        assert "vm" in entry["platforms"]
+        assert entry["modules"] == []
+
+    def test_suite_membership_overrides_label_axis_inference(self) -> None:
+        """Regression: trait labels must not add extra axis ownership.
 
         A check can carry labels like ``("security", "network")`` for pytest
-        filtering AND appear in a single suite YAML (e.g. ``security.yaml``).
-        ``_build_platform_map`` must use the suite as the source of truth and
-        skip label-derived platform inference in that case - otherwise the
-        UI shows phantom platform badges.
+        filtering AND appear in a single module suite YAML (e.g.
+        ``security.yaml``). Suite membership is the source of truth - otherwise
+        the UI shows phantom axis badges.
 
         DO NOT add per-check asserts to this test. It is a property test
         that already covers every check in the catalog. If a new validation
         breaks the invariant, the failure message names it.
         """
-        from isvtest.catalog import (
-            LABEL_TO_PLATFORM,
-            PLATFORM_CONFIGS,
-            _extract_checks_from_config,
-            _find_configs_dir,
-        )
+        from isvtest.catalog import _build_axis_maps, _find_configs_dir
 
         configs_dir = _find_configs_dir()
         assert configs_dir is not None, "isvctl/configs/ not found"
 
-        suite_platforms: dict[str, set[str]] = {}
-        for platform, files in PLATFORM_CONFIGS.items():
-            for relpath in files:
-                for name in _extract_checks_from_config(configs_dir / relpath):
-                    suite_platforms.setdefault(name, set()).add(platform)
+        suite_platforms, suite_modules = _build_axis_maps()
+        platform_axis, module_axis = build_axis_taxonomy()
+        platform_axis_set = set(platform_axis)
+        module_axis_set = set(module_axis)
 
         for entry in build_catalog(released_only=False):
             name = entry["name"]
-            if name not in suite_platforms:
+            in_suite = name in suite_platforms or name in suite_modules
+            if not in_suite:
                 continue
-            label_platforms = {LABEL_TO_PLATFORM[label] for label in entry["labels"] if label in LABEL_TO_PLATFORM}
-            expected = suite_platforms[name]
-            actual = set(entry["platforms"])
-            phantom = (label_platforms - expected) & actual
-            assert not phantom, (
-                f"{name}: label-derived platforms {sorted(phantom)} leaked "
-                f"into catalog; expected exactly {sorted(expected)}, "
-                f"got {sorted(actual)}"
+            expected_platforms = sorted(suite_platforms.get(name, set()))
+            expected_modules = sorted(suite_modules.get(name, set()))
+            label_platforms = sorted({label for label in entry["labels"] if label in platform_axis_set})
+            label_modules = sorted({label for label in entry["labels"] if label in module_axis_set})
+            phantom_platforms = sorted(set(label_platforms) - set(expected_platforms) & set(entry["platforms"]))
+            phantom_modules = sorted(set(label_modules) - set(expected_modules) & set(entry["modules"]))
+            assert not phantom_platforms, (
+                f"{name}: label-derived platforms {phantom_platforms} leaked into catalog; "
+                f"expected exactly {expected_platforms}, got {entry['platforms']}"
             )
-            assert actual == expected, (
-                f"{name}: platforms should equal suite assignment {sorted(expected)}, got {sorted(actual)}"
+            assert not phantom_modules, (
+                f"{name}: label-derived modules {phantom_modules} leaked into catalog; "
+                f"expected exactly {expected_modules}, got {entry['modules']}"
+            )
+            assert entry["platforms"] == expected_platforms, (
+                f"{name}: platforms should equal suite assignment {expected_platforms}, got {entry['platforms']}"
+            )
+            assert entry["modules"] == expected_modules, (
+                f"{name}: modules should equal suite assignment {expected_modules}, got {entry['modules']}"
             )
 
-    def test_observability_label_infers_platform_for_unlisted_checks(self) -> None:
-        """Checks labelled with `observability` are tagged OBSERVABILITY when not in any suite."""
+    def test_observability_label_infers_module_for_unlisted_checks(self) -> None:
+        """Checks labelled with `observability` are tagged on modules when not in any suite."""
 
         class ObservabilityLabelledCheck(BaseValidation):
             description = "Observability check labelled but not in any suite"
@@ -290,7 +305,7 @@ tests:
 
         with (
             patch("isvtest.catalog.discover_all_tests", return_value=[ObservabilityLabelledCheck]),
-            patch("isvtest.catalog._build_platform_map", return_value={}),
+            patch("isvtest.catalog._build_axis_maps", return_value=({}, {})),
             patch(
                 "isvtest.catalog.build_label_map",
                 return_value={"ObservabilityLabelledCheck": {"observability"}},
@@ -306,8 +321,8 @@ tests:
                 "description": "Observability check labelled but not in any suite",
                 "labels": ["observability"],
                 "test_ids": [],
-                "module": "isvtest.validations.fake",
-                "platforms": ["OBSERVABILITY"],
+                "platforms": [],
+                "modules": ["observability"],
             }
         ]
 

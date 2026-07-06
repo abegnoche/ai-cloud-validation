@@ -192,12 +192,14 @@ tests:
     assert any("ProviderCheck" in err and "multiple platform labels" in err for err in errors)
 
 
-def test_derive_axis_labels_covers_platform_labels() -> None:
-    """Guardrail: derived axis labels cover every catalog platform-ownership label."""
-    from isvtest.catalog import LABEL_TO_PLATFORM
+def test_derive_axis_labels_match_catalog_taxonomy() -> None:
+    """Guardrail: wiring validator and catalog share the same axis scanner."""
+    from isvtest.catalog import build_axis_taxonomy
 
     platform_labels, module_labels = validate_suite_wiring.derive_axis_labels()
-    assert set(LABEL_TO_PLATFORM).issubset(platform_labels | module_labels)
+    tax_platforms, tax_modules = build_axis_taxonomy()
+    assert platform_labels == frozenset(tax_platforms)
+    assert module_labels == frozenset(tax_modules)
 
 
 def test_wiring_errors_reports_yaml_parse_failures(tmp_path: Path) -> None:

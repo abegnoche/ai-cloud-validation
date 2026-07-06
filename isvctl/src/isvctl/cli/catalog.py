@@ -86,20 +86,20 @@ def list_cmd(
     )
     table.add_column("Test", style="green", no_wrap=True)
     table.add_column("Test IDs", style="magenta", max_width=32)
-    table.add_column("Labels (Platforms)", style="dim", max_width=40)
+    table.add_column("Labels (Axes)", style="dim", max_width=40)
     table.add_column("Description")
 
     for entry in sorted(catalog_entries, key=lambda e: e["name"]):
         labels = ", ".join(entry.get("labels") or [])
-        platforms = ", ".join(entry.get("platforms") or [])
-        if labels and platforms:
-            labels_platforms = f"{labels} ({platforms})"
+        axes = ", ".join((entry.get("platforms") or []) + (entry.get("modules") or []))
+        if labels and axes:
+            labels_axes = f"{labels} ({axes})"
         else:
-            labels_platforms = labels or platforms
+            labels_axes = labels or axes
         table.add_row(
             entry["name"],
             ", ".join(entry.get("test_ids") or []) or "-",
-            labels_platforms or "-",
+            labels_axes or "-",
             entry.get("description") or "-",
         )
 

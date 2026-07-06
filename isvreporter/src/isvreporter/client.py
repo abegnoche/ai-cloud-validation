@@ -297,7 +297,7 @@ def upload_test_catalog(
         jwt_token: JWT access token
         isv_test_version: Test suite version string (e.g. "1.2.3")
         entries: List of catalog entry dicts with keys:
-            name, description, labels, module, platforms, test_ids
+            name, description, labels, platforms, modules, test_ids
         schema_version: Catalog document schema version.
         platforms: Capability axis labels (e.g. ["bare_metal", "vm"]) - the
             matrix columns; empty list when unknown.
@@ -331,8 +331,8 @@ def upload_test_catalog(
                 "name": e["name"],
                 "description": e.get("description", ""),
                 "labels": e.get("labels", []),
-                "module": e.get("module", ""),
                 "platforms": e.get("platforms", []),
+                "modules": e.get("modules", []),
                 "test_ids": e.get("test_ids", []),
             }
             for e in entries
