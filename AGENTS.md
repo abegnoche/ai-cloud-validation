@@ -25,9 +25,9 @@ make format            # ruff format
 make plan              # render docs/test-plan.yaml to AsciiDoc + interactive HTML
 uv run isvctl test run -f isvctl/configs/suites/k8s.yaml          # canonical invocation
 uv run isvctl test run -f config.yaml -- -v -s -k "test_name"     # forward pytest args
-uv run isvctl test run --provider aws --platform vm              # run a whole platform column (vm config + all module configs)
-uv run isvctl test run --provider aws --module iam               # run a single module suite
-uv run isvctl test run --provider aws --label storage            # cross-file label discovery (PR 485)
+uv run isvctl test run --provider aws --platform vm               # run a whole platform column (vm config + all module configs)
+uv run isvctl test run --provider aws --module iam                # run a single module suite
+uv run isvctl test run --provider aws --label storage             # cross-file label discovery
 ```
 
 Selection: `--platform <env>` runs the environment's config plus every module
@@ -123,9 +123,10 @@ marks an operational concern (`iam`, `network`, `security`, `observability`,
 `platform:` marks a platform suite. Provider configs inherit the key via `import:`.
 The platform/module label axes are *derived* from these keys.
 `scripts/validate_suite_wiring.py` governs labels: every suite declares exactly
-one axis key, every wiring label must be a platform, module, or
-`MODIFIER_LABELS` label, and a check may carry at most one platform label
-(platform-scoped exclusion is any-intersection). A check that needs a
+one axis key, every suite check carries that declared axis label, and a check
+may carry at most one platform label (platform-scoped exclusion is
+any-intersection). Labels are otherwise free-form (they originate in the wiring
+YAML, so there is no external allowlist). A check that needs a
 platform's live host lives inline in that platform suite ("piggyback"); a
 concern that provisions its own subject or hits an API stays in its own `module:`
 suite. See `isvctl/configs/suites/README.md`.

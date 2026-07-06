@@ -41,7 +41,7 @@ class TestAxisTaxonomy:
     """Tests for the platform/module axis taxonomy and the catalog envelope."""
 
     def test_derives_platform_and_module_axes_from_suites(self) -> None:
-        """Platforms come from platform suites; modules from module suites + extras."""
+        """Platforms come from platform suites; modules from module suites."""
         platforms, modules = build_axis_taxonomy()
         assert platforms == ["bare_metal", "kubernetes", "slurm", "vm"]
         assert modules == [
@@ -51,7 +51,6 @@ class TestAxisTaxonomy:
             "network",
             "observability",
             "security",
-            "storage",
         ]
 
     def test_catalog_document_wraps_entries_with_metadata(self) -> None:
@@ -62,7 +61,7 @@ class TestAxisTaxonomy:
         assert doc["isvTestVersion"] == "1.2.3"
         assert doc["entries"] == entries
         assert doc["platforms"] == ["bare_metal", "kubernetes", "slurm", "vm"]
-        assert "storage" in doc["modules"]
+        assert "iam" in doc["modules"]
         # The label universe is intentionally not summarized at the top level.
         assert "labels" not in doc
 

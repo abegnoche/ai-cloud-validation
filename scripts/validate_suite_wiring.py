@@ -27,13 +27,13 @@ validation metadata on this branch. This validator enforces:
 * ``test_id`` - a plan id from ``docs/test-plan.yaml``, or ``"N/A"`` when the
   check is generic plumbing with no plan item.
 * ``labels`` - a non-empty list used for pytest selection and catalog reporting.
-  Each canonical suite check must include its suite label, for example checks in
-  ``bare_metal.yaml`` must include ``bare_metal``.
-* label governance - every label used in wiring must be a known platform,
-  module, or modifier label (kills typos and ungoverned growth), and a check
-  may carry at most one platform-axis label (platform-scoped exclusion is
-  any-intersection, so two platform labels would skip the check under every
-  column).
+  Each suite check must include its declared axis label, for example checks in
+  a suite with ``tests.platform: bare_metal`` must include ``bare_metal``.
+* label governance - a check may carry at most one platform-axis label
+  (platform-scoped exclusion is any-intersection, so two platform labels would
+  skip the check under every column). Labels are otherwise free-form: they
+  originate in the wiring YAML itself, so there is no external allowlist to
+  validate them against.
 
 Provider configs under ``isvctl/configs/providers/`` are scanned for the label
 governance rules only (they inherit ``kind``/``test_id`` from the suites they
@@ -59,50 +59,6 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SUITES_DIR = REPO_ROOT / "isvctl" / "configs" / "suites"
 _NEXT_CATEGORY_LINE = re.compile(r"^    \S")
-SUITE_REQUIRED_LABELS: dict[str, str] = {
-    "bare_metal": "bare_metal",
-    "control-plane": "control_plane",
-    "iam": "iam",
-    "image-registry": "image_registry",
-    "k8s": "kubernetes",
-    "network": "network",
-    "observability": "observability",
-    "security": "security",
-    "slurm": "slurm",
-    "storage": "storage",
-    "vm": "vm",
-}
-
-# Labels that are neither platform nor module axes: hardware/trait attributes
-# and selection presets. Authoritative list generated from
-# ``ISVTEST_INCLUDE_UNRELEASED=1 uv run isvctl catalog labels --json`` minus the
-# derived axis labels. Any new label must be added here (a modifier) or become a
-# platform/module suite platform, otherwise wiring validation fails.
-MODIFIER_LABELS: frozenset[str] = frozenset(
-    {
-        "min_req",
-        "slow",
-        "workload",
-        "gpu",
-        "ssh",
-        "sanitization",
-        "attestation",
-        "firmware",
-        "disk",
-        "infiniband",
-        "ingestion",
-        "dpu",
-        "governance",
-        "health",
-        "capacity",
-        "l2",
-    }
-)
-
-# Module-axis labels with no dedicated ``kind: module`` suite yet: their checks
-# piggyback on a platform suite (e.g. K8s CSI ``storage`` checks live inline in
-# ``k8s.yaml``). Allowlisted so wiring can select them by label.
-EXTRA_MODULE_LABELS: frozenset[str] = frozenset({"storage"})
 
 
 def _check_line_patterns(check_name: str) -> tuple[re.Pattern[str], ...]:
@@ -148,9 +104,13 @@ def _normalize_test_id(value: Any) -> str | None:
     return None
 
 
-def required_suite_label(config_path: Path) -> str | None:
-    """Return the label every check in a known canonical suite must carry."""
-    return SUITE_REQUIRED_LABELS.get(config_path.stem)
+def required_suite_label(platform: Any, module: Any) -> str | None:
+    """Return the declared axis label every check in a suite must carry."""
+    if isinstance(module, str) and module:
+        return module
+    if isinstance(platform, str) and platform:
+        return platform
+    return None
 
 
 def iter_suite_checks(config_path: Path) -> Iterator[tuple[str, str, dict[str, Any]]]:
@@ -198,10 +158,9 @@ def _suite_platform_and_module(config_path: Path) -> tuple[Any, Any]:
 def derive_axis_labels(suites_dir: Path = SUITES_DIR) -> tuple[frozenset[str], frozenset[str]]:
     """Derive the (platform, module) label axes from the suites' axis keys.
 
-    Module labels are the values of ``module:`` keys plus the piggyback allowlist
-    (:data:`EXTRA_MODULE_LABELS`); platform labels are the ``platform:`` values
-    of suites that declare no ``module``. Malformed suites are skipped here;
-    :func:`wiring_errors` reports them separately.
+    Module labels are the values of ``module:`` keys; platform labels are the
+    ``platform:`` values of suites that declare no ``module``. Malformed suites
+    are skipped here; :func:`wiring_errors` reports them separately.
     """
     platform_labels: set[str] = set()
     module: set[str] = set()
@@ -214,7 +173,7 @@ def derive_axis_labels(suites_dir: Path = SUITES_DIR) -> tuple[frozenset[str], f
             module.add(mod)
         elif isinstance(platform, str) and platform:
             platform_labels.add(platform)
-    return frozenset(platform_labels), frozenset(module | EXTRA_MODULE_LABELS)
+    return frozenset(platform_labels), frozenset(module)
 
 
 def _iter_provider_configs(providers_dir: Path) -> Iterator[Path]:
@@ -229,13 +188,9 @@ def _label_governance_errors(
     location: str,
     labels: list[str],
     platform_labels: frozenset[str],
-    known_labels: frozenset[str],
 ) -> list[str]:
-    """Return unknown-label and multiple-platform-label errors for one check."""
+    """Return multiple-platform-label errors for one check."""
     errors: list[str] = []
-    unknown = [label for label in labels if label not in known_labels]
-    for label in unknown:
-        errors.append(f"{location}: unknown label {label!r} (not a platform, module, or modifier label)")
     platform_hits = sorted({label for label in labels if label in platform_labels})
     if len(platform_hits) > 1:
         errors.append(f"{location}: multiple platform labels ({', '.join(platform_hits)}); at most one is allowed")
@@ -273,8 +228,7 @@ def wiring_errors(suites_dir: Path = SUITES_DIR, providers_dir: Path | None = No
     if providers_dir is None:
         providers_dir = suites_dir.parent / "providers"
 
-    platform_labels, module_labels = derive_axis_labels(suites_dir)
-    known_labels = platform_labels | module_labels | MODIFIER_LABELS
+    platform_labels, _module_labels = derive_axis_labels(suites_dir)
 
     errors: list[str] = []
     occurrence: dict[tuple[Path, str, str], int] = defaultdict(int)
@@ -304,14 +258,14 @@ def wiring_errors(suites_dir: Path = SUITES_DIR, providers_dir: Path | None = No
             location = _format_location(path, category, name, line_number)
             test_id = _normalize_test_id(params.get("test_id"))
             labels = _normalize_labels(params.get("labels"))
-            required_label = required_suite_label(path)
+            required_label = required_suite_label(platform, module)
             if test_id is None:
                 errors.append(f'{location}: missing test_id (use a plan id or "N/A")')
             if not labels:
                 errors.append(f"{location}: missing labels (non-empty list required)")
             elif required_label and required_label not in labels:
                 errors.append(f"{location}: missing suite label {required_label!r}")
-            errors.extend(_label_governance_errors(location, labels, platform_labels, known_labels))
+            errors.extend(_label_governance_errors(location, labels, platform_labels))
 
     for path in _iter_provider_configs(providers_dir):
         try:
@@ -327,7 +281,7 @@ def wiring_errors(suites_dir: Path = SUITES_DIR, providers_dir: Path | None = No
             occurrence[key] += 1
             location = _format_location(path, category, name, line_number)
             labels = _normalize_labels(params.get("labels"))
-            errors.extend(_label_governance_errors(location, labels, platform_labels, known_labels))
+            errors.extend(_label_governance_errors(location, labels, platform_labels))
 
     return errors
 

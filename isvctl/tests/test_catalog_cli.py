@@ -78,7 +78,7 @@ def test_catalog_list_json() -> None:
     assert payload["entries"] == _FAKE_ENTRIES
     # Axis lists are derived from the real suites and drive the UI matrix.
     assert payload["platforms"] == ["bare_metal", "kubernetes", "slurm", "vm"]
-    assert "storage" in payload["modules"]
+    assert "iam" in payload["modules"]
 
 
 def test_catalog_labels_table() -> None:

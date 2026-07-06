@@ -71,32 +71,36 @@ check follows infra need.
 
 ### A concern that spans platforms
 
-Model "storage on K8s *and* BM" (or any cross-platform concern) as **one
-check-set per platform, each carrying its own single platform label plus the
-shared concern label** - never one check with two platform labels:
+A cross-platform concern (e.g. `storage` covering K8s CSI *and*, later, BM block
+devices) is modelled as **one check-set per platform, each carrying its own
+single platform label plus the shared concern label** - never one check with two
+platform labels:
 
 ```yaml
 # k8s.yaml           labels: ["kubernetes", "storage"]   reads {{steps.setup.csi.*}}
 # bare_metal.yaml    labels: ["bare_metal", "storage"]   reads {{steps.launch_instance.*}}
 ```
 
-The catalog then shows the `storage` row under both columns automatically. Do
-**not** put both in one `storage.yaml` imported by both platforms: a plain
-`-f eks.yaml` run would drag the BM checks in and they would SKIP (no
-`launch_instance` step), polluting the report. Keep them inline, or use one
-validation-only fragment per platform.
+Today only the K8s side exists (the `storage`-labeled CSI checks in `k8s.yaml`).
+Note that `storage` is only a **label** here, not a module: it is orthogonal to
+the module axis, so there is no `storage` matrix row until a `suites/storage.yaml`
+(`module: storage`) is added. Do **not** put both platforms' checks in one
+`storage.yaml` imported by both: a plain `-f eks.yaml` run would drag the BM
+checks in and they would SKIP (no `launch_instance` step), polluting the report.
+Keep them inline, or use one validation-only fragment per platform.
 
 ### Label governance
 
 `scripts/validate_suite_wiring.py` (run via `make validate-suites`) enforces:
 
 - every suite declares exactly one of `platform:` / `module:`;
-- every wiring label is a known **platform**, **module**, or **modifier**
-  label (`MODIFIER_LABELS`: `min_req`, `slow`, `gpu`, `ssh`, `workload`, and the
-  hardware traits) - typos and ungoverned label growth fail the check;
+- every suite check carries the suite's declared `platform:` or `module:` label;
 - a check carries **at most one platform label** (platform-scoped exclusion
   is any-intersection, so two platform labels would skip the check under every
   column).
+
+Labels are otherwise free-form: they originate in the wiring YAML itself, so
+there is no external allowlist to validate them against.
 
 Provider configs are governed for labels too (they inherit the axis key/`test_id`).
 
@@ -128,7 +132,8 @@ isvctl test run --provider aws --module iam
 # Cross-file label discovery (PR 485): every config with an iam-labeled check.
 isvctl test run --provider aws --label iam
 
-# The storage row lives under the kubernetes column today (K8s CSI checks).
+# Narrow a platform column to a subset by label (labels are free-form selection
+# tags, orthogonal to the module axis - e.g. the storage-labeled K8s CSI checks).
 isvctl test run --provider aws --platform kubernetes --label storage
 
 # -f is the override escape hatch (unchanged).
@@ -152,12 +157,10 @@ An `aws/config/eks.yaml` importing `k8s.yaml` is the `kubernetes` platform.
   `vm.yaml` (platform) then `network`/`iam`/`security`/`control-plane`/
   `image-registry`/`observability` (modules), each with `exclude_labels =
   {bare_metal, kubernetes, slurm}` so a differently-scoped module check skips.
-- **Host is VM, run only storage:** storage is K8s-only today, so run it under
-  the kubernetes column (`--provider aws --platform kubernetes --label
-  storage` or `--provider aws --label storage`). `--platform vm --label
-  storage` runs nothing until a VM storage check is authored (inline in
-  `vm.yaml` or an imported fragment), at which point the same command runs it
-  inside the VM orchestration.
+- **Storage is a label, not a module (yet):** the `storage`-labeled K8s CSI
+  checks in `k8s.yaml` are selectable via `--label storage`, but `storage` is
+  not a module *axis* (no matrix row) - labels are orthogonal to modules. It
+  becomes a module once a `suites/storage.yaml` (`module: storage`) is added.
 
 ## Test Suite Details
 

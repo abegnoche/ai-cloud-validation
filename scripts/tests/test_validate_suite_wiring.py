@@ -60,26 +60,26 @@ tests:
     assert any("BadCheck" in err and "missing labels" in err for err in errors)
 
 
-def test_wiring_errors_require_canonical_suite_label(tmp_path: Path) -> None:
-    """Checks in known suite files must include that suite's label."""
-    suite = tmp_path / "k8s.yaml"
+def test_wiring_errors_require_declared_suite_label(tmp_path: Path) -> None:
+    """Checks must include the suite label derived from tests.platform/module."""
+    suite = tmp_path / "custom-name.yaml"
     suite.write_text(
         """\
 tests:
-  platform: kubernetes
+  module: custom_module
   validations:
     example:
       checks:
         MissingSuiteLabel:
-          test_id: "K8S01-01"
+          test_id: "MOD01-01"
           labels: ["gpu"]
         GoodCheck:
-          test_id: "K8S01-02"
-          labels: ["gpu", "kubernetes"]
+          test_id: "MOD01-02"
+          labels: ["gpu", "custom_module"]
 """
     )
     errors = validate_suite_wiring.wiring_errors(tmp_path)
-    assert any("MissingSuiteLabel" in err and "missing suite label 'kubernetes'" in err for err in errors)
+    assert any("MissingSuiteLabel" in err and "missing suite label 'custom_module'" in err for err in errors)
     assert not any("GoodCheck" in err for err in errors)
 
 
@@ -115,25 +115,6 @@ tests:
     assert any("both_axes.yaml" in err and "both tests.platform and tests.module" in err for err in errors)
 
 
-def test_wiring_errors_flags_unknown_label(tmp_path: Path) -> None:
-    """A typo'd label that is neither platform, module, nor modifier fails."""
-    suite = tmp_path / "network.yaml"
-    suite.write_text(
-        """\
-tests:
-  module: network
-  validations:
-    example:
-      checks:
-        TypoCheck:
-          test_id: "NET01-01"
-          labels: ["network", "netwrok"]
-"""
-    )
-    errors = validate_suite_wiring.wiring_errors(tmp_path)
-    assert any("TypoCheck" in err and "unknown label 'netwrok'" in err for err in errors)
-
-
 def test_wiring_errors_flags_multiple_platform_labels(tmp_path: Path) -> None:
     """A check may carry at most one platform-axis label."""
     (tmp_path / "bare_metal.yaml").write_text(
@@ -166,23 +147,35 @@ tests:
     )
 
 
-def test_wiring_errors_flags_provider_config_label_typo(tmp_path: Path) -> None:
+def test_wiring_errors_flags_provider_config_multiple_platform_labels(tmp_path: Path) -> None:
     """Provider configs are governed for labels even though they inherit the axis key."""
     suites_dir = tmp_path / "suites"
     suites_dir.mkdir()
-    (suites_dir / "network.yaml").write_text(
+    (suites_dir / "vm.yaml").write_text(
         """\
 tests:
-  module: network
+  platform: vm
   validations:
     example:
       checks:
         GoodCheck:
-          test_id: "NET01-01"
-          labels: ["network"]
+          test_id: "VM01-01"
+          labels: ["vm"]
 """
     )
-    provider_config = tmp_path / "providers" / "acme" / "config" / "network.yaml"
+    (suites_dir / "bare_metal.yaml").write_text(
+        """\
+tests:
+  platform: bare_metal
+  validations:
+    example:
+      checks:
+        GoodCheck:
+          test_id: "BM01-01"
+          labels: ["bare_metal"]
+"""
+    )
+    provider_config = tmp_path / "providers" / "acme" / "config" / "vm.yaml"
     provider_config.parent.mkdir(parents=True)
     provider_config.write_text(
         """\
@@ -191,12 +184,12 @@ tests:
     example:
       checks:
         ProviderCheck:
-          test_id: "NET01-02"
-          labels: ["netwrok"]
+          test_id: "VM01-02"
+          labels: ["vm", "bare_metal"]
 """
     )
     errors = validate_suite_wiring.wiring_errors(suites_dir, tmp_path / "providers")
-    assert any("ProviderCheck" in err and "unknown label 'netwrok'" in err for err in errors)
+    assert any("ProviderCheck" in err and "multiple platform labels" in err for err in errors)
 
 
 def test_derive_axis_labels_covers_platform_labels() -> None:

@@ -78,12 +78,6 @@ LABEL_TO_PLATFORM: dict[str, str] = {
 # (isvTestVersion), which tracks the test content.
 CATALOG_SCHEMA_VERSION = 1
 
-# Module-axis labels with no dedicated ``module:`` suite: their checks piggyback
-# on a platform suite (e.g. the K8s CSI ``storage`` checks live inline in
-# ``k8s.yaml``). Mirrors ``EXTRA_MODULE_LABELS`` in
-# ``scripts/validate_suite_wiring.py`` (the wiring-governance authority).
-EXTRA_MODULE_LABELS: frozenset[str] = frozenset({"storage"})
-
 
 def _find_configs_dir() -> Path | None:
     """Locate the isvctl/configs/ directory."""
@@ -375,10 +369,8 @@ def build_axis_taxonomy() -> tuple[list[str], list[str]]:
     Derived from the suite axis keys (``tests.platform`` / ``tests.module``)
     under ``isvctl/configs/suites``, so adding a suite extends the axes
     automatically. A suite that declares ``module:`` contributes a module label;
-    otherwise its ``platform:`` contributes a platform (capability) label. Module
-    labels also include the piggyback extras (:data:`EXTRA_MODULE_LABELS`, e.g.
-    ``storage``) that have no dedicated ``module:`` suite. Mirrors
-    ``derive_axis_labels`` in ``scripts/validate_suite_wiring.py``.
+    otherwise its ``platform:`` contributes a platform (capability) label.
+    Mirrors ``derive_axis_labels`` in ``scripts/validate_suite_wiring.py``.
 
     Both lists are label-form (lowercase, matching each entry's ``labels``) and
     sorted, so a consumer can build the capability x module matrix directly.
@@ -402,7 +394,7 @@ def build_axis_taxonomy() -> tuple[list[str], list[str]]:
             platform = tests.get("platform")
             if isinstance(platform, str) and platform:
                 platforms.add(platform)
-    return sorted(platforms), sorted(modules | EXTRA_MODULE_LABELS)
+    return sorted(platforms), sorted(modules)
 
 
 def catalog_document(entries: list[dict[str, Any]], version: str) -> dict[str, Any]:
