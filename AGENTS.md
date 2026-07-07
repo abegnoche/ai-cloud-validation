@@ -116,12 +116,17 @@ checks that exist in no suite.
 
 Suites are classified by a single axis key in `tests:` - `platform: <name>`
 marks a service-line platform (`vm`, `bare_metal`, `kubernetes`, `slurm`;
-`platform` is the long-standing runtime + upload key), while `module: <name>`
+`platform` is the long-standing runtime key), while `module: <name>`
 marks an operational concern (`iam`, `network`, `security`, `observability`,
 `control_plane`, `image_registry`, ...) whose value is also the runtime platform
-(derived). A config that declares `module:` is a module; otherwise its
-`platform:` marks a platform suite. Provider configs inherit the key via `import:`.
+(derived - the `commands[...]` group only). A config that declares `module:` is
+a module; otherwise its `platform:` marks a platform suite. Provider configs
+inherit the key via `import:`.
 The platform/module label axes are *derived* from these keys.
+Result upload reports a `(capability, module)` pair, never the module name as a
+capability: platform runs report `(platform, -)`, module runs inside a
+`--platform` column report `(column, module)`, and standalone module runs
+report `(-, module)` (no capability).
 `scripts/validate_suite_wiring.py` governs labels: every suite declares exactly
 one axis key, every suite check carries that declared axis label, and a check
 may carry at most one platform label (platform-scoped exclusion is

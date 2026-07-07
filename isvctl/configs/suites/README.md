@@ -38,11 +38,16 @@ Every suite declares exactly one axis key in its `tests:` block:
 
 - **`platform: <name>`** - a **service-line platform**: `vm`, `bare_metal`,
   `kubernetes`, `slurm`. Owns a run's setup/test/teardown lifecycle. (`platform`
-  is the long-standing runtime term - the `commands[...]` group to run and the
-  upload/report key.)
+  is the long-standing runtime term - the `commands[...]` group to run.)
 - **`module: <name>`** - an operational concern: `iam`, `network`, `security`,
   `observability`, `control_plane`, `image_registry`. Its value is also the
   runtime platform (derived), so a module suite needs no separate `platform:`.
+
+Result upload reports both axes as a `(capability, module)` pair - the module
+name is never reported as a capability. A platform run uploads
+`(platform, -)`; a module run inside a `--platform` column uploads
+`(column, module)`; a standalone `--module`/`-f` module run uploads
+`(-, module)` (it targets no capability of its own).
 
 Provider configs inherit the axis key through `import:` (an `aws/config/eks.yaml`
 that imports `k8s.yaml` is a platform config automatically - classification is

@@ -19,7 +19,6 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-import yaml
 
 from isvctl.config.merger import (
     apply_set_value,
@@ -27,6 +26,7 @@ from isvctl.config.merger import (
     merge_yaml_files,
     parse_set_value,
 )
+from isvctl.config.platform_resolution import effective_axes
 from isvctl.config.schema import RunConfig
 from isvctl.orchestrator.context import Context
 
@@ -441,13 +441,12 @@ class TestImportEndToEnd:
         assert result["tests"]["module"] == "iam"
         assert RunConfig.model_validate(result).tests.platform == "iam"
 
-    def test_my_isv_observability_declares_raw_axis_for_report_upload(self) -> None:
-        """Raw observability config exposes its axis key for upload paths that skip imports."""
+    def test_my_isv_observability_axes_resolve_for_report_upload(self) -> None:
+        """Upload paths resolve the observability config's axis pair through imports."""
         config_path = self.CONFIGS_DIR / "providers" / "my-isv" / "config" / "observability.yaml"
 
-        raw_config = yaml.safe_load(config_path.read_text()) or {}
-        # Declared explicitly (not just inherited) so get_platform_from_config resolves it.
-        assert raw_config.get("tests", {}).get("module") == "observability"
+        # A module suite exercises its module and targets no capability of its own.
+        assert effective_axes(config_path) == (None, "observability")
 
         result = merge_yaml_files([config_path])
         assert RunConfig.model_validate(result).tests.platform == "observability"

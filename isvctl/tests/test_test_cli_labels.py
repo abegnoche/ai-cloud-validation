@@ -332,6 +332,12 @@ def test_platform_dry_run_prints_plan(monkeypatch: pytest.MonkeyPatch, tmp_path:
     assert [r["platform"] for r in plan["runs"]] == ["vm", "iam", "network"]
     assert plan["runs"][0]["exclude_labels"] == []
     assert plan["runs"][1]["exclude_labels"] == ["bare_metal"]
+    # every run in the column uploads the column capability; module runs add their module
+    assert [r["upload"] for r in plan["runs"]] == [
+        {"capability": "vm", "module": None},
+        {"capability": "vm", "module": "iam"},
+        {"capability": "vm", "module": "network"},
+    ]
 
 
 def test_module_dispatches_single_config(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -347,6 +353,88 @@ def test_module_dispatches_single_config(monkeypatch: pytest.MonkeyPatch, tmp_pa
     assert result.exit_code == 0, result.output
     assert [call["platform"] for call in _FakeOrchestrator.calls] == ["iam"]
     assert _FakeOrchestrator.calls[0]["run_kwargs"].get("exclude_labels") is None
+
+
+def _patch_upload(monkeypatch: pytest.MonkeyPatch, upload_calls: list[dict[str, Any]]) -> None:
+    """Enable the upload path and capture create_test_run kwargs.
+
+    The fake returns None (creation "failed") so the CLI skips the
+    catalog-build/update half of the upload flow after tests run.
+    """
+    monkeypatch.setattr(test_cli, "check_upload_credentials", lambda: (True, "id", "secret"))
+    monkeypatch.setattr(test_cli, "get_environment_config", lambda: ("https://svc.example", "https://issuer.example"))
+
+    def _fake_create_test_run(**kwargs: Any) -> None:
+        upload_calls.append(kwargs)
+        return None
+
+    monkeypatch.setattr(test_cli, "create_test_run", _fake_create_test_run)
+
+
+def test_platform_column_uploads_column_capability_for_modules(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Module runs in a --platform column report the column as their capability."""
+    configs_root = tmp_path / "configs"
+    _build_platform_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+    upload_calls: list[dict[str, Any]] = []
+    _patch_upload(monkeypatch, upload_calls)
+
+    result = runner.invoke(test_cli.app, ["run", "--provider", "acme", "--platform", "vm", "--lab-id", "7"])
+
+    assert result.exit_code == 0, result.output
+    assert [(call["platform"], call["module"]) for call in upload_calls] == [
+        ("vm", None),
+        ("vm", "iam"),
+        ("vm", "network"),
+    ]
+
+
+def test_standalone_module_uploads_module_without_capability(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """A standalone --module run reports its module and no capability."""
+    configs_root = tmp_path / "configs"
+    _build_platform_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+    upload_calls: list[dict[str, Any]] = []
+    _patch_upload(monkeypatch, upload_calls)
+
+    result = runner.invoke(test_cli.app, ["run", "--provider", "acme", "--module", "iam", "--lab-id", "7"])
+
+    assert result.exit_code == 0, result.output
+    assert [(call["platform"], call["module"]) for call in upload_calls] == [(None, "iam")]
+
+
+def test_config_file_module_suite_uploads_module_only(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """`-f <module config>` reports the module, never the module name as capability."""
+    configs_root = tmp_path / "configs"
+    _build_platform_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+    upload_calls: list[dict[str, Any]] = []
+    _patch_upload(monkeypatch, upload_calls)
+    config_path = configs_root / "providers" / "acme" / "config" / "iam.yaml"
+
+    result = runner.invoke(test_cli.app, ["run", "-f", str(config_path), "--lab-id", "7"])
+
+    assert result.exit_code == 0, result.output
+    assert [(call["platform"], call["module"]) for call in upload_calls] == [(None, "iam")]
+
+
+def test_config_file_platform_suite_uploads_capability_only(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """`-f <platform config>` reports the platform as capability, no module."""
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+    _FakeOrchestrator.calls = []
+    upload_calls: list[dict[str, Any]] = []
+    _patch_upload(monkeypatch, upload_calls)
+    config = _write_config(tmp_path)
+
+    result = runner.invoke(test_cli.app, ["run", "-f", str(config), "--lab-id", "7"])
+
+    assert result.exit_code == 0, result.output
+    assert [(call["platform"], call["module"]) for call in upload_calls] == [("kubernetes", None)]
 
 
 def test_platform_and_module_mutually_exclusive(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

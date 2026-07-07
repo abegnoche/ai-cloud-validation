@@ -60,6 +60,11 @@ class PlannedRun:
     role: AxisKind
     platform: str
     exclude_labels: tuple[str, ...] = ()
+    # The platform column this run executes under (the --platform value). Set for
+    # every run in a column plan - including module runs, whose own ``platform``
+    # is their module name - so result upload can report the capability the
+    # module was exercised under. None for standalone --module runs (no column).
+    column_platform: str | None = None
 
 
 def _effective_kind_and_platform(config_path: Path) -> tuple[AxisKind | None, str | None]:
@@ -85,6 +90,21 @@ def _effective_kind_and_platform(config_path: Path) -> tuple[AxisKind | None, st
         return "module", module
     if has_platform:
         return "platform", platform
+    return None, None
+
+
+def effective_axes(config_path: Path) -> tuple[str | None, str | None]:
+    """Return the ``(capability, module)`` pair a config resolves to after imports.
+
+    A platform suite targets its platform as the capability and exercises no
+    module; a module suite exercises its module and targets no capability of
+    its own. ``(None, None)`` when the config declares neither axis key.
+    """
+    kind, value = _effective_kind_and_platform(config_path)
+    if kind == "platform":
+        return value, None
+    if kind == "module":
+        return None, value
     return None, None
 
 
@@ -159,7 +179,14 @@ def plan_platform_run(provider: str, platform: str, *, configs_root: Path) -> li
     universe = platform_label_universe(configs_root)
     exclude_labels = tuple(sorted(universe - {normalized}))
 
-    runs: list[PlannedRun] = [PlannedRun(config_path=platform_config.config_path, role="platform", platform=normalized)]
+    runs: list[PlannedRun] = [
+        PlannedRun(
+            config_path=platform_config.config_path,
+            role="platform",
+            platform=normalized,
+            column_platform=normalized,
+        )
+    ]
     for module_config in sorted((c for c in classified if c.kind == "module"), key=lambda c: c.config_path):
         runs.append(
             PlannedRun(
@@ -167,6 +194,7 @@ def plan_platform_run(provider: str, platform: str, *, configs_root: Path) -> li
                 role="module",
                 platform=module_config.platform,
                 exclude_labels=exclude_labels,
+                column_platform=normalized,
             )
         )
     return runs

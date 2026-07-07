@@ -362,8 +362,8 @@ class ValidationConfig(BaseModel):
     platform: str | None = Field(
         default=None,
         description=(
-            "Service-line platform (the commands[...] group to run and the "
-            "upload/report key): vm, bare_metal, kubernetes, slurm. A suite that declares "
+            "Service-line platform (the commands[...] group to run; reported as "
+            "the run's capability): vm, bare_metal, kubernetes, slurm. A suite that declares "
             "'platform' is a platform suite; one that declares 'module' is an operational concern."
         ),
     )

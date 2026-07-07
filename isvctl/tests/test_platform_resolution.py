@@ -78,6 +78,7 @@ def test_plan_platform_run_orders_and_excludes(tmp_path: Path) -> None:
     assert runs[0].role == "platform"
     assert runs[0].platform == "vm"
     assert runs[0].exclude_labels == ()
+    assert runs[0].column_platform == "vm"
 
     module_runs = runs[1:]
     assert [r.platform for r in module_runs] == ["iam", "network"]
@@ -85,6 +86,8 @@ def test_plan_platform_run_orders_and_excludes(tmp_path: Path) -> None:
         assert module_run.role == "module"
         # every platform label except the selected one
         assert module_run.exclude_labels == ("bare_metal", "kubernetes", "slurm")
+        # module runs report the column they ran under as their capability
+        assert module_run.column_platform == "vm"
 
 
 def test_plan_platform_run_k8s_alias(tmp_path: Path) -> None:
@@ -126,6 +129,8 @@ def test_resolve_module_configs_returns_single(tmp_path: Path) -> None:
     assert run.platform == "iam"
     assert run.exclude_labels == ()
     assert run.config_path.name == "iam.yaml"
+    # standalone module runs have no platform column, hence no capability
+    assert run.column_platform is None
 
 
 def test_resolve_module_configs_missing_lists_available(tmp_path: Path) -> None:

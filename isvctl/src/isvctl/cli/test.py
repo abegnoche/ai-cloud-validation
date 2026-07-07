@@ -132,6 +132,10 @@ def _planned_run_plan(provider: str, selection: dict[str, Any], runs: list[Plann
                 "role": run.role,
                 "platform": run.platform,
                 "exclude_labels": list(run.exclude_labels),
+                "upload": {
+                    "capability": run.column_platform,
+                    "module": run.platform if run.role == "module" else None,
+                },
             }
             for run in runs
         ],
@@ -168,6 +172,7 @@ def _execute_planned_runs(
                 exclude_labels=combined_excludes or None,
                 dry_run=False,
                 junitxml=_junitxml_for_config(junitxml, planned.config_path, total),
+                column_platform=planned.column_platform,
                 **forward_kwargs,
             )
             outcomes.append((planned.config_path, True))
@@ -322,6 +327,17 @@ def run(
         typer.Option(
             "--isv-software-version",
             help="ISV software stack version (opaque string provided by ISV, e.g., 'nemo-2.1.0-rc3')",
+        ),
+    ] = None,
+    column_platform: Annotated[
+        str | None,
+        typer.Option(
+            "--column-platform",
+            hidden=True,
+            help=(
+                "Internal: the platform column a module config runs under "
+                "(set by --platform fan-out so upload reports the capability)."
+            ),
         ),
     ] = None,
 ) -> None:
@@ -532,11 +548,28 @@ def run(
 
     # Create test run before running tests
     if upload_results and lab_id:
-        print_progress("Creating test run in ISV Lab Service...")
-        platform = config.tests.platform if config.tests and config.tests.platform else "kubernetes"
+        # A run reports both axes: the capability (platform column) and the
+        # module. A module suite's derived tests.platform is its module name,
+        # never a capability - its capability is the column it ran under
+        # (--column-platform from --platform fan-out; None standalone).
+        module_axis = config.tests.module if config.tests else None
+        if module_axis:
+            capability = column_platform
+        else:
+            capability = config.tests.platform if config.tests and config.tests.platform else "kubernetes"
+        axes = ", ".join(
+            part
+            for part in (
+                f"capability={capability}" if capability else None,
+                f"module={module_axis}" if module_axis else None,
+            )
+            if part
+        )
+        print_progress(f"Creating test run in ISV Lab Service ({axes})...")
         test_run_id = create_test_run(
             lab_id=lab_id,
-            platform=platform,
+            platform=capability,
+            module=module_axis,
             tags=tags or ["validation-test", "isvctl"],
             start_time=start_time,
             isv_software_version=isv_software_version,
