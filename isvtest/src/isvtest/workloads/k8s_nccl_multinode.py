@@ -27,6 +27,7 @@ automatically creates a ComputeDomain to enable Multi-Node NVLink (MNNVL)
 via IMEX channels for full NVLink bandwidth across nodes.
 """
 
+import re as _re
 import subprocess
 import time
 import uuid
@@ -237,7 +238,6 @@ class K8sNcclMultiNodeWorkload(BaseWorkloadCheck):
         quick_mode: bool = False,
     ) -> str:
         """Replace placeholder values in the MPIJob manifest."""
-        import re as _re
 
         yaml_content = yaml_content.replace("name: nccl-allreduce-multinode", f"name: {job_name}", 1)
         yaml_content = yaml_content.replace("slotsPerWorker: 4", f"slotsPerWorker: {gpus_per_node}")

@@ -17,6 +17,7 @@ import json
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
+from typing import ClassVar
 
 from isvtest.config.settings import get_k8s_namespace
 from isvtest.core.k8s import (
@@ -25,12 +26,13 @@ from isvtest.core.k8s import (
     names_from_items,
     pod_state_from_result,
 )
-from isvtest.core.nvidia import count_gpus_from_full_output, parse_driver_version
+from isvtest.core.nvidia import count_gpus_from_list_output, parse_driver_version
 from isvtest.core.validation import BaseValidation
 
 
 class K8sNvidiaSmiCheck(BaseValidation):
     description = "Verify nvidia-smi is accessible and returns valid output on all GPU nodes."
+    nvidia_smi_command: ClassVar[list[str]] = ["nvidia-smi"]
 
     def run(self) -> None:
         # Configurable timeout, defaulting to 60 seconds for robustness
@@ -124,7 +126,7 @@ class K8sNvidiaSmiCheck(BaseValidation):
                     {
                         "name": "test",
                         "image": image,
-                        "command": ["nvidia-smi"],
+                        "command": self.nvidia_smi_command,
                         "resources": {"limits": {"nvidia.com/gpu": "1"}},
                     }
                 ],
@@ -253,14 +255,15 @@ class K8sDriverVersionCheck(K8sNvidiaSmiCheck):
 
 
 class K8sGpuPodAccessCheck(K8sNvidiaSmiCheck):
-    """Verify GPU access from pods by running nvidia-smi.
+    """Verify GPU access from pods by running nvidia-smi -L.
 
     Note: This check runs nvidia-smi in a pod that requests 1 GPU, so it can only
     verify that 1 GPU is accessible per node (due to Kubernetes resource isolation).
     Use K8sGpuCapacityCheck for actual node-level GPU count validation.
     """
 
-    description = "Verify GPU access from pods by running nvidia-smi (sees 1 allocated GPU per node)."
+    description = "Verify GPU access from pods by running nvidia-smi -L (sees 1 allocated GPU per node)."
+    nvidia_smi_command: ClassVar[list[str]] = ["nvidia-smi", "-L"]
 
     def run(self) -> None:
         gpu_count_per_node = self.config.get("gpu_count")
@@ -288,8 +291,7 @@ class K8sGpuPodAccessCheck(K8sNvidiaSmiCheck):
             if res["error"]:
                 continue
 
-            # Use shared parser for GPU count from full nvidia-smi output
-            actual_count = count_gpus_from_full_output(res["output"])
+            actual_count = count_gpus_from_list_output(res["output"])
             total_gpus_found += actual_count
 
             # Check per-node count if configured
