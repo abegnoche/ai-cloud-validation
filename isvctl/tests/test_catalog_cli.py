@@ -73,8 +73,11 @@ def test_catalog_list_json() -> None:
 
     assert result.exit_code == 0, result.output
     payload = json.loads(result.output)
+    assert payload["schemaVersion"] == 1
     assert payload["isvTestVersion"] == "1.2.3"
     assert payload["entries"] == _FAKE_ENTRIES
+    # The platform axis is derived from the real configs and drives the UI matrix.
+    assert "KUBERNETES" in payload["platforms"]
 
 
 def test_catalog_labels_table() -> None:

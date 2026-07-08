@@ -281,6 +281,9 @@ def upload_test_catalog(
     jwt_token: str,
     isv_test_version: str,
     entries: list[dict[str, Any]],
+    *,
+    schema_version: int = 1,
+    platforms: list[str] | None = None,
 ) -> bool:
     """Upload test catalog for a suite version (idempotent per version).
 
@@ -294,6 +297,9 @@ def upload_test_catalog(
         isv_test_version: Test suite version string (e.g. "1.2.3")
         entries: List of catalog entry dicts with keys:
             name, description, labels, module, platforms, test_ids
+        schema_version: Catalog document schema version.
+        platforms: Platform axis labels (e.g. ["KUBERNETES", "VM"]) - the
+            matrix columns; empty list when unknown.
 
     Returns:
         True if catalog was uploaded or already exists, False on error
@@ -313,7 +319,9 @@ def upload_test_catalog(
     url = f"{endpoint}/v1/test-catalog"
 
     payload = {
+        "schemaVersion": schema_version,
         "isvTestVersion": isv_test_version,
+        "platforms": platforms or [],
         "entries": [
             {
                 "name": e["name"],
