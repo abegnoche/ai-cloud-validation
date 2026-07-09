@@ -73,6 +73,11 @@ LABEL_TO_PLATFORM: dict[str, str] = {
     "vm": "VM",
 }
 
+# Version of the catalog document envelope (schemaVersion field), bumped only
+# when the top-level shape changes - independent of the isvtest package version
+# (isvTestVersion), which tracks the test content.
+CATALOG_SCHEMA_VERSION = 1
+
 
 def _find_configs_dir() -> Path | None:
     """Locate the isvctl/configs/ directory."""
@@ -356,6 +361,33 @@ def build_catalog(*, released_only: bool = True) -> list[dict[str, Any]]:
 
     logger.info("Built test catalog with %d entries", len(catalog))
     return catalog
+
+
+def build_platform_axis() -> list[str]:
+    """Return the sorted platform-axis labels (the catalog's capability columns).
+
+    Derived from :data:`PLATFORM_CONFIGS`, the canonical per-platform suite
+    mapping, so adding a platform there extends the axis automatically. The
+    values match each entry's ``platforms`` field (e.g. ``KUBERNETES``), so a
+    consumer can build the platform matrix straight from the catalog.
+    """
+    return sorted(PLATFORM_CONFIGS.keys())
+
+
+def catalog_document(entries: list[dict[str, Any]], version: str) -> dict[str, Any]:
+    """Wrap catalog ``entries`` in the versioned upload/artifact envelope.
+
+    Adds the schema version, the isvtest package version, and the platform axis
+    list (see :func:`build_platform_axis`). The per-entry ``labels`` are
+    intentionally not summarized at the top level - a consumer can derive the
+    label universe from the entries when needed.
+    """
+    return {
+        "schemaVersion": CATALOG_SCHEMA_VERSION,
+        "isvTestVersion": version,
+        "platforms": build_platform_axis(),
+        "entries": entries,
+    }
 
 
 def get_catalog_version() -> str:

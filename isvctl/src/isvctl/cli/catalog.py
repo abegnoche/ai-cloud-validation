@@ -24,7 +24,7 @@ from collections import Counter
 from typing import Annotated
 
 import typer
-from isvtest.catalog import build_catalog, build_label_file_map, get_catalog_version
+from isvtest.catalog import build_catalog, build_label_file_map, catalog_document, get_catalog_version
 from isvtest.release_manifest import load_released_tests
 from rich.console import Console
 from rich.table import Table
@@ -74,7 +74,7 @@ def list_cmd(
     catalog_version = get_catalog_version()
 
     if json_output:
-        typer.echo(json.dumps({"isvTestVersion": catalog_version, "entries": catalog_entries}, indent=2))
+        typer.echo(json.dumps(catalog_document(catalog_entries, catalog_version), indent=2))
         return
 
     table = Table(
@@ -193,11 +193,12 @@ def push(
     print_progress("Building test catalog...")
     catalog_entries = build_catalog()
     catalog_version = get_catalog_version()
+    document = catalog_document(catalog_entries, catalog_version)
     print_progress(f"  {len(catalog_entries)} tests (version: {catalog_version})")
 
     output_dir = get_output_dir()
     catalog_path = output_dir / "test_catalog.json"
-    catalog_path.write_text(json.dumps({"isvTestVersion": catalog_version, "entries": catalog_entries}, indent=2))
+    catalog_path.write_text(json.dumps(document, indent=2))
     print_progress(f"  Saved to: {catalog_path}")
 
     if no_upload:
@@ -225,6 +226,8 @@ def push(
         jwt_token=jwt_token,
         isv_test_version=catalog_version,
         entries=catalog_entries,
+        schema_version=document["schemaVersion"],
+        platforms=document["platforms"],
     ):
         print_progress(typer.style("[OK]", fg=typer.colors.GREEN) + " Catalog push complete")
     else:

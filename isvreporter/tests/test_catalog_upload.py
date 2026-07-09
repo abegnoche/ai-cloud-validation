@@ -70,6 +70,9 @@ class TestUploadTestCatalog:
 
         payload = json.loads(request.data.decode())
         assert payload["isvTestVersion"] == "1.2.3"
+        # Envelope defaults when axis metadata is not supplied.
+        assert payload["schemaVersion"] == 1
+        assert payload["platforms"] == []
         assert len(payload["entries"]) == 2
         assert payload["entries"][0]["name"] == "TestA"
         assert payload["entries"][0]["labels"] == ["k8s"]
@@ -180,6 +183,33 @@ class TestUploadTestCatalog:
         assert "markers" not in entry
         assert entry["module"] == ""
         assert entry["test_ids"] == []
+
+    @patch("isvreporter.client.urlopen")
+    def test_forwards_platform_axis_metadata(self, mock_urlopen: MagicMock) -> None:
+        """schema_version/platforms are sent in the top-level envelope."""
+        get_response = MagicMock()
+        get_response.read.return_value = json.dumps([]).encode()
+        get_response.__enter__ = MagicMock(return_value=get_response)
+        get_response.__exit__ = MagicMock(return_value=False)
+        post_response = MagicMock()
+        post_response.read.return_value = json.dumps({"status": "created"}).encode()
+        post_response.__enter__ = MagicMock(return_value=post_response)
+        post_response.__exit__ = MagicMock(return_value=False)
+        mock_urlopen.side_effect = [get_response, post_response]
+
+        upload_test_catalog(
+            endpoint="https://api.example.com",
+            jwt_token="test-token",
+            isv_test_version="1.2.3",
+            entries=[{"name": "TestA"}],
+            schema_version=1,
+            platforms=["KUBERNETES", "VM"],
+        )
+
+        request = mock_urlopen.call_args_list[1][0][0]
+        payload = json.loads(request.data.decode())
+        assert payload["schemaVersion"] == 1
+        assert payload["platforms"] == ["KUBERNETES", "VM"]
 
     @patch("isvreporter.client.urlopen")
     def test_markers_field_is_not_forwarded(self, mock_urlopen: MagicMock) -> None:

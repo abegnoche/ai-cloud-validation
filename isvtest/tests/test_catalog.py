@@ -17,7 +17,13 @@
 
 from unittest.mock import patch
 
-from isvtest.catalog import build_catalog, get_catalog_version
+from isvtest.catalog import (
+    CATALOG_SCHEMA_VERSION,
+    build_catalog,
+    build_platform_axis,
+    catalog_document,
+    get_catalog_version,
+)
 from isvtest.core.validation import BaseValidation
 
 
@@ -29,6 +35,36 @@ class ExplicitLabelCatalogCheck(BaseValidation):
     def run(self) -> None:
         """Mark the validation passed."""
         self.set_passed()
+
+
+class TestCatalogDocument:
+    """Tests for the platform axis and the versioned catalog envelope."""
+
+    def test_derives_platform_axis_from_configs(self) -> None:
+        """The platform axis lists every platform in PLATFORM_CONFIGS, sorted."""
+        assert build_platform_axis() == [
+            "BARE_METAL",
+            "CONTROL_PLANE",
+            "IAM",
+            "IMAGE_REGISTRY",
+            "KUBERNETES",
+            "NETWORK",
+            "OBSERVABILITY",
+            "SECURITY",
+            "SLURM",
+            "VM",
+        ]
+
+    def test_catalog_document_wraps_entries_with_metadata(self) -> None:
+        """The envelope carries schema version, package version, and the platform axis."""
+        entries = [{"name": "X", "labels": ["iam"]}]
+        doc = catalog_document(entries, "1.2.3")
+        assert doc["schemaVersion"] == CATALOG_SCHEMA_VERSION
+        assert doc["isvTestVersion"] == "1.2.3"
+        assert doc["entries"] == entries
+        assert doc["platforms"] == build_platform_axis()
+        # The label universe is intentionally not summarized at the top level.
+        assert "labels" not in doc
 
 
 class TestBuildCatalog:
