@@ -594,7 +594,11 @@ def main() -> int:
             user_based_passed = allowed_passed and username in caller_arn
             result["tests"]["policy_dimensions_user_based"] = {
                 "passed": user_based_passed,
-                "message": "temporary principal identity verified",
+                "message": (
+                    "temporary principal identity verified"
+                    if user_based_passed
+                    else "temporary principal identity check failed"
+                ),
             }
             if not user_based_passed:
                 result["tests"]["policy_dimensions_user_based"]["error"] = (
