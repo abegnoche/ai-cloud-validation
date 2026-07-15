@@ -57,6 +57,11 @@
 #     nico-admin-cli into the provider-neutral attestation contract (SEC22-01 /
 #     CNP09-02). It requires operator/admin CLI credentials in addition to the
 #     tenant REST credentials used for machine enumeration.
+#   - query_key_access.py reads the site's SSH Key Groups and serial-console
+#     configuration and reports whether a tenant-specified key can access
+#     out-of-band components; SpecifiedKeyAccessCheck validates it (AUTH-XX-03).
+#     This is a read-only step (like the other checks here); the auto-provisioning
+#     variant that mints a throwaway key lives in the dedicated key_access.yaml.
 #   - list_instances.py / describe_instance.py query existing instances;
 #     InstanceListCheck and InstanceStateCheck validate the JSON contract.
 #
@@ -303,6 +308,26 @@ commands:
         phase: test
         continue_on_failure: true
         command: "python ../scripts/attestation/query_attestation.py"
+        args:
+          - "--org"
+          - "{{org}}"
+          - "--site-id"
+          - "{{site_id}}"
+          - "--api-base"
+          - "{{nico_api_base}}"
+        timeout: 120
+
+      # ─── Specified-Key Access (AUTH-XX-03) ──────────────────────────
+      # Reads the site's SSH Key Groups and serial-console configuration from
+      # the NICo API (/carbide/ segment, like the other NICo steps) and reports
+      # whether a tenant-specified key can access out-of-band components. The serial
+      # console (SOL) is verifiable from the tenant API (provider-enabled +
+      # SSH-key auth + key synced); network-device access is provider-managed
+      # and reported as unverified. SpecifiedKeyAccessCheck validates it.
+      - name: query_key_access
+        phase: test
+        continue_on_failure: true
+        command: "python ../scripts/auth/query_key_access.py"
         args:
           - "--org"
           - "{{org}}"

@@ -181,18 +181,38 @@ def forge_get(
     params: dict[str, str] | None = None,
     timeout: int = 30,
 ) -> dict[str, Any]:
-    """Make an authenticated GET request to a single NICo API page.
+    """Make an authenticated GET request to a single NICo API page."""
+    return forge_request(org, path, token, base_url=base_url, params=params, timeout=timeout)
+
+
+def forge_request(
+    org: str,
+    path: str,
+    token: str,
+    *,
+    base_url: str,
+    method: str = "GET",
+    params: dict[str, str] | None = None,
+    body: dict[str, Any] | None = None,
+    timeout: int = 30,
+) -> dict[str, Any]:
+    """Make an authenticated request to the NICo API.
 
     Args:
         org: NGC org name.
-        path: API path relative to the API name segment (e.g., "machine", "expected-machine").
+        path: API path relative to the API name segment (e.g., "sshkey", "sshkeygroup/{id}").
         token: Bearer token.
         base_url: NICo API base URL.
+        method: HTTP method ("GET", "POST", "PATCH", "DELETE").
         params: Query parameters (will be URL-encoded).
+        body: Optional JSON request body.
         timeout: Request timeout in seconds.
 
     Returns:
-        Parsed JSON response as a dict.
+        Parsed JSON response, or ``{}`` when the response body is empty. DELETE
+        also returns ``{}`` for a non-JSON body (legacy carbide answers with a
+        bare ``OK`` string); other methods raise ``JSONDecodeError`` on a
+        non-JSON body.
 
     Raises:
         HTTPError: On non-2xx response.
@@ -200,16 +220,48 @@ def forge_get(
     url = f"{base_url}/{org}/{nico_api_name()}/{path}"
     if params:
         url = f"{url}?{urlencode(params)}"
+    data = json.dumps(body).encode() if body is not None else None
+    headers = {"Authorization": f"Bearer {token}"}
+    if data is not None:
+        headers["Content-Type"] = "application/json"
 
-    req = Request(url, headers={"Authorization": f"Bearer {token}"})
+    req = Request(url, data=data, headers=headers, method=method)
     try:
         with urlopen(req, timeout=timeout) as resp:
-            return json.loads(resp.read().decode())
+            raw = resp.read().decode()
+            if not raw.strip():
+                return {}
+            try:
+                return json.loads(raw)
+            except json.JSONDecodeError:
+                if method.upper() == "DELETE":
+                    # Legacy carbide DELETE may return a bare "OK" string.
+                    return {}
+                raise
     except HTTPError as e:
-        body = ""
+        err_body = ""
         if e.fp:
-            body = e.fp.read().decode(errors="replace")[:500]
-        raise type(e)(e.url, e.code, f"{e.reason}: {body}", e.headers, None) from e
+            err_body = e.fp.read().decode(errors="replace")[:500]
+        raise type(e)(e.url, e.code, f"{e.reason}: {err_body}", e.headers, None) from e
+
+
+def forge_post(
+    org: str, path: str, token: str, *, base_url: str, body: dict[str, Any], timeout: int = 30
+) -> dict[str, Any]:
+    """POST a JSON body to a NICo API path."""
+    return forge_request(org, path, token, base_url=base_url, method="POST", body=body, timeout=timeout)
+
+
+def forge_patch(
+    org: str, path: str, token: str, *, base_url: str, body: dict[str, Any], timeout: int = 30
+) -> dict[str, Any]:
+    """PATCH a JSON body to a NICo API path."""
+    return forge_request(org, path, token, base_url=base_url, method="PATCH", body=body, timeout=timeout)
+
+
+def forge_delete(org: str, path: str, token: str, *, base_url: str, timeout: int = 30) -> dict[str, Any]:
+    """DELETE a NICo API resource."""
+    return forge_request(org, path, token, base_url=base_url, method="DELETE", timeout=timeout)
 
 
 def forge_get_all(
@@ -277,6 +329,27 @@ def forge_get_all(
         page_number += 1
 
     return all_items
+
+
+# SSH Key Group / site-association status that means the group's keys have
+# fully propagated to the site and are therefore usable for access.
+SYNCED_STATUS = "Synced"
+
+
+def sshkeygroup_synced_to_site(group: dict[str, Any], site_id: str) -> bool:
+    """Return whether an SSH key group has reached ``Synced`` for the site.
+
+    The group is accepted when either its own status is ``Synced`` or the
+    association for this specific site is ``Synced``.
+    """
+    if group.get("status") == SYNCED_STATUS:
+        return True
+    for assoc in group.get("siteAssociations") or []:
+        if not isinstance(assoc, dict):
+            continue
+        if (assoc.get("site") or {}).get("id") == site_id and assoc.get("status") == SYNCED_STATUS:
+            return True
+    return False
 
 
 def classify_health(health: dict[str, Any]) -> str:
