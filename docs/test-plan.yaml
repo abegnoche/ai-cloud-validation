@@ -36,7 +36,7 @@ domains:
                   - "#38"
                 req_id: BOOT01
                 test_id: BOOT01-01
-                status: approved
+                status: published
                 notes: ""
               - summary: CRUD an OS install configuration (e.g. iPXE config like Carbide)
                 priority: P0
@@ -47,7 +47,7 @@ domains:
                   - "#39"
                 req_id: BOOT01
                 test_id: BOOT01-02
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - image_registry
@@ -62,7 +62,7 @@ domains:
                   - "#40"
                 req_id: BOOT03
                 test_id: BOOT03-01
-                status: approved
+                status: published
                 notes: ""
               - summary: CRUD (get, list, create, delete) custom OS images for fast boot (raw, qcow2, img, etc) for BM/VM
                 labels:
@@ -74,7 +74,7 @@ domains:
                   - "#104"
                 req_id: BOOT03
                 test_id: BOOT03-02
-                status: approved
+                status: published
                 notes: ""
               - summary: Check that an OS image can be installed on a BMaaS system
                 labels:
@@ -88,7 +88,7 @@ domains:
                   - "#41"
                 req_id: BOOT01
                 test_id: BOOT01-03
-                status: approved
+                status: published
                 notes: ""
               - summary: Check that an OS install configuration can be installed on a BMaaS system
                 labels:
@@ -102,7 +102,7 @@ domains:
                   - "#43"
                 req_id: BOOT01
                 test_id: BOOT01-04
-                status: approved
+                status: published
                 notes: ""
               - summary: Check that a VM image can be installed onto a VMaaS system
                 labels:
@@ -116,7 +116,7 @@ domains:
                   - "#44"
                 req_id: BOOT01
                 test_id: BOOT01-05
-                status: approved
+                status: published
                 notes: ""
               - summary: Verify that an OS image (iso file) with full NVIDIA support is readily available
                 priority: P1
@@ -158,11 +158,11 @@ domains:
                 status: approved
                 notes: ""
               - summary: Spin up an instance which uses a specified key
-                milestone: M5
+                milestone: M6
                 req_id: AUTH02
                 test_id: AUTH02-01
                 legacy_ids: [AUTH-XX-02]
-                status: approved
+                status: published
                 priority: P1
                 notes: ""
                 github_issues:
@@ -202,7 +202,7 @@ domains:
                 req_id: IAM01
                 test_id: IAM01-01
                 legacy_ids: [IAM-XX-01]
-                status: approved
+                status: published
                 notes: ""
               - summary: Delete user
                 priority: P0
@@ -214,7 +214,7 @@ domains:
                 req_id: IAM02
                 test_id: IAM02-01
                 legacy_ids: [IAM-XX-02]
-                status: approved
+                status: published
                 notes: ""
               - summary: Validate that a user created can access the API and authorized resources
                 priority: P1
@@ -245,7 +245,7 @@ domains:
                 req_id: IPAM01
                 test_id: IPAM01-01
                 legacy_ids: [CP-XX-01]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - network
@@ -260,7 +260,7 @@ domains:
                 req_id: IPAM02
                 test_id: IPAM02-01
                 legacy_ids: [CP-XX-02]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - network
@@ -310,7 +310,7 @@ domains:
                 req_id: CP03
                 test_id: CP03-01
                 legacy_ids: [CP-XX-03]
-                status: approved
+                status: published
                 notes: ""
               - summary: Control Plane can be upgraded (measure impact)
                 priority: P2
@@ -334,7 +334,7 @@ domains:
                 req_id: CP05
                 test_id: CP05-01
                 legacy_ids: [CP-XX-05]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - control_plane
@@ -353,7 +353,7 @@ domains:
                 req_id: CP06
                 test_id: CP06-01
                 legacy_ids: [CP-XX-06]
-                status: approved
+                status: published
                 notes: ""
               - summary: Create tenants
                 priority: P0
@@ -365,7 +365,7 @@ domains:
                 req_id: CP07
                 test_id: CP07-01
                 legacy_ids: [CP-XX-07]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - control_plane
@@ -380,7 +380,7 @@ domains:
                 req_id: CP08
                 test_id: CP08-01
                 legacy_ids: [CP-XX-08]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - control_plane
@@ -396,7 +396,7 @@ domains:
                 req_id: CP09
                 test_id: CP09-01
                 legacy_ids: [CP-XX-09]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - control_plane
@@ -411,7 +411,7 @@ domains:
                 req_id: CP10
                 test_id: CP10-01
                 legacy_ids: [CP-XX-10]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - control_plane
@@ -427,7 +427,7 @@ domains:
                 req_id: CP11
                 test_id: CP11-01
                 legacy_ids: [CP-XX-11]
-                status: approved
+                status: published
                 notes: ""
       - name: Hardware ingestion
         capabilities:
@@ -437,13 +437,13 @@ domains:
                 priority: P1 (check w/ ISVs)
                 dependencies:
                   - MiniCloud
-                milestone: M4
+                milestone: M6
                 github_issues:
                   - "#133"
                 req_id: HWING01
                 test_id: HWING01-01
                 legacy_ids: [HWING-XX-01]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - bare_metal
@@ -466,10 +466,10 @@ domains:
                 priority: P1
                 dependencies:
                   - MiniCloud
-                milestone: M5
+                milestone: M6
                 req_id: SEC22
                 test_id: SEC22-01
-                status: approved
+                status: published
                 notes: ""
                 github_issues:
                   - "#315"
@@ -493,10 +493,10 @@ domains:
                 priority: P1
                 dependencies:
                   - MiniCloud
-                milestone: M5
+                milestone: M6
                 req_id: SEC22
                 test_id: SEC22-02
-                status: approved
+                status: published
                 notes: ""
                 github_issues:
                   - "#316"
@@ -508,7 +508,7 @@ domains:
                 req_id: ATTEST02
                 test_id: ATTEST02-01
                 legacy_ids: [ATTEST-XX-02]
-                status: approved
+                status: published
                 notes: ""
                 github_issues:
                   - "#319"
@@ -532,19 +532,20 @@ domains:
                   - min_req
                   - security
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#259"
                 req_id: CNP09
                 test_id: CNP09-02
-                status: pending
+                status: published
               - summary: TPM Secure Boot in BIOS
                 notes: REVIEW
                 req_id: SEC22
                 test_id: SEC22-03
                 status: pending
-                priority: ""
+                milestone: M9
+                priority: P0
       - name: "Compute Services: BMaaS"
         capabilities:
           - description: Supports the basic lifecycle of Bare Metal nodes
@@ -561,20 +562,20 @@ domains:
                   - "#49"
                 req_id: CNP01
                 test_id: CNP01-01
-                status: approved
+                status: published
                 notes: ""
               - summary: "Supports the basic lifecycle of Bare Metal nodes, following the standard CRUD pattern"
                 labels:
                   - min_req
                 priority: P0
-                milestone: M5
+                milestone: M1
                 notes: ""
                 github_issues:
                   - "#51"
                   - "#52"
                 req_id: CNP01, CNP04
                 test_id: CNP01-02
-                status: approved
+                status: published
               - summary: Delete a Bare Metal node
                 labels:
                   - min_req
@@ -586,7 +587,7 @@ domains:
                   - "#53"
                 req_id: CNP01
                 test_id: CNP01-03
-                status: approved
+                status: published
                 notes: ""
               - summary: Confirm sanitization on delete - Tenant View
                 labels:
@@ -602,7 +603,7 @@ domains:
                   - "#47"
                 req_id: SEC21
                 test_id: SEC21-01
-                status: approved
+                status: published
                 notes: ""
               - summary: Confirm sanitization on delete - Low Level
                 labels:
@@ -614,12 +615,12 @@ domains:
                 priority: P0
                 dependencies:
                   - MiniCloud
-                milestone: M4
+                milestone: M6
                 github_issues:
                   - "#134"
                 req_id: SEC21
                 test_id: SEC21-02
-                status: approved
+                status: published
                 notes: ""
               - summary: Topology-based placement
                 labels:
@@ -633,7 +634,7 @@ domains:
                   - "#105"
                 req_id: CNP01
                 test_id: CNP01-04
-                status: approved
+                status: published
                 notes: ""
               - summary: Node attached storage
                 notes: REVIEW
@@ -641,14 +642,16 @@ domains:
                 test_id: BMAAS01-01
                 legacy_ids: [BMAAS-XX-01]
                 status: pending
-                priority: ""
+                priority: P2
+                milestone: ""
               - summary: "Storage: Config/default/access to local NVME drives"
                 notes: REVIEW
                 req_id: BMAAS02
                 test_id: BMAAS02-01
                 legacy_ids: [BMAAS-XX-02]
                 status: pending
-                priority: ""
+                priority: P2
+                milestone: ""
           - description: Once created, nodes can be accessed for usage, and have the high level support controls of reboot, reinstall.
             example: AWS EC2/Forge
             tests:
@@ -663,7 +666,7 @@ domains:
                 req_id: BMAAS03
                 test_id: BMAAS03-01
                 legacy_ids: [BMAAS-XX-03]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - bare_metal
@@ -679,7 +682,7 @@ domains:
                   - "#57"
                 req_id: CNP01
                 test_id: CNP01-05
-                status: approved
+                status: published
                 notes: ""
               - summary: A running node can be power-cycled in case of issue
                 labels:
@@ -693,7 +696,7 @@ domains:
                   - "#135"
                 req_id: CNP01
                 test_id: CNP01-06
-                status: approved
+                status: published
                 notes: ""
               - summary: "DEPRECATED: A node can be reinstalled from its configured stock operating system"
                 priority: P0
@@ -706,7 +709,7 @@ domains:
                 req_id: BMAAS04
                 test_id: BMAAS04-01
                 legacy_ids: [BMAAS-XX-04]
-                status: approved
+                status: published
                 notes: ""
               - summary: A running node can be powered off (Without being destroyed)
                 labels:
@@ -721,7 +724,7 @@ domains:
                   - "#106"
                 req_id: CNP01
                 test_id: CNP01-07
-                status: approved
+                status: published
               - summary: Support for cloud-init and instance metadata discovery via link-local addresses (e.g. 169.254.169.254) or virtual devices (Bare Metal)
                 labels:
                   - bare_metal
@@ -735,7 +738,7 @@ domains:
                   - "#113"
                 req_id: BOOT02
                 test_id: BOOT02-01
-                status: approved
+                status: published
               - summary: A powered off node can be powered back on
                 labels:
                   - bare_metal
@@ -749,7 +752,7 @@ domains:
                   - "#108"
                 req_id: CNP01
                 test_id: CNP01-08
-                status: approved
+                status: published
               - summary: Support for user-defined tags/labels and cloud-init metadata on instances. (Bare Metal)
                 labels:
                   - bare_metal
@@ -760,7 +763,7 @@ domains:
                 milestone: M3 .5
                 req_id: CNP05
                 test_id: CNP05-01
-                status: approved
+                status: published
                 priority: P0
                 github_issues:
                   - "#112"
@@ -772,13 +775,13 @@ domains:
                 priority: P0
                 dependencies:
                   - MiniCloud
-                milestone: M4
+                milestone: M6
                 github_issues:
                   - "#136"
                 req_id: BMAAS05
                 test_id: BMAAS05-01
                 legacy_ids: [BMAAS-XX-05]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - bare_metal
@@ -793,7 +796,7 @@ domains:
                 req_id: BMAAS06
                 test_id: BMAAS06-01
                 legacy_ids: [BMAAS-XX-06]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - bare_metal
@@ -810,7 +813,7 @@ domains:
                 req_id: BMAAS07
                 test_id: BMAAS07-01
                 legacy_ids: [BMAAS-XX-07]
-                status: approved
+                status: published
                 github_issues:
                   - "#250"
                 labels:
@@ -828,7 +831,7 @@ domains:
                   - "#114"
                 req_id: CNP06
                 test_id: CNP06-01
-                status: approved
+                status: published
                 notes: ""
               - summary: Verify NVIDIA hardware
                 priority: P0
@@ -840,7 +843,7 @@ domains:
                 req_id: BMAAS08
                 test_id: BMAAS08-01
                 legacy_ids: [BMAAS-XX-08]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - bare_metal
@@ -863,7 +866,7 @@ domains:
                 req_id: BMAAS09
                 test_id: BMAAS09-01
                 legacy_ids: [BMAAS-XX-09]
-                status: approved
+                status: published
                 notes: ""
               - summary: Nim Inference jobs (Bare Metal)
                 labels:
@@ -884,7 +887,7 @@ domains:
                 req_id: BMAAS10
                 test_id: BMAAS10-01
                 legacy_ids: [BMAAS-XX-10]
-                status: approved
+                status: published
               - summary: NCCL tests
                 labels:
                   - bare_metal
@@ -901,7 +904,7 @@ domains:
                 req_id: BMAAS11
                 test_id: BMAAS11-01
                 legacy_ids: [BMAAS-XX-11]
-                status: approved
+                status: published
                 notes: ""
               - summary: Training workload test
                 labels:
@@ -920,7 +923,7 @@ domains:
                 req_id: BMAAS12
                 test_id: BMAAS12-01
                 legacy_ids: [BMAAS-XX-12]
-                status: approved
+                status: published
               - summary: Verify that serial console output is logged and queryable for at least 1 month of history
                 labels:
                   - bare_metal
@@ -932,7 +935,7 @@ domains:
                   - "#258"
                 req_id: CNP06
                 test_id: CNP06-02
-                status: pending
+                status: published
           - description: Stable Identifiers
             tests:
               - summary: Verify that a BM node's ID does not change after a reboot
@@ -948,7 +951,7 @@ domains:
                   - "#185"
                 req_id: CNP08
                 test_id: CNP08-01
-                status: pending
+                status: published
               - summary: Verify that a BM node's ID does not change after a maintenance/reprovision event
                 labels:
                   - min_req
@@ -975,7 +978,7 @@ domains:
                   - "#42"
                 req_id: CNP01
                 test_id: CNP01-09
-                status: approved
+                status: published
                 notes: ""
               - summary: Get info about a specific VM node, including if it is ready for use
                 notes: ""
@@ -984,12 +987,12 @@ domains:
                 priority: P0
                 dependencies:
                   - LimitedEnv
-                milestone: M2
+                milestone: M1
                 github_issues:
                   - "#51"
                 req_id: CNP01, CNP04
                 test_id: CNP01-10
-                status: approved
+                status: published
               - summary: Get a list of all VM nodes in a VPC
                 labels:
                   - min_req
@@ -1002,7 +1005,7 @@ domains:
                   - "#45"
                 req_id: CNP01
                 test_id: CNP01-11
-                status: approved
+                status: published
                 notes: ""
               - summary: Delete a VM node
                 labels:
@@ -1015,7 +1018,7 @@ domains:
                   - "#46"
                 req_id: CNP01
                 test_id: CNP01-12
-                status: approved
+                status: published
                 notes: ""
               - summary: Confirm sanitization on delete
                 labels:
@@ -1028,7 +1031,7 @@ domains:
                   - "#47"
                 req_id: SEC21
                 test_id: SEC21-03
-                status: approved
+                status: published
                 notes: ""
           - description: Once created, VM nodes can be accessed for usage, and have the high level support controls of reboot, reinstall
             tests:
@@ -1079,7 +1082,7 @@ domains:
                   - "#110"
                 req_id: CNP01
                 test_id: CNP01-14
-                status: approved
+                status: published
               - summary: A powered off VM can be started
                 labels:
                   - min_req
@@ -1093,7 +1096,7 @@ domains:
                   - "#111"
                 req_id: CNP01
                 test_id: CNP01-15
-                status: approved
+                status: published
               - summary: Support for user-defined tags/labels and cloud-init metadata on instances. (VM)
                 labels:
                   - min_req
@@ -1107,7 +1110,7 @@ domains:
                   - "#112"
                 req_id: CNP05
                 test_id: CNP05-02
-                status: approved
+                status: published
               - summary: Support for cloud-init and instance metadata discovery via link-local addresses (e.g. 169.254.169.254) or virtual devices (VM)
                 labels:
                   - min_req
@@ -1119,7 +1122,7 @@ domains:
                   - "#113"
                 req_id: BOOT02
                 test_id: BOOT02-02
-                status: approved
+                status: published
                 notes: ""
           - description: Quota should be enforced
             tests:
@@ -1130,6 +1133,7 @@ domains:
                 legacy_ids: [VMAAS-XX-03]
                 status: approved
                 notes: ""
+                milestone: ""
               - summary: Tenant cannot allocate more VMs than their quota allows
                 priority: P2
                 req_id: VMAAS04
@@ -1137,6 +1141,7 @@ domains:
                 legacy_ids: [VMAAS-XX-04]
                 status: approved
                 notes: ""
+                milestone: ""
           - description: The underlying system allows VMs to access the GPU, with high performance, and are running with the correct parameters for optimal performance
             tests:
               - summary: Check that the host OS is a known acceptable image (like Ubuntu/DGXOS)
@@ -1149,7 +1154,7 @@ domains:
                 req_id: VMAAS05
                 test_id: VMAAS05-01
                 legacy_ids: [VMAAS-XX-05]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - ssh
@@ -1164,7 +1169,7 @@ domains:
                 req_id: VMAAS06
                 test_id: VMAAS06-01
                 legacy_ids: [VMAAS-XX-06]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - gpu
@@ -1180,7 +1185,7 @@ domains:
                 req_id: VMAAS07
                 test_id: VMAAS07-01
                 legacy_ids: [VMAAS-XX-07]
-                status: approved
+                status: published
                 notes: ""
                 labels:
                   - gpu
@@ -1207,7 +1212,7 @@ domains:
                 req_id: VMAAS09
                 test_id: VMAAS09-01
                 legacy_ids: [VMAAS-XX-09]
-                status: approved
+                status: published
                 labels:
                   - gpu
                   - ssh
@@ -1283,7 +1288,7 @@ domains:
                   - "#114"
                 req_id: CNP06
                 test_id: CNP06-03
-                status: approved
+                status: published
                 notes: ""
           - description: Stable Identifiers
             tests:
@@ -1298,7 +1303,7 @@ domains:
                   - "#198"
                 req_id: CNP08
                 test_id: CNP08-03
-                status: pending
+                status: published
               - summary: Verify that a VM's ID does not change after a live migration or maintenance event
                 labels:
                   - min_req
@@ -1324,7 +1329,7 @@ domains:
                   - "#256"
                 req_id: CNP01
                 test_id: CNP01-16
-                status: pending
+                status: published
               - summary: Verify USB, clipboard, and unnecessary virtual devices are disabled
                 labels:
                   - min_req
@@ -1337,7 +1342,7 @@ domains:
                   - "#257"
                 req_id: CNP01
                 test_id: CNP01-17
-                status: pending
+                status: published
       - name: SDN Controller
         capabilities:
           - description: Controls software-defined networking overlays and fabric behavior to match the compute-on-demand requirements. Enables network segmentation, isolation, dynamic network configuration, and security groups.
@@ -1354,7 +1359,7 @@ domains:
                   - "#11"
                 req_id: SDN01
                 test_id: SDN01-01
-                status: approved
+                status: published
                 notes: ""
               - summary: Retrieve a VPC
                 labels:
@@ -1368,7 +1373,7 @@ domains:
                   - "#12"
                 req_id: SDN01
                 test_id: SDN01-02
-                status: approved
+                status: published
                 notes: ""
               - summary: Update a VPC
                 labels:
@@ -1382,7 +1387,7 @@ domains:
                   - "#13"
                 req_id: SDN01
                 test_id: SDN01-03
-                status: approved
+                status: published
                 notes: ""
               - summary: Delete a VPC
                 labels:
@@ -1396,7 +1401,7 @@ domains:
                   - "#14"
                 req_id: SDN01
                 test_id: SDN01-04
-                status: approved
+                status: published
                 notes: ""
               - summary: Verify that a VPC has an exclusive subnet
                 priority: P0
@@ -1407,7 +1412,7 @@ domains:
                   - "#16"
                 req_id: SDN04
                 test_id: SDN04-01
-                status: approved
+                status: published
                 notes: ""
               - summary: Verify that nodes in two VPCs cannot communicate over the N/S (TAN) network
                 labels:
@@ -1423,7 +1428,7 @@ domains:
                   - "#18"
                 req_id: SDN04
                 test_id: SDN04-02
-                status: approved
+                status: published
                 notes: ""
               - summary: Verify that nodes in two VPCs cannot communicate over the E/W (CIN) network
                 labels:
@@ -1436,7 +1441,7 @@ domains:
                   - "#18"
                 req_id: SDN04
                 test_id: SDN04-03
-                status: approved
+                status: published
                 notes: ""
               - summary: Support non-conflicting Bring-Your-Own-IP (including 7.0.0.0/8)
                 labels:
@@ -1448,7 +1453,7 @@ domains:
                   - "#115"
                 req_id: NET03, SDN01
                 test_id: NET03-01
-                status: approved
+                status: published
                 notes: ""
               - summary: Support Stable Private IP allocations, where if a VM crashes and restarts the same IP address remains pinned until the node is deleted
                 labels:
@@ -1461,7 +1466,7 @@ domains:
                 req_id: SDN11
                 test_id: SDN11-01
                 legacy_ids: [SDN-XX-01]
-                status: approved
+                status: published
                 notes: ""
               - summary: "Atomically switch a floating private IP between nodes via API within <10 seconds without requiring an instance reboot."
                 labels:
@@ -1473,7 +1478,7 @@ domains:
                   - "#117"
                 req_id: SDN05
                 test_id: SDN05-01
-                status: approved
+                status: published
                 notes: ""
               - summary: "Localized DNS: Support for custom, localized DNS settings to enable internal domain resolution to private endpoints (e.g. storage endpoints)"
                 labels:
@@ -1485,7 +1490,7 @@ domains:
                   - "#118"
                 req_id: SDN06
                 test_id: SDN06-01
-                status: approved
+                status: published
                 notes: ""
               - summary: "Support for VPC peering with full bandwidth and no \"hairpin\" routing."
                 labels:
@@ -1497,7 +1502,7 @@ domains:
                   - "#119"
                 req_id: SDN07
                 test_id: SDN07-01
-                status: approved
+                status: published
                 notes: ""
               - summary: Create a Security Group
                 labels:
@@ -1507,12 +1512,13 @@ domains:
                 notes: ""
                 req_id: SDN02, SDN03
                 test_id: SDN02-01
-                status: approved
+                status: published
                 priority: P0
                 github_issues:
                   - "#199"
                   - "#171"
                   - "#178"
+                milestone: M4
               - summary: Retrieve a Security Group/list Security Groups
                 labels:
                   - min_req
@@ -1521,10 +1527,11 @@ domains:
                 notes: ""
                 req_id: SDN02, SDN03
                 test_id: SDN02-02
-                status: approved
+                status: published
                 priority: P0
                 github_issues:
                   - "#200"
+                milestone: ""
               - summary: Update a Security Group
                 labels:
                   - min_req
@@ -1533,10 +1540,11 @@ domains:
                 notes: ""
                 req_id: SDN02, SDN03
                 test_id: SDN02-03
-                status: approved
+                status: published
                 priority: P0
                 github_issues:
                   - "#201"
+                milestone: ""
               - summary: Delete a Security Group
                 labels:
                   - min_req
@@ -1545,10 +1553,11 @@ domains:
                 notes: ""
                 req_id: SDN02, SDN03
                 test_id: SDN02-04
-                status: approved
+                status: published
                 priority: P0
                 github_issues:
                   - "#202"
+                milestone: ""
               - summary: NVLink Partitioning
                 priority: P0
                 dependencies:
@@ -1558,7 +1567,7 @@ domains:
                   - "#19"
                 req_id: CNP03
                 test_id: CNP03-01
-                status: approved
+                status: published
                 notes: ""
               - summary: "NVLink: Create a new partition; verify success response with partition key."
                 dependencies:
@@ -1569,6 +1578,7 @@ domains:
                 legacy_ids: [SDN-XX-02]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "NVLink: List partitions; retrieve a specific partition by partition ID"
                 dependencies:
                   - LimitedEnv
@@ -1578,6 +1588,7 @@ domains:
                 legacy_ids: [SDN-XX-03]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "NVLink: Delete an empty partition (no instances); retrieve by ID and verify not found."
                 dependencies:
                   - LimitedEnv
@@ -1587,6 +1598,7 @@ domains:
                 legacy_ids: [SDN-XX-04]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "NVLink: Create a partition, create instance in that partition, make sure the instance becomes ready, delete instance, verify GPUs removed from partition."
                 dependencies:
                   - LimitedEnv
@@ -1596,6 +1608,7 @@ domains:
                 legacy_ids: [SDN-XX-05]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "NVLink: Create partition, create 2 instances, verify both share the same nvlink_partition_id and both GPUs are reported for that partition"
                 dependencies:
                   - LimitedEnv
@@ -1605,6 +1618,7 @@ domains:
                 legacy_ids: [SDN-XX-06]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "IMEX: Assert nvidia-imex and nvidia-imex-ctl packages are installed and nvidia-imex.service unit is registered with systemd."
                 dependencies:
                   - LimitedEnv
@@ -1614,6 +1628,7 @@ domains:
                 legacy_ids: [SDN-XX-07]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "IMEX: Start nvidia-imex via systemctl start nvidia-imex and assert the service reaches active/ready state."
                 dependencies:
                   - LimitedEnv
@@ -1623,6 +1638,7 @@ domains:
                 legacy_ids: [SDN-XX-08]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "IMEX: Stop nvidia-imex via systemctl stop nvidia-imex and assert clean shutdown (other nodes show disabled node status)."
                 dependencies:
                   - LimitedEnv
@@ -1632,6 +1648,7 @@ domains:
                 legacy_ids: [SDN-XX-09]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "IMEX: Enable IMEX at boot with systemctl enable nvidia-imex, reboot, and confirm IMEX starts automatically."
                 dependencies:
                   - LimitedEnv
@@ -1641,6 +1658,7 @@ domains:
                 legacy_ids: [SDN-XX-10]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "IMEX: After all nodes start IMEX, query domain state via nvidia-imex-ctl -N and assert state is UP, fully connected matrix"
                 dependencies:
                   - LimitedEnv
@@ -1650,6 +1668,7 @@ domains:
                 legacy_ids: [SDN-XX-11]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "IMEX: With IMEX_ENABLE_AUTH_ENCRYPTION=0, form a multi-node domain and assert connectivity without any auth/encryption."
                 dependencies:
                   - LimitedEnv
@@ -1659,6 +1678,7 @@ domains:
                 legacy_ids: [SDN-XX-12]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "IMEX: Enable IMEX_ENABLE_AUTH_ENCRYPTION=1 with SSL_TLS mode, provide valid server/client certs, and assert mutual authentication and encrypted communication."
                 dependencies:
                   - LimitedEnv
@@ -1668,6 +1688,7 @@ domains:
                 legacy_ids: [SDN-XX-13]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "IMEX: Enable GSSAPI/Kerberos mode (GSS_AUTH_ENCRYPT), configure KDC/keytabs, and assert mutual auth + encryption between nodes."
                 dependencies:
                   - LimitedEnv
@@ -1677,6 +1698,7 @@ domains:
                 legacy_ids: [SDN-XX-14]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "IMEX: IMEX/K8s: Submit a workload requesting a ComputeDomain; assert ComputeDomain pods are created on each allocated node."
                 dependencies:
                   - LimitedEnv
@@ -1686,6 +1708,7 @@ domains:
                 legacy_ids: [SDN-XX-15]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "IMEX: From workload pods in a ComputeDomain run nvbandwidth-test-job"
                 dependencies:
                   - LimitedEnv
@@ -1695,6 +1718,7 @@ domains:
                 legacy_ids: [SDN-XX-16]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: "IMEX: After workload completes, assert ComputeDomain and associated IMEX resources are cleaned up."
                 dependencies:
                   - LimitedEnv
@@ -1704,6 +1728,7 @@ domains:
                 legacy_ids: [SDN-XX-17]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: Redundant Gateways
                 notes: REVIEW
                 req_id: SDN28
@@ -1711,6 +1736,7 @@ domains:
                 legacy_ids: [SDN-XX-18]
                 status: pending
                 priority: ""
+                milestone: ""
           - description: "Security Group Scope & Timing"
             tests:
               - summary: Verify security group rules can be scoped at workload level
@@ -1725,7 +1751,7 @@ domains:
                   - "#281"
                 req_id: SDN02
                 test_id: SDN02-05
-                status: pending
+                status: published
               - summary: Verify security group rules can be scoped at node level
                 labels:
                   - min_req
@@ -1738,7 +1764,7 @@ domains:
                   - "#282"
                 req_id: SDN02
                 test_id: SDN02-06
-                status: pending
+                status: published
               - summary: Verify security group rules can be scoped at subnet/tenant level
                 labels:
                   - min_req
@@ -1751,20 +1777,20 @@ domains:
                   - "#283"
                 req_id: SDN02
                 test_id: SDN02-07
-                status: pending
+                status: published
               - summary: Measure and verify policy propagation timing is within acceptable bounds
                 labels:
                   - min_req
                   - network
                   - security
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#284"
                 req_id: SDN02
                 test_id: SDN02-08
-                status: pending
+                status: published
               - summary: Verify security group rules can be scoped at K8s API service level
                 labels:
                   - min_req
@@ -1777,7 +1803,7 @@ domains:
                   - "#285"
                 req_id: SDN02
                 test_id: SDN02-09
-                status: pending
+                status: published
           - description: All-to-All Storage Routing
             tests:
               - summary: Verify that storage hosts can route to each other with all-to-all L3 communication
@@ -1785,13 +1811,13 @@ domains:
                   - min_req
                   - network
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#289"
                 req_id: SDN08
                 test_id: SDN08-01
-                status: pending
+                status: published
           - description: Port Security
             tests:
               - summary: Verify customizable port security policies can be applied to virtual interfaces
@@ -1800,13 +1826,13 @@ domains:
                   - network
                   - security
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#286"
                 req_id: SDN02
                 test_id: SDN02-10
-                status: pending
+                status: published
           - description: Network Infrastructure Observability
             tests:
               - summary: Verify logging is available for network hardware faults
@@ -1820,7 +1846,7 @@ domains:
                   - "#290"
                 req_id: SDN09
                 test_id: SDN09-01
-                status: pending
+                status: published
               - summary: Verify logging captures latency/performance fluctuations
                 labels:
                   - min_req
@@ -1832,7 +1858,7 @@ domains:
                   - "#291"
                 req_id: SDN09
                 test_id: SDN09-02
-                status: pending
+                status: published
               - summary: Verify a detailed audit trail exists for all configuration changes to network filtering rules
                 labels:
                   - min_req
@@ -1845,7 +1871,7 @@ domains:
                   - "#292"
                 req_id: SDN09
                 test_id: SDN09-03
-                status: pending
+                status: published
       - name: Metadata Service
         capabilities:
           - description: shared service source of truth for resource metadata such as nodes, GPUs, topology, and ownership. Enables scheduling, automation, and lifecycle management.
@@ -1879,17 +1905,19 @@ domains:
                 test_id: CAP02-01
                 status: approved
                 notes: ""
-                priority: ""
+                priority: P1
                 github_issues:
                   - "#203"
+                milestone: ""
               - summary: "Resource discovery API: newly delivered capacity must be discoverable. This \"Resource Index\" must provide a stable resource identifer."
                 req_id: CAP03
                 test_id: CAP03-01
                 status: approved
                 notes: ""
-                priority: ""
+                priority: P1
                 github_issues:
                   - "#204"
+                milestone: ""
           - description: Stable Identifiers (Switches/Infrastructure)
             tests:
               - summary: Verify that switch identifiers are stable across reboots and firmware updates
@@ -1917,6 +1945,7 @@ domains:
                 legacy_ids: [LB-XX-01]
                 status: approved
                 notes: ""
+                milestone: ""
               - summary: Verify that traffic is distributed across multiple nodes
                 dependencies:
                   - LimitedEnv
@@ -1925,12 +1954,16 @@ domains:
                 legacy_ids: [LB-XX-02]
                 status: approved
                 notes: ""
+                priority: ""
+                milestone: ""
               - summary: Verify that nodes can be marked as down or up (for rolling deployments/etc)
                 req_id: LB03
                 test_id: LB03-01
                 legacy_ids: [LB-XX-03]
                 status: approved
                 notes: ""
+                priority: ""
+                milestone: ""
               - summary: Verify that no traffic is dropped during outages
                 dependencies:
                   - LimitedEnv
@@ -1939,6 +1972,8 @@ domains:
                 legacy_ids: [LB-XX-04]
                 status: approved
                 notes: ""
+                priority: ""
+                milestone: ""
       - name: Break-Fix
         capabilities:
           - description: A break-fix service works with a variety of components to detect, triage, remediate, and validate nodes in an AI factory. The critical focus here is on the GPU nodes, but the system can scale beyond.
@@ -1953,6 +1988,7 @@ domains:
                 legacy_ids: [BFX-XX-01]
                 status: approved
                 notes: ""
+                milestone: ""
               - summary: Verify that Tenants can be notified, by some communication system, of planned future node maintenance
                 dependencies:
                   - LimitedEnv
@@ -1961,6 +1997,8 @@ domains:
                 legacy_ids: [BFX-XX-02]
                 status: approved
                 notes: ""
+                priority: ""
+                milestone: ""
               - summary: Verify that Tenants can be notified, by some communication system, of immediate node failure
                 dependencies:
                   - LimitedEnv
@@ -1969,6 +2007,8 @@ domains:
                 legacy_ids: [BFX-XX-03]
                 status: approved
                 notes: ""
+                priority: ""
+                milestone: ""
           - description: Breakfix API Lifecycle
             tests:
               - summary: Reset GPUs on an individual node via the Breakfix API
@@ -2110,65 +2150,210 @@ domains:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#327"
                 req_id: HSS01
                 test_id: HSS01-01
+                status: published
+              - summary: Verify authentication to the storage management API with the configured credential (basic auth or bearer token)
+                labels:
+                  - storage
+                priority: P1
+                milestone: M8
+                notes: ""
+                github_issues:
+                  - "#505"
+                req_id: HSS01
+                test_id: HSS01-02
+                status: pending
+              - summary: Verify the volume provisioning API provisions a volume of the requested size within NVIDIA's tenant
+                labels:
+                  - storage
+                priority: P1
+                milestone: M8
+                notes: ""
+                github_issues:
+                  - "#506"
+                req_id: HSS01
+                test_id: HSS01-03
                 status: pending
               - summary: Verify QoS — provisioned throughput meets requested minimum bandwidth and IOPS
                 labels:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#328"
                 req_id: HSS02
                 test_id: HSS02-01
-                status: pending
+                status: published
               - summary: Verify K8s CSI integration for storage
                 labels:
                   - min_req
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#329"
                 req_id: HSS03, K8S23
                 test_id: HSS03-01
-                status: pending
+                status: published
+              - summary: Verify the CSI controller Deployment and node DaemonSet pods are running and healthy
+                labels:
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: "Implemented in #523 (K8sCsiDriverHealthCheck)."
+                github_issues:
+                  - "#486"
+                req_id: HSS03
+                test_id: HSS03-02
+                status: published
+              - summary: Verify the CSIDriver object is registered for the NCP provisioner
+                labels:
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: "Implemented in #523 (K8sCsiDriverHealthCheck)."
+                github_issues:
+                  - "#487"
+                req_id: HSS03
+                test_id: HSS03-03
+                status: published
+              - summary: Verify at least one StorageClass references the NCP CSI provisioner
+                labels:
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: "Implemented in #523 (K8sCsiDriverHealthCheck)."
+                github_issues:
+                  - "#488"
+                req_id: HSS03
+                test_id: HSS03-04
+                status: published
+              - summary: Verify a PVC against the NCP StorageClass reaches Bound and creates a PV
+                labels:
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: ""
+                github_issues:
+                  - "#489"
+                req_id: HSS03, K8S23
+                test_id: HSS03-05
+                status: published
+              - summary: Verify the provisioned PV capacity is >= the PVC request
+                labels:
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: ""
+                github_issues:
+                  - "#490"
+                req_id: HSS03, K8S23
+                test_id: HSS03-06
+                status: published
+              - summary: Verify a pod can mount the PVC and read back data it wrote
+                labels:
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: ""
+                github_issues:
+                  - "#491"
+                req_id: HSS03, K8S23
+                test_id: HSS03-07
+                status: published
+              - summary: Verify multiple concurrent PVCs bind to distinct PVs
+                labels:
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: ""
+                github_issues:
+                  - "#492"
+                req_id: HSS03, K8S23
+                test_id: HSS03-08
+                status: published
               - summary: Verify quota limits can be set on user workloads/volumes
                 labels:
                   - min_req
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#330"
                 req_id: HSS04
                 test_id: HSS04-01
+                status: published
+              - summary: Verify a functional API reports tenant-level storage utilization and quota
+                labels:
+                  - storage
+                priority: P1
+                milestone: M8
+                notes: ""
+                github_issues:
+                  - "#507"
+                req_id: HSS04
+                test_id: HSS04-02
+                status: pending
+              - summary: Verify a functional API lists the quotas configured within the NVIDIA tenancy
+                labels:
+                  - storage
+                priority: P1
+                milestone: M8
+                notes: ""
+                github_issues:
+                  - "#508"
+                req_id: HSS04
+                test_id: HSS04-03
+                status: pending
+              - summary: Verify a functional API returns utilization against a given quota by ID
+                labels:
+                  - storage
+                priority: P1
+                milestone: M8
+                notes: ""
+                github_issues:
+                  - "#509"
+                req_id: HSS04
+                test_id: HSS04-04
+                status: pending
+              - summary: Verify reported quota consumption reflects data written to the filesystem
+                labels:
+                  - storage
+                priority: P1
+                milestone: M8
+                notes: ""
+                github_issues:
+                  - "#510"
+                req_id: HSS04
+                test_id: HSS04-05
                 status: pending
               - summary: Verify non-disruptive upgrades (NVIDIA can defer maintenance up to 2 weeks)
                 labels:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#331"
                 req_id: HSS05
                 test_id: HSS05-01
-                status: pending
+                status: published
               - summary: "Storage: Config/default/access to network provided storage"
                 notes: REVIEW
                 req_id: STOR01
                 test_id: STOR01-01
                 legacy_ids: [STOR-XX-01]
                 status: pending
+                priority: ""
+                milestone: ""
           - description: Home Directory Storage
             tests:
               - summary: Verify NFS protocol shared storage is available
@@ -2183,6 +2368,19 @@ domains:
                 req_id: DIR02
                 test_id: DIR02-01
                 status: pending
+              - summary: Verify POSIX filesystem compliance via the applicable pjdfstest suites
+                labels:
+                  - kubernetes
+                  - slow
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: ""
+                github_issues:
+                  - "#494"
+                req_id: DIR02
+                test_id: DIR02-02
+                status: published
               - summary: Verify configurable filesystem-wide quota limits
                 labels:
                   - min_req
@@ -2213,47 +2411,47 @@ domains:
                 labels:
                   - min_req
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#263"
                 req_id: DMS01
                 test_id: DMS01-01
-                status: pending
+                status: published
               - summary: Verify dedicated CPU nodes are available for data mover with high-performance networking
                 labels:
                   - min_req
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#264"
                 req_id: DMS02
                 test_id: DMS02-01
-                status: pending
+                status: published
               - summary: Verify the same filesystem mounted on GPU nodes is accessible from data mover nodes
                 labels:
                   - min_req
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#265"
                 req_id: DMS03
                 test_id: DMS03-01
-                status: pending
+                status: published
               - summary: Verify stable egress IP for allowlisting access to NVIDIA services
                 labels:
                   - min_req
                   - network
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#266"
                 req_id: DMS05
                 test_id: DMS05-01
-                status: pending
+                status: published
           - description: DGXC-Managed Storage Deployment
             tests:
               - summary: Verify optional skip-sanitization flag during break/fix where tenancy doesn't change
@@ -2325,6 +2523,18 @@ domains:
                   - "#296"
                 req_id: SEC04
                 test_id: SEC04-01
+                status: published
+              - summary: Verify multi-tenant isolation — quota listings contain only paths within the tenant's namespace
+                labels:
+                  - security
+                  - storage
+                priority: P1
+                milestone: M8
+                notes: ""
+                github_issues:
+                  - "#511"
+                req_id: SEC04
+                test_id: SEC04-03
                 status: pending
           - description: RDMA Memory Protection
             tests:
@@ -2333,13 +2543,13 @@ domains:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#332"
                 req_id: HSS06
                 test_id: HSS06-01
-                status: pending
+                status: published
       - name: Parallel File System Services
         capabilities:
           - description: high performance file system optimized for AI and HPC workloads
@@ -2349,97 +2559,184 @@ domains:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#333"
                 req_id: HSS07
                 test_id: HSS07-01
-                status: pending
+                status: published
+              - summary: Verify large-directory listing of 1,000,000 files and 500,000 subdirectories without error or truncation
+                labels:
+                  - kubernetes
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: ""
+                github_issues:
+                  - "#498"
+                  - "#499"
+                req_id: HSS07
+                test_id: HSS07-02
+                status: published
               - summary: "Verify multiple filesystems can exist within total capacity (minimum FS size <= 50 TiB)"
                 labels:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#334"
                 req_id: HSS09
                 test_id: HSS09-01
-                status: pending
+                status: published
               - summary: Verify live filesystem expansion (capacity, inodes, IO, metadata)
                 labels:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#335"
                 req_id: HSS10
                 test_id: HSS10-01
-                status: pending
+                status: published
+              - summary: Verify PVC expansion grows PV capacity and pod-visible size (if supported)
+                labels:
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: "Platform/context-sensitive (platform: kubernetes). Overlaps HSS10-01 (platform-agnostic whole-filesystem expansion). Candidate for consolidation/deprecation before v1.0; two implementations of one behavior must not both ship to customers."
+                github_issues:
+                  - "#493"
+                req_id: HSS10
+                test_id: HSS10-02
+                status: published
               - summary: Verify uid/gid/project-id soft and hard quotas with enforcement
                 labels:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#336"
                 req_id: HSS12
                 test_id: HSS12-01
-                status: pending
+                status: published
               - summary: Verify root-squash can be enabled and disabled at any time
                 labels:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#337"
                 req_id: HSS13
                 test_id: HSS13-01
-                status: pending
+                status: published
               - summary: Verify the filesystem can be mounted with flock
                 labels:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#338"
                 req_id: HSS14
                 test_id: HSS14-01
-                status: pending
+                status: published
+              - summary: Verify flock() locking behavior is correct across pods on the same PVC
+                labels:
+                  - kubernetes
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: "Platform/context-sensitive (platform: kubernetes). Overlaps HSS14-01 (platform-agnostic provider-evidence flock check). Candidate for consolidation/deprecation before v1.0; two implementations of one behavior must not both ship to customers."
+                github_issues:
+                  - "#495"
+                req_id: HSS14
+                test_id: HSS14-02
+                status: published
               - summary: Verify changelog/audit data is accessible (tracking by uid/gid, file/dir operations)
                 labels:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#339"
                 req_id: HSS15
                 test_id: HSS15-01
-                status: pending
+                status: published
               - summary: Verify client multipathing to all storage servers
                 labels:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#340"
                 req_id: HSS18
                 test_id: HSS18-01
-                status: pending
+                status: published
+              - summary: Verify a file written on one node is visible with correct content on another node within 1 second
+                labels:
+                  - kubernetes
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: ""
+                github_issues:
+                  - "#496"
+                req_id: HSS17
+                test_id: HSS17-01
+                status: published
+              - summary: Verify file size and mtime changes on one node are reflected on another within the attribute-cache window
+                labels:
+                  - kubernetes
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: ""
+                github_issues:
+                  - "#497"
+                req_id: HSS17
+                test_id: HSS17-02
+                status: published
+              - summary: Verify NFS mounts use the expected version (e.g. vers=4.1), nconnect value, transport protocol (proto=rdma or proto=tcp), and readahead tuning
+                labels:
+                  - kubernetes
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: ""
+                github_issues:
+                  - "#500"
+                  - "#501"
+                  - "#502"
+                  - "#503"
+                req_id: HSS11
+                test_id: HSS11-01
+                status: published
+              - summary: Verify required vendor/DKMS kernel modules are installed on all GPU and CPU nodes
+                labels:
+                  - kubernetes
+                  - storage
+                priority: P1
+                milestone: M7
+                notes: ""
+                github_issues:
+                  - "#504"
+                req_id: HSS11
+                test_id: HSS11-04
+                status: published
       - name: Object Storage Service
         capabilities:
           - description: durable, scalable object storage for things like datasets, model artifacts, logs, backups.
@@ -2450,14 +2747,14 @@ domains:
                   - control_plane
                   - min_req
                 priority: P2
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#262"
                 req_id: DATASVC01
                 test_id: DATASVC01-01
                 legacy_ids: [DATASVC-XX-01]
-                status: pending
+                status: published
       - name: Block Storage Services
         capabilities:
           - description: persistent block volumes for a wide range of uses
@@ -2473,46 +2770,46 @@ domains:
                   - "#272"
                 req_id: K8S23
                 test_id: K8S23-01
-                status: pending
+                status: published
               - summary: Verify volume snapshots
                 labels:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#321"
                 req_id: DATASVC02
                 test_id: DATASVC02-01
                 legacy_ids: [DATASVC-XX-02]
-                status: pending
+                status: published
               - summary: Verify volume resizing
                 labels:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#322"
                 req_id: DATASVC03
                 test_id: DATASVC03-01
                 legacy_ids: [DATASVC-XX-03]
-                status: pending
+                status: published
               - summary: Verify persistent block volumes survive instance restarts
                 labels:
                   - min_req
                   - storage
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#323"
                 req_id: DATASVC04
                 test_id: DATASVC04-01
                 legacy_ids: [DATASVC-XX-04]
-                status: pending
+                status: published
       - name: Cache Services
         capabilities:
           - description: in-memory data store for frequently used data
@@ -2527,6 +2824,7 @@ domains:
                 legacy_ids: [DATASVC-XX-05]
                 status: pending
                 notes: ""
+                milestone: ""
       - name: Vector Store
         capabilities:
           - description: stores and indexes embeddings for semantic search and RAG generation
@@ -2541,6 +2839,7 @@ domains:
                 legacy_ids: [DATASVC-XX-06]
                 status: pending
                 notes: ""
+                milestone: ""
       - name: Relational Database
         capabilities:
           - description: structured database (SQL) service
@@ -2555,6 +2854,7 @@ domains:
                 legacy_ids: [DATASVC-XX-07]
                 status: pending
                 notes: ""
+                milestone: ""
   - name: Workload Orchestration
     components:
       - name: Backup and Recovery
@@ -2582,6 +2882,7 @@ domains:
                 legacy_ids: [DATASVC-XX-09]
                 status: pending
                 notes: ""
+                milestone: ""
       - name: Slurm Control Plane
         capabilities:
           - description: control plane to schedule and manage large-scale GPU batch training with SLURM semantics.
@@ -2596,7 +2897,7 @@ domains:
                 req_id: SLURM01
                 test_id: SLURM01-01
                 legacy_ids: [SLURM-XX-01]
-                status: done
+                status: published
               - summary: SlurmInfoAvailable
                 notes: ""
                 priority: P0
@@ -2606,7 +2907,7 @@ domains:
                 req_id: SLURM02
                 test_id: SLURM02-01
                 legacy_ids: [SLURM-XX-02]
-                status: done
+                status: published
                 labels:
                   - slurm
               - summary: SlurmPartition cpu and gpu
@@ -2618,7 +2919,7 @@ domains:
                 req_id: SLURM03
                 test_id: SLURM03-01
                 legacy_ids: [SLURM-XX-03]
-                status: done
+                status: published
                 labels:
                   - slurm
               - summary: SlurmJobSubmission
@@ -2630,7 +2931,7 @@ domains:
                 req_id: SLURM04
                 test_id: SLURM04-01
                 legacy_ids: [SLURM-XX-04]
-                status: done
+                status: published
                 labels:
                   - slurm
               - summary: SlurmGpuAllocation 1gpu and 2gpu
@@ -2642,7 +2943,7 @@ domains:
                 req_id: SLURM05
                 test_id: SLURM05-01
                 legacy_ids: [SLURM-XX-05]
-                status: done
+                status: published
                 labels:
                   - slurm
               - summary: SlurmNodeJobExecution cpu and gpu
@@ -2654,7 +2955,7 @@ domains:
                 req_id: SLURM06
                 test_id: SLURM06-01
                 legacy_ids: [SLURM-XX-06]
-                status: done
+                status: published
                 labels:
                   - slurm
               - summary: SlurmGpuStressWorkload
@@ -2666,7 +2967,7 @@ domains:
                 req_id: SLURM07
                 test_id: SLURM07-01
                 legacy_ids: [SLURM-XX-07]
-                status: done
+                status: published
                 labels:
                   - gpu
                   - slow
@@ -2681,7 +2982,7 @@ domains:
                 req_id: SLURM08
                 test_id: SLURM08-01
                 legacy_ids: [SLURM-XX-08]
-                status: done
+                status: published
                 labels:
                   - gpu
                   - slow
@@ -2696,7 +2997,7 @@ domains:
                 req_id: SLURM09
                 test_id: SLURM09-01
                 legacy_ids: [SLURM-XX-09]
-                status: done
+                status: published
                 labels:
                   - slow
                   - slurm
@@ -2710,7 +3011,7 @@ domains:
                 req_id: SLURM10
                 test_id: SLURM10-01
                 legacy_ids: [SLURM-XX-10]
-                status: done
+                status: published
       - name: Managed Kubernetes Control Plane
         capabilities:
           - description: Tenant-isolated Kubernetes control planes for managing k8s workloads. does placement, networking, lifecyle mgmt.
@@ -2727,7 +3028,7 @@ domains:
                 milestone: M0
                 req_id: K8S05
                 test_id: K8S05-01
-                status: done
+                status: published
           - description: Full lifecycle management
             tests:
               - summary: Run through all the steps of the k8s lifecycle management, including user-initated CP update
@@ -2739,13 +3040,15 @@ domains:
                 legacy_ids: [K8S-XX-01]
                 status: approved
                 notes: ""
+                priority: ""
               - summary: The control plane should automatically add more capacity when load increases
                 req_id: K8S41
                 test_id: K8S41-01
                 legacy_ids: [SEC23-01]
                 status: pending
                 notes: ""
-                priority: ""
+                priority: P2
+                milestone: ""
               - summary: Pin Control Plane instances to a specific count to handle a particular load-limit
                 labels:
                   - min_req
@@ -2753,8 +3056,10 @@ domains:
                 test_id: K8S27-01
                 status: pending
                 notes: ""
+                priority: P2
                 github_issues:
                   - "#217"
+                milestone: ""
           - description: Control Plane Isolation
             tests:
               - summary: per tenant k8s control plane outside of the tenant cluster/VPC
@@ -2765,6 +3070,7 @@ domains:
                 test_id: K8S14-01
                 status: approved
                 notes: ""
+                priority: ""
               - summary: Be able to run k8s workloads
                 labels:
                   - min_req
@@ -2776,7 +3082,7 @@ domains:
                 req_id: K8S39
                 test_id: K8S39-01
                 legacy_ids: [K8S-XX-02]
-                status: done
+                status: published
               - summary: K8s Nim Inference
                 notes: ""
                 priority: P0
@@ -2786,7 +3092,7 @@ domains:
                 req_id: K8S40
                 test_id: K8S40-01
                 legacy_ids: [K8S-XX-03]
-                status: done
+                status: published
                 labels:
                   - gpu
                   - kubernetes
@@ -2801,7 +3107,7 @@ domains:
                 req_id: K8S32
                 test_id: K8S32-01
                 legacy_ids: [K8S-XX-04]
-                status: done
+                status: published
                 labels:
                   - gpu
                   - kubernetes
@@ -2822,6 +3128,7 @@ domains:
                 legacy_ids: [K8S-XX-05]
                 status: approved
                 notes: ""
+                milestone: ""
           - description: k8s upstream proxy
             tests:
               - summary: validate adherence to upstream proxy requirements (service to pod load balancing, acces to internal services)
@@ -2833,6 +3140,7 @@ domains:
                 legacy_ids: [K8S-XX-06]
                 status: approved
                 priority: P0
+                milestone: ""
           - description: Dynamic Resource Allocaiton
             tests:
               - summary: verify that the k8s cluster supports the DRA API (resources.k8s.io) to get GPUs on the same nvlink
@@ -2843,6 +3151,7 @@ domains:
                 test_id: K8S24-01
                 status: approved
                 priority: P0
+                milestone: ""
           - description: Run k8s conformance tests
             tests:
               - summary: "get versions, topology, core APIs by: (a) pass CNCF k8s conformance: https://github.com/cncf/k8s-conformance (b) add AI conformance: [https://github.com/cncf/k8s-ai-conformance](https://github.com/cncf/k8s-ai-conformance)"
@@ -2854,10 +3163,11 @@ domains:
                 notes: k8s01
                 req_id: K8S01
                 test_id: K8S01-01
-                status: pending
+                status: published
                 priority: P0
                 github_issues:
                   - "#233"
+                milestone: ""
           - description: k8s service account OIDC
             tests:
               - summary: test that the service account can be authorized with OIDC
@@ -2867,6 +3177,8 @@ domains:
                 test_id: K8S17-01
                 status: approved
                 notes: ""
+                priority: ""
+                milestone: ""
           - description: Test support for CRDs and Validating/Mutating Admission Controllers (webhooks)
             tests:
               - summary: create a CRD, create webhook, and test validation/mutation requirement
@@ -2876,10 +3188,11 @@ domains:
                 notes: k8s19
                 req_id: K8S21
                 test_id: K8S21-01
-                status: approved
+                status: published
                 priority: P1
                 github_issues:
                   - "#218"
+                milestone: ""
           - description: "TODO: L3 networking logging"
             tests:
               - summary: Verify that pod-to-pod L3 traffic flow logs are available and queryable
@@ -2891,6 +3204,7 @@ domains:
                 legacy_ids: [K8S-XX-07]
                 status: approved
                 priority: P1
+                milestone: ""
           - description: CNI Compliance
             tests:
               - summary: Apply a NetworkPolicy; verify pod connectivity is restricted as expected; verify IPv4 and IPv6 addresses are assigned on dual-stack nodes
@@ -2900,10 +3214,11 @@ domains:
                 notes: K8s20
                 req_id: K8S22
                 test_id: K8S22-01
-                status: approved
+                status: published
                 priority: P0
                 github_issues:
                   - "#219"
+                milestone: ""
           - description: "TODO: Dynamic provisioning, snapshots, and resizing"
             tests:
               - summary: "TODO: Helm version"
@@ -2914,6 +3229,7 @@ domains:
                 test_id: K8S23-02
                 status: approved
                 priority: ""
+                milestone: ""
               - summary: "TODO: Kustomize version"
                 labels:
                   - min_req
@@ -2922,6 +3238,7 @@ domains:
                 test_id: K8S23-03
                 status: approved
                 priority: ""
+                milestone: ""
               - summary: Verify CSI supports block, shared filesystem, and NFS storage
                 labels:
                   - kubernetes
@@ -2933,7 +3250,7 @@ domains:
                   - "#273"
                 req_id: K8S23
                 test_id: K8S23-04
-                status: pending
+                status: published
               - summary: Verify CSI supports both static and dynamic provisioning via PVs and PVCs
                 labels:
                   - kubernetes
@@ -2945,7 +3262,7 @@ domains:
                   - "#274"
                 req_id: K8S23
                 test_id: K8S23-05
-                status: pending
+                status: published
               - summary: Verify CSI credentials are tenant cluster scoped (no cross-cluster access)
                 labels:
                   - kubernetes
@@ -2957,7 +3274,7 @@ domains:
                   - "#275"
                 req_id: K8S23
                 test_id: K8S23-06
-                status: pending
+                status: published
               - summary: Verify APIs to query storage usage against overall cluster quota with per-PVC/Volume breakdown
                 labels:
                   - kubernetes
@@ -2969,7 +3286,7 @@ domains:
                   - "#276"
                 req_id: K8S23
                 test_id: K8S23-07
-                status: pending
+                status: published
           - description: NVIDIA Operator support
             tests:
               - summary: "TODO: Compatibility with the mainline NVIDIA GPU Operator"
@@ -2981,6 +3298,7 @@ domains:
                 test_id: K8S25-01
                 status: approved
                 priority: P0
+                milestone: ""
               - summary: Verify provider-default accelerator operators and drivers can be replaced or overridden with tenant-required versions
                 labels:
                   - min_req
@@ -3073,7 +3391,7 @@ domains:
                   - "#271"
                 req_id: K8S15
                 test_id: K8S15-01
-                status: pending
+                status: published
           - description: K8s Encryption
             tests:
               - summary: Verify at-rest encryption is enabled for etcd
@@ -3099,7 +3417,7 @@ domains:
                   - "#301"
                 req_id: SEC09
                 test_id: SEC09-01
-                status: pending
+                status: published
               - summary: Verify support for both provider-managed and customer-managed keys
                 labels:
                   - min_req
@@ -3111,7 +3429,7 @@ domains:
                   - "#302"
                 req_id: SEC09
                 test_id: SEC09-02
-                status: pending
+                status: published
           - description: Autoscaling
             tests:
               - summary: Verify Cluster Autoscaler integration (upstream)
@@ -3119,14 +3437,14 @@ domains:
                   - kubernetes
                   - min_req
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#267"
                 req_id: K8S36
                 test_id: K8S36-01
                 legacy_ids: [K8S-XX-08]
-                status: pending
+                status: published
           - description: Kubernetes Security Response
             tests:
               - summary: Verify NCP participates in the Kubernetes Security Response Committee (SRC) process and can patch disclosed vulnerabilities during embargo
@@ -3154,7 +3472,7 @@ domains:
                   - "#221"
                 req_id: K8S06
                 test_id: K8S06-01
-                status: pending
+                status: published
               - summary: Update a K8s node pool (e.g., scale to a target count)
                 labels:
                   - kubernetes
@@ -3168,7 +3486,7 @@ domains:
                   - "#222"
                 req_id: K8S06
                 test_id: K8S06-02
-                status: pending
+                status: published
               - summary: Delete a K8s node pool
                 labels:
                   - kubernetes
@@ -3181,7 +3499,7 @@ domains:
                   - "#223"
                 req_id: K8S06
                 test_id: K8S06-03
-                status: pending
+                status: published
               - summary: Verify default node labels and taints can be specified when a node joins the cluster via node pool
                 labels:
                   - min_req
@@ -3192,7 +3510,7 @@ domains:
                   - "#224"
                 req_id: K8S06
                 test_id: K8S06-04
-                status: pending
+                status: published
           - description: API Server Metrics
             tests:
               - summary: Verify API Server metrics are available in a Prometheus-scrapable format for SLO measurement
@@ -3206,7 +3524,7 @@ domains:
                   - "#225"
                 req_id: K8S07
                 test_id: K8S07-01
-                status: pending
+                status: published
           - description: Public OIDC Endpoint
             tests:
               - summary: Verify the cluster exposes a cluster-specific OIDC Issuer endpoint for workload identity federation
@@ -3221,7 +3539,7 @@ domains:
                 req_id: K8S17
                 test_id: K8S17-02
                 legacy_ids: [K8S18-01]
-                status: pending
+                status: published
           - description: K8s Control Plane Logging
             tests:
               - summary: Verify ability to view or export Kubernetes control plane logs (apiserver, kcm)
@@ -3235,7 +3553,7 @@ domains:
                   - "#227"
                 req_id: K8S20
                 test_id: K8S20-01
-                status: pending
+                status: published
           - description: K8s Performance
             tests:
               - summary: Verify the managed K8s service meets standard Kubernetes performance tests to max cluster size
@@ -3259,11 +3577,11 @@ domains:
                   - kubernetes
                   - min_req
                 priority: P0
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#277"
-                status: pending
+                status: published
       - name: Power Policy Management
         capabilities:
           - description: Control plane to manage power allocation (re-allocation) based on need and availability
@@ -3278,6 +3596,7 @@ domains:
                 legacy_ids: [POWER-XX-01]
                 status: approved
                 notes: ""
+                milestone: ""
   - name: "AI Platform & User Access"
     components:
       - name: Host API Gateway
@@ -3292,6 +3611,7 @@ domains:
                 legacy_ids: [APIGW-XX-01]
                 status: approved
                 notes: ""
+                milestone: ""
       - name: Al Platform 1..N Control Planes
         capabilities:
           - description: "Placeholder for all AI platform CPs you might run. E.g. Run:ai, NVCF, Redhat Inference Server"
@@ -3303,6 +3623,7 @@ domains:
                 legacy_ids: [AICP-XX-01]
                 status: approved
                 notes: ""
+                milestone: ""
       - name: Web Management Dashboard
         capabilities:
           - description: ""
@@ -3332,7 +3653,7 @@ domains:
                 req_id: OBS01
                 test_id: OBS01-01
                 legacy_ids: [OBS-XX-01]
-                status: done
+                status: published
               - summary: Logging information about the control plane is available
                 notes: ""
                 priority: P0
@@ -3342,7 +3663,7 @@ domains:
                 req_id: OBS02
                 test_id: OBS02-01
                 legacy_ids: [OBS-XX-02]
-                status: done
+                status: published
               - summary: Logging information from instances
                 notes: ""
                 priority: P0
@@ -3352,7 +3673,7 @@ domains:
                 req_id: OBS03
                 test_id: OBS03-01
                 legacy_ids: [OBS-XX-03]
-                status: done
+                status: published
               - summary: Alerts can be issued by the system in case of problems
                 notes: ""
                 priority: P0
@@ -3362,7 +3683,7 @@ domains:
                 req_id: OBS04
                 test_id: OBS04-01
                 legacy_ids: [OBS-XX-04]
-                status: done
+                status: published
           - description: Telemetry Delivery
             tests:
               - summary: Verify telemetry latency is no longer than 120 seconds
@@ -3370,14 +3691,14 @@ domains:
                   - min_req
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#342"
                 req_id: OBS05
                 test_id: OBS05-01
                 legacy_ids: [OBS-XX-05]
-                status: pending
+                status: published
           - description: Network Telemetry
             tests:
               - summary: Verify telemetry is available for North-South (front-end) network
@@ -3386,70 +3707,70 @@ domains:
                   - network
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#343"
                 req_id: OBS06
                 test_id: OBS06-01
                 legacy_ids: [OBS-XX-06]
-                status: pending
+                status: published
               - summary: Verify telemetry is available for East-West (back-end / GPU interconnect) network
                 labels:
                   - min_req
                   - network
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#344"
                 req_id: OBS07
                 test_id: OBS07-01
                 legacy_ids: [OBS-XX-07]
-                status: pending
+                status: published
               - summary: Verify telemetry is available for Management network
                 labels:
                   - min_req
                   - network
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#345"
                 req_id: OBS08
                 test_id: OBS08-01
                 legacy_ids: [OBS-XX-08]
-                status: pending
+                status: published
               - summary: Verify telemetry is available for NVSwitch Fabric (GB200+)
                 labels:
                   - min_req
                   - network
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#346"
                 req_id: OBS09
                 test_id: OBS09-01
                 legacy_ids: [OBS-XX-09]
-                status: pending
+                status: published
               - summary: Verify telemetry is available for Host network (NIC-level)
                 labels:
                   - min_req
                   - network
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#347"
                 req_id: OBS10
                 test_id: OBS10-01
                 legacy_ids: [OBS-XX-10]
-                status: pending
+                status: published
           - description: Required Logs
             tests:
               - summary: Verify Fabric Manager logs are available (where applicable)
@@ -3457,124 +3778,124 @@ domains:
                   - min_req
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#348"
                 req_id: OBS11
                 test_id: OBS11-01
                 legacy_ids: [OBS-XX-11]
-                status: pending
+                status: published
               - summary: Verify Subnet Manager logs are available (where applicable)
                 labels:
                   - min_req
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#349"
                 req_id: OBS12
                 test_id: OBS12-01
                 legacy_ids: [OBS-XX-12]
-                status: pending
+                status: published
               - summary: Verify UFM Event logs are available
                 labels:
                   - min_req
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#350"
                 req_id: OBS13
                 test_id: OBS13-01
                 legacy_ids: [OBS-XX-13]
-                status: pending
+                status: published
               - summary: Verify general switch logs are available
                 labels:
                   - min_req
                   - network
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#351"
                 req_id: OBS14
                 test_id: OBS14-01
                 legacy_ids: [OBS-XX-14]
-                status: pending
+                status: published
               - summary: Verify switch syslogs are available
                 labels:
                   - min_req
                   - network
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#352"
                 req_id: OBS15
                 test_id: OBS15-01
                 legacy_ids: [OBS-XX-15]
-                status: pending
+                status: published
               - summary: Verify switch kernel logs are available
                 labels:
                   - min_req
                   - network
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#353"
                 req_id: OBS16
                 test_id: OBS16-01
                 legacy_ids: [OBS-XX-16]
-                status: pending
+                status: published
               - summary: Verify BMC SEL logs are available
                 labels:
                   - min_req
                   - observability
                   - security
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#354"
                 req_id: OBS17
                 test_id: OBS17-01
                 legacy_ids: [OBS-XX-17]
-                status: pending
+                status: published
               - summary: Verify host syslogs are available
                 labels:
                   - bare_metal
                   - min_req
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#355"
                 req_id: OBS18
                 test_id: OBS18-01
                 legacy_ids: [OBS-XX-18]
-                status: pending
+                status: published
               - summary: Verify VPC Flow logs (all ingress/egress traffic) are available
                 labels:
                   - min_req
                   - network
                   - observability
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#356"
                 req_id: OBS19
                 test_id: OBS19-01
                 legacy_ids: [OBS-XX-19]
-                status: pending
+                status: published
       - name: Telemetry / Data Lakes
         capabilities:
           - description: ""
@@ -3588,6 +3909,7 @@ domains:
                 legacy_ids: [TELEM-XX-01]
                 status: approved
                 notes: ""
+                milestone: ""
               - summary: Read only access to a BMaaS system's serial console
                 labels:
                   - min_req
@@ -3601,7 +3923,7 @@ domains:
                 req_id: TELEM02
                 test_id: TELEM02-01
                 legacy_ids: [TELEM-XX-02]
-                status: approved
+                status: published
               - summary: Read only access to a VM serial console
                 labels:
                   - min_req
@@ -3615,7 +3937,7 @@ domains:
                 req_id: TELEM03
                 test_id: TELEM03-01
                 legacy_ids: [TELEM-XX-03]
-                status: approved
+                status: published
           - description: BMC/Redfish Telemetry
             tests:
               - summary: Verify BMC/Redfish telemetry is accessible via API for GPU metrics not available from the host OS
@@ -3625,14 +3947,14 @@ domains:
                   - observability
                   - security
                 priority: P1
-                milestone: M5
+                milestone: M7
                 notes: ""
                 github_issues:
                   - "#362"
                 req_id: TELEM04
                 test_id: TELEM04-01
                 legacy_ids: [TELEM-XX-04]
-                status: pending
+                status: published
           - description: Storage Telemetry
             tests:
               - summary: Verify storage resource capacity metrics are available (used/free/total)
@@ -3707,7 +4029,7 @@ domains:
                   - "#306"
                 req_id: SEC12
                 test_id: SEC12-01
-                status: pending
+                status: published
               - summary: Verify BMC interfaces are not reachable from tenant networks
                 labels:
                   - min_req
@@ -3720,7 +4042,7 @@ domains:
                   - "#307"
                 req_id: SEC12
                 test_id: SEC12-02
-                status: pending
+                status: published
               - summary: Verify IPMI is disabled; Redfish over TLS is used with AAA
                 labels:
                   - min_req
@@ -3733,7 +4055,7 @@ domains:
                   - "#260"
                 req_id: CNP10
                 test_id: CNP10-01
-                status: pending
+                status: published
               - summary: Verify BMC is only accessible via a hardened bastion (jumphost) server; direct public/corporate network access is blocked
                 labels:
                   - min_req
@@ -3746,7 +4068,7 @@ domains:
                   - "#308"
                 req_id: SEC12
                 test_id: SEC12-03
-                status: pending
+                status: published
           - description: Network Traffic Encryption
             tests:
               - summary: Verify mTLS (or equivalent) for all east-west and north-south traffic
@@ -3776,20 +4098,20 @@ domains:
                   - "#311"
                 req_id: SEC14
                 test_id: SEC14-01
-                status: pending
+                status: published
               - summary: Verify insecure protocols (HTTP, SSLv3, TLSv1) are disabled
                 labels:
                   - min_req
                   - network
                   - security
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#310"
                 req_id: SEC13
                 test_id: SEC13-02
-                status: pending
+                status: published
           - description: InfiniBand Security
             tests:
               - summary: Verify IB tenant isolation — compute dedicated to NVIDIA is isolated from other customers
@@ -3800,13 +4122,13 @@ domains:
                   - network
                   - security
                 priority: P0
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#287"
                 req_id: SDN04
                 test_id: SDN04-04
-                status: pending
+                status: published
               - summary: "Verify IB keys are configured: P_Key, Management Key, Aggregation Management Key, VendorSpecific Key, CongestionControl Key, Node2Node Key, Manager2Node Key"
                 labels:
                   - bare_metal
@@ -3815,13 +4137,13 @@ domains:
                   - network
                   - security
                 priority: P0
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#288"
                 req_id: SDN04
                 test_id: SDN04-05
-                status: pending
+                status: published
           - description: Tenancy Isolation
             tests:
               - summary: Verify hard physical or logical isolation between tenants for network, data, compute, and storage resources
@@ -3837,7 +4159,7 @@ domains:
                 notes: ""
                 github_issues:
                   - "#305"
-                status: pending
+                status: published
       - name: Authentication
         capabilities:
           - description: User Authentication
@@ -3854,7 +4176,7 @@ domains:
                   - "#293"
                 req_id: SEC01
                 test_id: SEC01-01
-                status: pending
+                status: published
           - description: In-Cluster Authentication
             tests:
               - summary: Verify workloads and nodes receive short-lived credentials/tokens
@@ -3870,7 +4192,7 @@ domains:
                 req_id: SEC06
                 test_id: SEC06-01
                 legacy_ids: [SEC02-01]
-                status: pending
+                status: published
           - description: External Service Authentication
             tests:
               - summary: Verify out-of-cluster service accounts can authenticate with long-lived credentials
@@ -3885,7 +4207,7 @@ domains:
                   - "#295"
                 req_id: SEC03
                 test_id: SEC03-01
-                status: pending
+                status: published
           - description: Admin Interface Security
             tests:
               - summary: Verify all administrative interfaces (UI, CLI, API) are protected by Multi-Factor Authentication
@@ -3900,7 +4222,7 @@ domains:
                   - "#298"
                 req_id: SEC07
                 test_id: SEC07-01
-                status: pending
+                status: published
       - name: Authorization
         capabilities:
           - description: RBAC
@@ -3917,7 +4239,7 @@ domains:
                   - "#297"
                 req_id: SEC04
                 test_id: SEC04-02
-                status: pending
+                status: published
       - name: "Audit & Logging"
         capabilities:
           - description: "Audit & Logging"
@@ -3933,7 +4255,7 @@ domains:
                   - "#299"
                 req_id: SEC08
                 test_id: SEC08-01
-                status: pending
+                status: published
               - summary: Verify audit logs are retained for at least 30 days
                 labels:
                   - min_req
@@ -3945,7 +4267,7 @@ domains:
                   - "#300"
                 req_id: SEC08
                 test_id: SEC08-02
-                status: pending
+                status: published
       - name: "Hardware Security & Compliance"
         capabilities:
           - description: Data Sanitization
@@ -3957,13 +4279,13 @@ domains:
                   - sanitization
                   - security
                 priority: P0
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#312"
                 req_id: SEC21
                 test_id: SEC21-04
-                status: pending
+                status: published
               - summary: Verify SRAM/GPU memory is sanitized between tenants
                 labels:
                   - bare_metal
@@ -3972,13 +4294,13 @@ domains:
                   - sanitization
                   - security
                 priority: P0
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#313"
                 req_id: SEC21
                 test_id: SEC21-05
-                status: pending
+                status: published
               - summary: Verify TPM and BIOS are reset during tenant transitions or hardware replacement
                 labels:
                   - bare_metal
@@ -3987,13 +4309,13 @@ domains:
                   - sanitization
                   - security
                 priority: P0
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#314"
                 req_id: SEC21, SEC22
                 test_id: SEC21-06
-                status: pending
+                status: published
           - description: At-Rest Encryption
             tests:
               - summary: Verify all data at rest is encrypted via SED on local NVMe/SSD and network-attached storage
@@ -4019,7 +4341,7 @@ domains:
                   - "#303"
                 req_id: SEC09, SEC10
                 test_id: SEC09-03
-                status: pending
+                status: published
               - summary: Verify support for Customer Managed Keys (BYOK)
                 labels:
                   - min_req
@@ -4033,7 +4355,7 @@ domains:
                   - "#304"
                 req_id: SEC09
                 test_id: SEC09-04
-                status: pending
+                status: published
   - name: Network Transport
     components:
       - name: Backend Switch Fabric API
@@ -4051,7 +4373,7 @@ domains:
                   - "#278"
                 req_id: NET01
                 test_id: NET01-01
-                status: pending
+                status: published
       - name: NVLink Domain API
         capabilities:
           - description: NVLink Domain API
@@ -4067,7 +4389,7 @@ domains:
                   - "#279"
                 req_id: NET02
                 test_id: NET02-02
-                status: pending
+                status: published
       - name: Transport Connectivity
         capabilities:
           - description: CorpIT Interconnect
@@ -4139,13 +4461,13 @@ domains:
                   - governance
                   - min_req
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#251"
                 req_id: CAP01
                 test_id: CAP01-01
-                status: pending
+                status: published
       - name: Capacity Reservations
         capabilities:
           - description: Capacity Reservations
@@ -4157,13 +4479,13 @@ domains:
                   - min_req
                   - security
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#252"
                 req_id: CAP04
                 test_id: CAP04-01
-                status: pending
+                status: published
               - summary: Verify atomic allocation of a topology block as a single unit
                 labels:
                   - bare_metal
@@ -4171,13 +4493,13 @@ domains:
                   - min_req
                   - security
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#253"
                 req_id: CAP04
                 test_id: CAP04-02
-                status: pending
+                status: published
       - name: Unified Health APIs
         capabilities:
           - description: Unified Health APIs
@@ -4188,26 +4510,26 @@ domains:
                   - health
                   - min_req
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#254"
                 req_id: CAP05
                 test_id: CAP05-01
-                status: pending
+                status: published
               - summary: Verify primitive-level health aggregation (cluster, nodegroup, or reservation level)
                 labels:
                   - bare_metal
                   - health
                   - min_req
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#255"
                 req_id: CAP05
                 test_id: CAP05-02
-                status: pending
+                status: published
   - name: Benchmarking
     components:
       - name: Exemplar
@@ -4221,13 +4543,16 @@ domains:
                 test_id: BM01-01
                 status: pending
                 notes: ""
+                priority: ""
+                milestone: ""
               - summary: "NVMesh checks?"
                 notes: REVIEW
                 req_id: BENCH01
                 test_id: BENCH01-01
                 legacy_ids: [BENCH-XX-01]
                 status: pending
-                priority: ""
+                priority: P2
+                milestone: ""
               - summary: "IPv4 and IPv6 checks?"
                 notes: REVIEW
                 req_id: BENCH02
@@ -4235,14 +4560,15 @@ domains:
                 legacy_ids: [BENCH-XX-02]
                 status: pending
                 priority: ""
+                milestone: ""
               - summary: "Verify performance is within 5% of NVIDIA Reference"
                 labels:
                   - min_req
                 priority: P1
-                milestone: M5
+                milestone: M6
                 notes: ""
                 github_issues:
                   - "#249"
                 req_id: BM01
                 test_id: BM01-02
-                status: pending
+                status: published

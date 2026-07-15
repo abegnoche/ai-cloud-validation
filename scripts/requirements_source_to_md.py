@@ -21,7 +21,7 @@ Google-Docs-friendly view. Handles both the `offtake` and `reference` sources.
 
 Usage:
     python3 scripts/requirements_source_to_md.py docs/requirements/offtake-requirements.yaml
-    python3 scripts/requirements_source_to_md.py            # render both known sources
+    python3 scripts/requirements_source_to_md.py            # render all known sources
 """
 
 from __future__ import annotations
@@ -34,7 +34,11 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REQ_DIR = REPO_ROOT / "docs" / "requirements"
-DEFAULT_SOURCES = [REQ_DIR / "offtake-requirements.yaml", REQ_DIR / "software-reference-requirements.yaml"]
+DEFAULT_SOURCES = [
+    REQ_DIR / "offtake-requirements.yaml",
+    REQ_DIR / "software-reference-requirements.yaml",
+    REQ_DIR / "storage-acceptance-requirements.yaml",
+]
 
 GENERATED_BANNER = "<!-- GENERATED FILE - DO NOT EDIT BY HAND. Source: {src}. Run `make plan`. -->"
 
@@ -109,7 +113,43 @@ def render_reference(doc: dict[str, Any], src_name: str) -> str:
     return "\n".join(out) + "\n"
 
 
-RENDERERS = {"offtake": render_offtake, "reference": render_reference}
+def render_storage(doc: dict[str, Any], src_name: str) -> str:
+    """Render the storage-acceptance listing, grouped by section -> subsection."""
+    out = [
+        GENERATED_BANNER.format(src=src_name),
+        "",
+        f"# {doc.get('title', 'Storage Acceptance Requirements')}",
+        "",
+        f"> Structured source of record: `{src_name}` (version {doc.get('version', 'n/a')}).",
+        "> Requirement IDs are this document's own native identifiers (N-001..N-033),",
+        "> a distinct namespace from the offtake HSS/DIR requirements. Upstream 'PRD",
+        "> Ref' cross-references are tracked in the traceability matrix, not here.",
+        "> Edit the YAML, not this file.",
+        "",
+    ]
+    section = subsection = None
+    for r in doc.get("requirements", []):
+        section_changed = r.get("section") != section
+        if section_changed:
+            section = r.get("section")
+            heading(out, f"## {section}")
+            subsection = None
+        if section_changed or r.get("subsection") != subsection:
+            subsection = r.get("subsection")
+            if subsection:
+                heading(out, f"### {subsection}")
+            out += [
+                "| Req ID | Requirement Area | Description | Status |",
+                "| :----- | :--------------- | :---------- | :----- |",
+            ]
+        out.append(
+            f"| {cell(r.get('req_id'))} | {cell(r.get('area'))} | {cell(r.get('description'))} "
+            f"| {cell(r.get('status', 'active'))} |"
+        )
+    return "\n".join(out) + "\n"
+
+
+RENDERERS = {"offtake": render_offtake, "reference": render_reference, "storage": render_storage}
 
 
 def render(path: Path) -> None:
@@ -127,7 +167,7 @@ def render(path: Path) -> None:
 
 
 def main() -> None:
-    """Render the given source YAML(s), or both known sources by default."""
+    """Render the given source YAML(s), or all known default sources by default."""
     targets = [Path(a) for a in sys.argv[1:]] or DEFAULT_SOURCES
     for t in targets:
         if t.exists():

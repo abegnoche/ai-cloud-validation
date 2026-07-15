@@ -27,7 +27,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/38[#38]
 | M0
 |
 | CRUD an custom OS image (iso file) (Upload an ISO file if supported, or remote URL if supported).
-| approved
+| published
 |
 
 | [[BOOT01-02]]BOOT01-02
@@ -41,7 +41,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/39[#39]
 | M1
 |
 | CRUD an OS install configuration (e.g. iPXE config like Carbide)
-| approved
+| published
 |
 
 | [[BOOT03-01]]BOOT03-01
@@ -55,7 +55,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/40[#40]
 | M0
 |
 | CRUD a custom VM image
-| approved
+| published
 |
 
 | [[BOOT03-02]]BOOT03-02
@@ -69,7 +69,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/104[#104]
 | M3
 |
 | CRUD (get, list, create, delete) custom OS images for fast boot (raw, qcow2, img, etc) for BM/VM
-| approved
+| published
 |
 
 | [[BOOT01-03]]BOOT01-03
@@ -83,7 +83,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/41[#41]
 | M1
 |
 | Check that an OS image can be installed on a BMaaS system
-| approved
+| published
 |
 
 | [[BOOT01-04]]BOOT01-04
@@ -97,7 +97,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/43[#43]
 | M1
 |
 | Check that an OS install configuration can be installed on a BMaaS system
-| approved
+| published
 |
 
 | [[BOOT01-05]]BOOT01-05
@@ -111,7 +111,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/44[#44]
 | M0
 |
 | Check that a VM image can be installed onto a VMaaS system
-| approved
+| published
 |
 
 | [[IMG01-01]]IMG01-01
@@ -181,10 +181,10 @@ a|
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/247[#247]
 |
-| M5
+| M6
 |
 | Spin up an instance which uses a specified key
-| approved
+| published
 |
 
 | [[AUTH03-01]]AUTH03-01
@@ -215,7 +215,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/21[#21]
 | M0
 |
 | Create user and log in as that user
-| approved
+| published
 |
 
 | [[IAM02-01]]IAM02-01
@@ -229,7 +229,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/23[#23]
 | M0
 |
 | Delete user
-| approved
+| published
 |
 
 | [[IAM03-01]]IAM03-01
@@ -260,7 +260,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/131[#131]
 | M4
 |
 | Check that IP addresses are managed by the platform, and that DHCP is able to provide IP addresses
-| approved
+| published
 |
 
 | [[IPAM02-01]]IPAM02-01
@@ -274,7 +274,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/132[#132]
 | M4
 |
 | Check that IP addresses are managed sensibly as VPCs are configured (Move to SDN section?)
-| approved
+| published
 |
 
 | Network Underlay & Mgmt
@@ -327,7 +327,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/27[#27]
 | M0
 |
 | Make sure we can ping the control plane, or get a heart beat/status code
-| approved
+| published
 |
 
 | [[CP04-01]]CP04-01
@@ -355,7 +355,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/28[#28]
 | M0
 |
 | Access keys can be created, received, used to log in
-| approved
+| published
 |
 
 | [[CP06-01]]CP06-01
@@ -369,7 +369,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/29[#29]
 | M0
 |
 | Access keys can expire or be disabled
-| approved
+| published
 |
 
 | [[CP07-01]]CP07-01
@@ -383,7 +383,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/30[#30]
 | M0
 |
 | Create tenants
-| approved
+| published
 |
 
 | [[CP08-01]]CP08-01
@@ -397,7 +397,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/31[#31]
 | M0
 |
 | Retrieve list of tenants
-| approved
+| published
 |
 
 | [[CP09-01]]CP09-01
@@ -412,7 +412,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/33[#33]
 | M0
 |
 | Retrieve info about individual tenant
-| approved
+| published
 |
 
 | [[CP10-01]]CP10-01
@@ -426,7 +426,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/34[#34]
 | M0
 |
 | Delete Tenant
-| approved
+| published
 |
 
 | [[CP11-01]]CP11-01
@@ -440,7 +440,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/35[#35]
 | M0
 |
 | Add user to tenant
-| approved
+| published
 |
 
 .2+| Hardware ingestion
@@ -454,10 +454,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/35[#35]
 | P1 (check w/ ISVs)
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/133[#133]
 | MiniCloud
-| M4
+| M6
 |
 | Makes sure that all hardware under test has been ingested, and matches the provided hardware
-| approved
+| published
 |
 
 | [[HWING02-01]]HWING02-01
@@ -485,10 +485,10 @@ a|
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/315[#315]
 | MiniCloud
-| M5
+| M6
 |
 | Check that hardware passes nonce check
-| approved
+| published
 |
 
 | [[ATTEST01-01]]ATTEST01-01
@@ -513,10 +513,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/243[#243]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/316[#316]
 | MiniCloud
-| M5
+| M6
 |
 | Check that TPM Configuration can be set per host
-| approved
+| published
 |
 
 | [[ATTEST02-01]]ATTEST02-01
@@ -531,7 +531,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/246[#246]
 | M5
 |
 | Check that an updated BIOS is installed on all hardware
-| approved
+| published
 |
 
 | [[CNP09-01]]CNP09-01
@@ -556,10 +556,10 @@ a|
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/259[#259]
 |
-| M5
+| M6
 |
 | Verify all firmware is cryptographically signed and attested during boot
-| pending
+| published
 |
 
 | [[SEC22-03]]SEC22-03
@@ -567,10 +567,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/259[#259]
 |
 |
 | REVIEW
-|
+| P0
 a|
 |
-|
+| M9
 |
 | TPM Secure Boot in BIOS
 | pending
@@ -590,7 +590,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/49[#49]
 | M1
 |
 | Create a Bare Metal node
-| approved
+| published
 |
 
 | [[CNP01-02]]CNP01-02
@@ -602,10 +602,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/49[#49]
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/51[#51] +
 https://github.com/NVIDIA/ai-cloud-validation/issues/52[#52]
 |
-| M5
+| M1
 |
 | Supports the basic lifecycle of Bare Metal nodes, following the standard CRUD pattern
-| approved
+| published
 |
 
 | [[CNP01-03]]CNP01-03
@@ -619,7 +619,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/53[#53]
 | M1
 |
 | Delete a Bare Metal node
-| approved
+| published
 |
 
 | [[SEC21-01]]SEC21-01
@@ -634,7 +634,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/47[#47]
 | M1
 |
 | Confirm sanitization on delete - Tenant View
-| approved
+| published
 |
 
 | [[SEC21-02]]SEC21-02
@@ -645,10 +645,10 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/47[#47]
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/134[#134]
 | MiniCloud
-| M4
+| M6
 |
 | Confirm sanitization on delete - Low Level
-| approved
+| published
 |
 
 | [[CNP01-04]]CNP01-04
@@ -662,7 +662,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/105[#105]
 | M3
 |
 | Topology-based placement
-| approved
+| published
 |
 
 | [[BMAAS01-01]]BMAAS01-01
@@ -670,7 +670,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/105[#105]
 |
 |
 | REVIEW
-|
+| P2
 a|
 |
 |
@@ -684,7 +684,7 @@ a|
 |
 |
 | REVIEW
-|
+| P2
 a|
 |
 |
@@ -707,7 +707,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/56[#56]
 | M1
 |
 | A running node can be accessed via SSH/Teleport for further configuration (Bare Metal)
-| approved
+| published
 |
 
 | [[CNP01-05]]CNP01-05
@@ -722,7 +722,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/57[#57]
 | M1
 |
 | A running node can be rebooted in case of issue (Bare Metal)
-| approved
+| published
 |
 
 | [[CNP01-06]]CNP01-06
@@ -736,7 +736,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/135[#135]
 | M4
 |
 | A running node can be power-cycled in case of issue
-| approved
+| published
 |
 
 | [[BMAAS04-01]]BMAAS04-01
@@ -751,7 +751,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/69[#69]
 | M1
 |
 | DEPRECATED: A node can be reinstalled from its configured stock operating system
-| approved
+| published
 |
 
 | [[CNP01-07]]CNP01-07
@@ -765,7 +765,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/106[#106]
 | M3
 |
 | A running node can be powered off (Without being destroyed)
-| approved
+| published
 |
 
 | [[BOOT02-01]]BOOT02-01
@@ -780,7 +780,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/113[#113]
 | M3
 |
 | Support for cloud-init and instance metadata discovery via link-local addresses (e.g. 169.254.169.254) or virtual devices (Bare Metal)
-| approved
+| published
 |
 
 | [[CNP01-08]]CNP01-08
@@ -794,7 +794,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/108[#108]
 | M3
 |
 | A powered off node can be powered back on
-| approved
+| published
 |
 
 | [[CNP05-01]]CNP05-01
@@ -809,7 +809,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/181[#181]
 | M3 .5
 |
 | Support for user-defined tags/labels and cloud-init metadata on instances. (Bare Metal)
-| approved
+| published
 |
 
 .2+| Nodes will be able to access expected resources on the local networks
@@ -822,10 +822,10 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/181[#181]
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/136[#136]
 | MiniCloud
-| M4
+| M6
 |
 | Check the health and status of the DPU on instantiation
-| approved
+| published
 |
 
 | [[BMAAS06-01]]BMAAS06-01
@@ -839,7 +839,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/60[#60]
 | M1
 |
 | Nodes can communicate across ethernet, infiniband, and NVLink (Bare Metal)
-| approved
+| published
 |
 
 .8+| Observability & Debug
@@ -855,7 +855,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/250[#250]
 | M5
 |
 | Check for any per-host status log over time.
-| approved
+| published
 |
 
 | [[CNP06-01]]CNP06-01
@@ -870,7 +870,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/114[#114]
 | M3
 |
 | Serial console access is required (read-only sufficient, interactive preferred) (Bare Metal)
-| approved
+| published
 |
 
 | [[BMAAS08-01]]BMAAS08-01
@@ -884,7 +884,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/61[#61]
 | M1
 |
 | Verify NVIDIA hardware
-| approved
+| published
 |
 
 | [[BMAAS09-01]]BMAAS09-01
@@ -899,7 +899,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/68[#68]
 | M1
 |
 | GPU Stress workload (Bare Metal)
-| approved
+| published
 |
 
 | [[BMAAS10-01]]BMAAS10-01
@@ -914,7 +914,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/82[#82]
 | M1
 |
 | Nim Inference jobs (Bare Metal)
-| approved
+| published
 |
 
 | [[BMAAS11-01]]BMAAS11-01
@@ -928,7 +928,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/65[#65]
 | M1
 |
 | NCCL tests
-| approved
+| published
 |
 
 | [[BMAAS12-01]]BMAAS12-01
@@ -942,7 +942,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/66[#66]
 | M1
 |
 | Training workload test
-| approved
+| published
 |
 
 | [[CNP06-02]]CNP06-02
@@ -956,7 +956,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/258[#258]
 | M5
 |
 | Verify that serial console output is logged and queryable for at least 1 month of history
-| pending
+| published
 |
 
 .2+| Stable Identifiers
@@ -974,7 +974,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/185[#185]
 | M5
 |
 | Verify that a BM node's ID does not change after a reboot
-| pending
+| published
 |
 
 | [[CNP08-02]]CNP08-02
@@ -1005,7 +1005,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/42[#42]
 | M0
 |
 | Create a VM node
-| approved
+| published
 |
 
 | [[CNP01-10]]CNP01-10
@@ -1016,10 +1016,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/42[#42]
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/51[#51]
 | LimitedEnv
-| M2
+| M1
 |
 | Get info about a specific VM node, including if it is ready for use
-| approved
+| published
 |
 
 | [[CNP01-11]]CNP01-11
@@ -1033,7 +1033,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/45[#45]
 | M1
 |
 | Get a list of all VM nodes in a VPC
-| approved
+| published
 |
 
 | [[CNP01-12]]CNP01-12
@@ -1047,7 +1047,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/46[#46]
 | M0
 |
 | Delete a VM node
-| approved
+| published
 |
 
 | [[SEC21-03]]SEC21-03
@@ -1061,7 +1061,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/47[#47]
 | M0
 |
 | Confirm sanitization on delete
-| approved
+| published
 |
 
 .7+| Once created, VM nodes can be accessed for usage, and have the high level support controls of reboot, reinstall
@@ -1119,7 +1119,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/110[#110]
 | M3
 |
 | A running VM can be stopped (Without being destroyed)
-| approved
+| published
 |
 
 | [[CNP01-15]]CNP01-15
@@ -1133,7 +1133,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/111[#111]
 | M3
 |
 | A powered off VM can be started
-| approved
+| published
 |
 
 | [[CNP05-02]]CNP05-02
@@ -1147,7 +1147,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/112[#112]
 | M3
 |
 | Support for user-defined tags/labels and cloud-init metadata on instances. (VM)
-| approved
+| published
 |
 
 | [[BOOT02-02]]BOOT02-02
@@ -1161,7 +1161,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/113[#113]
 | M3
 |
 | Support for cloud-init and instance metadata discovery via link-local addresses (e.g. 169.254.169.254) or virtual devices (VM)
-| approved
+| published
 |
 
 .2+| Quota should be enforced
@@ -1207,7 +1207,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/55[#55]
 | M0
 |
 | Check that the host OS is a known acceptable image (like Ubuntu/DGXOS)
-| approved
+| published
 |
 
 | [[VMAAS06-01]]VMAAS06-01
@@ -1221,7 +1221,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/59[#59]
 | M0
 |
 | Check that the GPU is visible and accessible from the VM
-| approved
+| published
 |
 
 | [[VMAAS07-01]]VMAAS07-01
@@ -1235,7 +1235,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/62[#62]
 | M0
 |
 | Check that the correct Linux Kernel, libvirt, sbios, and NVIDIA drivers are installed
-| approved
+| published
 |
 
 | [[VMAAS08-01]]VMAAS08-01
@@ -1263,7 +1263,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/67[#67]
 | M0
 |
 | Check that vCPU pinning is set correctly, PCI bus is configured correctly
-| approved
+| published
 |
 
 | [[VMAAS10-01]]VMAAS10-01
@@ -1353,7 +1353,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/114[#114]
 | M3
 |
 | Serial console access is required (read-only sufficient, interactive preferred) (VM)
-| approved
+| published
 |
 
 .2+| Stable Identifiers
@@ -1369,7 +1369,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/198[#198]
 | M5
 |
 | Verify that a VM's ID does not change after a stop/start cycle
-| pending
+| published
 |
 
 | [[CNP08-04]]CNP08-04
@@ -1399,7 +1399,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/256[#256]
 | M5
 |
 | Verify console access is restricted via RBAC
-| pending
+| published
 |
 
 | [[CNP01-17]]CNP01-17
@@ -1413,7 +1413,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/257[#257]
 | M5
 |
 | Verify USB, clipboard, and unnecessary virtual devices are disabled
-| pending
+| published
 |
 
 .44+| SDN Controller
@@ -1430,7 +1430,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/11[#11]
 | M0
 |
 | Create a VPC
-| approved
+| published
 |
 
 | [[SDN01-02]]SDN01-02
@@ -1444,7 +1444,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/12[#12]
 | M0
 |
 | Retrieve a VPC
-| approved
+| published
 |
 
 | [[SDN01-03]]SDN01-03
@@ -1458,7 +1458,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/13[#13]
 | M0
 |
 | Update a VPC
-| approved
+| published
 |
 
 | [[SDN01-04]]SDN01-04
@@ -1472,7 +1472,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/14[#14]
 | M0
 |
 | Delete a VPC
-| approved
+| published
 |
 
 | [[SDN04-01]]SDN04-01
@@ -1486,7 +1486,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/16[#16]
 | M0
 |
 | Verify that a VPC has an exclusive subnet
-| approved
+| published
 |
 
 | [[SDN04-02]]SDN04-02
@@ -1501,7 +1501,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/18[#18]
 | M0
 |
 | Verify that nodes in two VPCs cannot communicate over the N/S (TAN) network
-| approved
+| published
 |
 
 | [[SDN04-03]]SDN04-03
@@ -1515,7 +1515,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/18[#18]
 | M0
 |
 | Verify that nodes in two VPCs cannot communicate over the E/W (CIN) network
-| approved
+| published
 |
 
 | [[NET03-01]]NET03-01
@@ -1529,7 +1529,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/115[#115]
 | M3
 |
 | Support non-conflicting Bring-Your-Own-IP (including 7.0.0.0/8)
-| approved
+| published
 |
 
 | [[SDN11-01]]SDN11-01
@@ -1543,7 +1543,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/116[#116]
 | M3
 |
 | Support Stable Private IP allocations, where if a VM crashes and restarts the same IP address remains pinned until the node is deleted
-| approved
+| published
 |
 
 | [[SDN05-01]]SDN05-01
@@ -1557,7 +1557,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/117[#117]
 | M3
 |
 | Atomically switch a floating private IP between nodes via API within <10 seconds without requiring an instance reboot.
-| approved
+| published
 |
 
 | [[SDN06-01]]SDN06-01
@@ -1571,7 +1571,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/118[#118]
 | M3
 |
 | Localized DNS: Support for custom, localized DNS settings to enable internal domain resolution to private endpoints (e.g. storage endpoints)
-| approved
+| published
 |
 
 | [[SDN07-01]]SDN07-01
@@ -1585,7 +1585,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/119[#119]
 | M3
 |
 | Support for VPC peering with full bandwidth and no "hairpin" routing.
-| approved
+| published
 |
 
 | [[SDN02-01]]SDN02-01
@@ -1598,10 +1598,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/199[#199] +
 https://github.com/NVIDIA/ai-cloud-validation/issues/171[#171] +
 https://github.com/NVIDIA/ai-cloud-validation/issues/178[#178]
 |
-|
+| M4
 |
 | Create a Security Group
-| approved
+| published
 |
 
 | [[SDN02-02]]SDN02-02
@@ -1615,7 +1615,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/200[#200]
 |
 |
 | Retrieve a Security Group/list Security Groups
-| approved
+| published
 |
 
 | [[SDN02-03]]SDN02-03
@@ -1629,7 +1629,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/201[#201]
 |
 |
 | Update a Security Group
-| approved
+| published
 |
 
 | [[SDN02-04]]SDN02-04
@@ -1643,7 +1643,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/202[#202]
 |
 |
 | Delete a Security Group
-| approved
+| published
 |
 
 | [[CNP03-01]]CNP03-01
@@ -1657,7 +1657,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/19[#19]
 | M0
 |
 | NVLink Partitioning
-| approved
+| published
 |
 
 | [[SDN12-01]]SDN12-01
@@ -1911,7 +1911,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/281[#281]
 | M5
 |
 | Verify security group rules can be scoped at workload level
-| pending
+| published
 |
 
 | [[SDN02-06]]SDN02-06
@@ -1925,7 +1925,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/282[#282]
 | M5
 |
 | Verify security group rules can be scoped at node level
-| pending
+| published
 |
 
 | [[SDN02-07]]SDN02-07
@@ -1939,7 +1939,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/283[#283]
 | M5
 |
 | Verify security group rules can be scoped at subnet/tenant level
-| pending
+| published
 |
 
 | [[SDN02-08]]SDN02-08
@@ -1950,10 +1950,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/283[#283]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/284[#284]
 |
-| M5
+| M6
 |
 | Measure and verify policy propagation timing is within acceptable bounds
-| pending
+| published
 |
 
 | [[SDN02-09]]SDN02-09
@@ -1967,7 +1967,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/285[#285]
 | M5
 |
 | Verify security group rules can be scoped at K8s API service level
-| pending
+| published
 |
 
 | All-to-All Storage Routing
@@ -1980,10 +1980,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/285[#285]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/289[#289]
 |
-| M5
+| M6
 |
 | Verify that storage hosts can route to each other with all-to-all L3 communication
-| pending
+| published
 |
 
 | Port Security
@@ -1996,10 +1996,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/289[#289]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/286[#286]
 |
-| M5
+| M6
 |
 | Verify customizable port security policies can be applied to virtual interfaces
-| pending
+| published
 |
 
 .3+| Network Infrastructure Observability
@@ -2015,7 +2015,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/290[#290]
 | M5
 |
 | Verify logging is available for network hardware faults
-| pending
+| published
 |
 
 | [[SDN09-02]]SDN09-02
@@ -2029,7 +2029,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/291[#291]
 | M5
 |
 | Verify logging captures latency/performance fluctuations
-| pending
+| published
 |
 
 | [[SDN09-03]]SDN09-03
@@ -2043,7 +2043,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/292[#292]
 | M5
 |
 | Verify a detailed audit trail exists for all configuration changes to network filtering rules
-| pending
+| published
 |
 
 | Metadata Service
@@ -2085,7 +2085,7 @@ a|
 | https://github.com/NVIDIA/ai-cloud-validation/issues/203[#203]
 |
 |
-|
+| P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/203[#203]
 |
 |
@@ -2099,7 +2099,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/203[#203]
 | https://github.com/NVIDIA/ai-cloud-validation/issues/204[#204]
 |
 |
-|
+| P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/204[#204]
 |
 |
@@ -2388,10 +2388,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/215[#215]
 | pending
 |
 
-.35+| Data Services
-.19+| SDS Controller
-.6+| Manages software-defined storage services and policies. Orchestrates provisioning, tiers, and resiliency.
-.6+| AWS: EBS + FSx backend control planes
+.57+| Data Services
+.34+| SDS Controller
+.19+| Manages software-defined storage services and policies. Orchestrates provisioning, tiers, and resiliency.
+.19+| AWS: EBS + FSx backend control planes
 | [[HSS01-01]]HSS01-01
 | HSS01
 | https://github.com/NVIDIA/ai-cloud-validation/issues/327[#327]
@@ -2400,9 +2400,37 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/215[#215]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/327[#327]
 |
-| M5
+| M7
 |
 | Verify storage provisioning via vendor/NCP API
+| published
+|
+
+| [[HSS01-02]]HSS01-02
+| HSS01
+| https://github.com/NVIDIA/ai-cloud-validation/issues/505[#505]
+| storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/505[#505]
+|
+| M8
+|
+| Verify authentication to the storage management API with the configured credential (basic auth or bearer token)
+| pending
+|
+
+| [[HSS01-03]]HSS01-03
+| HSS01
+| https://github.com/NVIDIA/ai-cloud-validation/issues/506[#506]
+| storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/506[#506]
+|
+| M8
+|
+| Verify the volume provisioning API provisions a volume of the requested size within NVIDIA's tenant
 | pending
 |
 
@@ -2414,10 +2442,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/327[#327]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/328[#328]
 |
-| M5
+| M7
 |
 | Verify QoS — provisioned throughput meets requested minimum bandwidth and IOPS
-| pending
+| published
 |
 
 | [[HSS03-01]]HSS03-01
@@ -2428,10 +2456,108 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/328[#328]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/329[#329]
 |
-| M5
+| M7
 |
 | Verify K8s CSI integration for storage
-| pending
+| published
+|
+
+| [[HSS03-02]]HSS03-02
+| HSS03
+| https://github.com/NVIDIA/ai-cloud-validation/issues/486[#486]
+| storage
+| Implemented in #523 (K8sCsiDriverHealthCheck).
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/486[#486]
+|
+| M7
+|
+| Verify the CSI controller Deployment and node DaemonSet pods are running and healthy
+| published
+|
+
+| [[HSS03-03]]HSS03-03
+| HSS03
+| https://github.com/NVIDIA/ai-cloud-validation/issues/487[#487]
+| storage
+| Implemented in #523 (K8sCsiDriverHealthCheck).
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/487[#487]
+|
+| M7
+|
+| Verify the CSIDriver object is registered for the NCP provisioner
+| published
+|
+
+| [[HSS03-04]]HSS03-04
+| HSS03
+| https://github.com/NVIDIA/ai-cloud-validation/issues/488[#488]
+| storage
+| Implemented in #523 (K8sCsiDriverHealthCheck).
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/488[#488]
+|
+| M7
+|
+| Verify at least one StorageClass references the NCP CSI provisioner
+| published
+|
+
+| [[HSS03-05]]HSS03-05
+| HSS03, K8S23
+| https://github.com/NVIDIA/ai-cloud-validation/issues/489[#489]
+| storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/489[#489]
+|
+| M7
+|
+| Verify a PVC against the NCP StorageClass reaches Bound and creates a PV
+| published
+|
+
+| [[HSS03-06]]HSS03-06
+| HSS03, K8S23
+| https://github.com/NVIDIA/ai-cloud-validation/issues/490[#490]
+| storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/490[#490]
+|
+| M7
+|
+| Verify the provisioned PV capacity is >= the PVC request
+| published
+|
+
+| [[HSS03-07]]HSS03-07
+| HSS03, K8S23
+| https://github.com/NVIDIA/ai-cloud-validation/issues/491[#491]
+| storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/491[#491]
+|
+| M7
+|
+| Verify a pod can mount the PVC and read back data it wrote
+| published
+|
+
+| [[HSS03-08]]HSS03-08
+| HSS03, K8S23
+| https://github.com/NVIDIA/ai-cloud-validation/issues/492[#492]
+| storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/492[#492]
+|
+| M7
+|
+| Verify multiple concurrent PVCs bind to distinct PVs
+| published
 |
 
 | [[HSS04-01]]HSS04-01
@@ -2442,9 +2568,65 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/329[#329]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/330[#330]
 |
-| M5
+| M7
 |
 | Verify quota limits can be set on user workloads/volumes
+| published
+|
+
+| [[HSS04-02]]HSS04-02
+| HSS04
+| https://github.com/NVIDIA/ai-cloud-validation/issues/507[#507]
+| storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/507[#507]
+|
+| M8
+|
+| Verify a functional API reports tenant-level storage utilization and quota
+| pending
+|
+
+| [[HSS04-03]]HSS04-03
+| HSS04
+| https://github.com/NVIDIA/ai-cloud-validation/issues/508[#508]
+| storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/508[#508]
+|
+| M8
+|
+| Verify a functional API lists the quotas configured within the NVIDIA tenancy
+| pending
+|
+
+| [[HSS04-04]]HSS04-04
+| HSS04
+| https://github.com/NVIDIA/ai-cloud-validation/issues/509[#509]
+| storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/509[#509]
+|
+| M8
+|
+| Verify a functional API returns utilization against a given quota by ID
+| pending
+|
+
+| [[HSS04-05]]HSS04-05
+| HSS04
+| https://github.com/NVIDIA/ai-cloud-validation/issues/510[#510]
+| storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/510[#510]
+|
+| M8
+|
+| Verify reported quota consumption reflects data written to the filesystem
 | pending
 |
 
@@ -2456,10 +2638,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/330[#330]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/331[#331]
 |
-| M5
+| M7
 |
 | Verify non-disruptive upgrades (NVIDIA can defer maintenance up to 2 weeks)
-| pending
+| published
 |
 
 | [[STOR01-01]]STOR01-01
@@ -2476,8 +2658,8 @@ a|
 | pending
 |
 
-.3+| Home Directory Storage
-.3+|
+.4+| Home Directory Storage
+.4+|
 | [[DIR02-01]]DIR02-01
 | DIR02
 | https://github.com/NVIDIA/ai-cloud-validation/issues/326[#326]
@@ -2490,6 +2672,20 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/326[#326]
 |
 | Verify NFS protocol shared storage is available
 | pending
+|
+
+| [[DIR02-02]]DIR02-02
+| DIR02
+| https://github.com/NVIDIA/ai-cloud-validation/issues/494[#494]
+| kubernetes, slow, storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/494[#494]
+|
+| M7
+|
+| Verify POSIX filesystem compliance via the applicable pjdfstest suites
+| published
 |
 
 | [[DIR01-01]]DIR01-01
@@ -2530,10 +2726,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/325[#325]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/263[#263]
 |
-| M5
+| M6
 |
 | Verify a dedicated K8s cluster (or ability to create one) for the data mover stack
-| pending
+| published
 |
 
 | [[DMS02-01]]DMS02-01
@@ -2544,10 +2740,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/263[#263]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/264[#264]
 |
-| M5
+| M6
 |
 | Verify dedicated CPU nodes are available for data mover with high-performance networking
-| pending
+| published
 |
 
 | [[DMS03-01]]DMS03-01
@@ -2558,10 +2754,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/264[#264]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/265[#265]
 |
-| M5
+| M6
 |
 | Verify the same filesystem mounted on GPU nodes is accessible from data mover nodes
-| pending
+| published
 |
 
 | [[DMS05-01]]DMS05-01
@@ -2572,10 +2768,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/265[#265]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/266[#266]
 |
-| M5
+| M6
 |
 | Verify stable egress IP for allowlisting access to NVIDIA services
-| pending
+| published
 |
 
 .4+| DGXC-Managed Storage Deployment
@@ -2636,8 +2832,8 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/361[#361]
 | pending
 |
 
-| Storage Security
-|
+.2+| Storage Security
+.2+|
 | [[SEC04-01]]SEC04-01
 | SEC04
 | https://github.com/NVIDIA/ai-cloud-validation/issues/296[#296]
@@ -2649,6 +2845,20 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/296[#296]
 | M5
 |
 | Verify least-privilege access policies (resource-based, user-based, network-based)
+| published
+|
+
+| [[SEC04-03]]SEC04-03
+| SEC04
+| https://github.com/NVIDIA/ai-cloud-validation/issues/511[#511]
+| security, storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/511[#511]
+|
+| M8
+|
+| Verify multi-tenant isolation — quota listings contain only paths within the tenant's namespace
 | pending
 |
 
@@ -2662,15 +2872,15 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/296[#296]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/332[#332]
 |
-| M5
+| M7
 |
 | Verify storage systems using RDMA enforce memory protection via authorization keys for both local and remote access
-| pending
+| published
 |
 
-.8+| Parallel File System Services
-.8+| high performance file system optimized for AI and HPC workloads
-.8+|
+.15+| Parallel File System Services
+.15+| high performance file system optimized for AI and HPC workloads
+.15+|
 | [[HSS07-01]]HSS07-01
 | HSS07
 | https://github.com/NVIDIA/ai-cloud-validation/issues/333[#333]
@@ -2679,10 +2889,25 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/332[#332]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/333[#333]
 |
-| M5
+| M7
 |
 | Verify that a parallel high-speed filesystem can be provisioned via API
-| pending
+| published
+|
+
+| [[HSS07-02]]HSS07-02
+| HSS07
+| https://github.com/NVIDIA/ai-cloud-validation/issues/498[#498]
+| kubernetes, storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/498[#498] +
+https://github.com/NVIDIA/ai-cloud-validation/issues/499[#499]
+|
+| M7
+|
+| Verify large-directory listing of 1,000,000 files and 500,000 subdirectories without error or truncation
+| published
 |
 
 | [[HSS09-01]]HSS09-01
@@ -2693,10 +2918,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/333[#333]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/334[#334]
 |
-| M5
+| M7
 |
 | Verify multiple filesystems can exist within total capacity (minimum FS size <= 50 TiB)
-| pending
+| published
 |
 
 | [[HSS10-01]]HSS10-01
@@ -2707,10 +2932,24 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/334[#334]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/335[#335]
 |
-| M5
+| M7
 |
 | Verify live filesystem expansion (capacity, inodes, IO, metadata)
-| pending
+| published
+|
+
+| [[HSS10-02]]HSS10-02
+| HSS10
+| https://github.com/NVIDIA/ai-cloud-validation/issues/493[#493]
+| storage
+| Platform/context-sensitive (platform: kubernetes). Overlaps HSS10-01 (platform-agnostic whole-filesystem expansion). Candidate for consolidation/deprecation before v1.0; two implementations of one behavior must not both ship to customers.
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/493[#493]
+|
+| M7
+|
+| Verify PVC expansion grows PV capacity and pod-visible size (if supported)
+| published
 |
 
 | [[HSS12-01]]HSS12-01
@@ -2721,10 +2960,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/335[#335]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/336[#336]
 |
-| M5
+| M7
 |
 | Verify uid/gid/project-id soft and hard quotas with enforcement
-| pending
+| published
 |
 
 | [[HSS13-01]]HSS13-01
@@ -2735,10 +2974,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/336[#336]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/337[#337]
 |
-| M5
+| M7
 |
 | Verify root-squash can be enabled and disabled at any time
-| pending
+| published
 |
 
 | [[HSS14-01]]HSS14-01
@@ -2749,10 +2988,24 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/337[#337]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/338[#338]
 |
-| M5
+| M7
 |
 | Verify the filesystem can be mounted with flock
-| pending
+| published
+|
+
+| [[HSS14-02]]HSS14-02
+| HSS14
+| https://github.com/NVIDIA/ai-cloud-validation/issues/495[#495]
+| kubernetes, storage
+| Platform/context-sensitive (platform: kubernetes). Overlaps HSS14-01 (platform-agnostic provider-evidence flock check). Candidate for consolidation/deprecation before v1.0; two implementations of one behavior must not both ship to customers.
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/495[#495]
+|
+| M7
+|
+| Verify flock() locking behavior is correct across pods on the same PVC
+| published
 |
 
 | [[HSS15-01]]HSS15-01
@@ -2763,10 +3016,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/338[#338]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/339[#339]
 |
-| M5
+| M7
 |
 | Verify changelog/audit data is accessible (tracking by uid/gid, file/dir operations)
-| pending
+| published
 |
 
 | [[HSS18-01]]HSS18-01
@@ -2777,10 +3030,69 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/339[#339]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/340[#340]
 |
-| M5
+| M7
 |
 | Verify client multipathing to all storage servers
-| pending
+| published
+|
+
+| [[HSS17-01]]HSS17-01
+| HSS17
+| https://github.com/NVIDIA/ai-cloud-validation/issues/496[#496]
+| kubernetes, storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/496[#496]
+|
+| M7
+|
+| Verify a file written on one node is visible with correct content on another node within 1 second
+| published
+|
+
+| [[HSS17-02]]HSS17-02
+| HSS17
+| https://github.com/NVIDIA/ai-cloud-validation/issues/497[#497]
+| kubernetes, storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/497[#497]
+|
+| M7
+|
+| Verify file size and mtime changes on one node are reflected on another within the attribute-cache window
+| published
+|
+
+| [[HSS11-01]]HSS11-01
+| HSS11
+| https://github.com/NVIDIA/ai-cloud-validation/issues/500[#500]
+| kubernetes, storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/500[#500] +
+https://github.com/NVIDIA/ai-cloud-validation/issues/501[#501] +
+https://github.com/NVIDIA/ai-cloud-validation/issues/502[#502] +
+https://github.com/NVIDIA/ai-cloud-validation/issues/503[#503]
+|
+| M7
+|
+| Verify NFS mounts use the expected version (e.g. vers=4.1), nconnect value, transport protocol (proto=rdma or proto=tcp), and readahead tuning
+| published
+|
+
+| [[HSS11-04]]HSS11-04
+| HSS11
+| https://github.com/NVIDIA/ai-cloud-validation/issues/504[#504]
+| kubernetes, storage
+|
+| P1
+a| https://github.com/NVIDIA/ai-cloud-validation/issues/504[#504]
+|
+| M7
+|
+| Verify required vendor/DKMS kernel modules are installed on all GPU and CPU nodes
+| published
 |
 
 | Object Storage Service
@@ -2794,10 +3106,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/340[#340]
 | P2
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/262[#262]
 |
-| M5
+| M6
 |
 | Verify S3-compatible API access with authenticated endpoints
-| pending
+| published
 |
 
 .4+| Block Storage Services
@@ -2814,7 +3126,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/272[#272]
 | M5
 |
 | Verify dynamic volume provisioning via CSI
-| pending
+| published
 |
 
 | [[DATASVC02-01]]DATASVC02-01
@@ -2825,10 +3137,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/272[#272]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/321[#321]
 |
-| M5
+| M7
 |
 | Verify volume snapshots
-| pending
+| published
 |
 
 | [[DATASVC03-01]]DATASVC03-01
@@ -2839,10 +3151,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/321[#321]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/322[#322]
 |
-| M5
+| M7
 |
 | Verify volume resizing
-| pending
+| published
 |
 
 | [[DATASVC04-01]]DATASVC04-01
@@ -2853,10 +3165,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/322[#322]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/323[#323]
 |
-| M5
+| M7
 |
 | Verify persistent block volumes survive instance restarts
-| pending
+| published
 |
 
 | Cache Services
@@ -2959,7 +3271,7 @@ a|
 | M0
 |
 | Create a SLURM instance using the software platform
-| done
+| published
 |
 
 | [[SLURM02-01]]SLURM02-01
@@ -2973,7 +3285,7 @@ a|
 | M0
 |
 | SlurmInfoAvailable
-| done
+| published
 |
 
 | [[SLURM03-01]]SLURM03-01
@@ -2987,7 +3299,7 @@ a|
 | M0
 |
 | SlurmPartition cpu and gpu
-| done
+| published
 |
 
 | [[SLURM04-01]]SLURM04-01
@@ -3001,7 +3313,7 @@ a|
 | M0
 |
 | SlurmJobSubmission
-| done
+| published
 |
 
 | [[SLURM05-01]]SLURM05-01
@@ -3015,7 +3327,7 @@ a|
 | M0
 |
 | SlurmGpuAllocation 1gpu and 2gpu
-| done
+| published
 |
 
 | [[SLURM06-01]]SLURM06-01
@@ -3029,7 +3341,7 @@ a|
 | M0
 |
 | SlurmNodeJobExecution cpu and gpu
-| done
+| published
 |
 
 | [[SLURM07-01]]SLURM07-01
@@ -3043,7 +3355,7 @@ a|
 | M0
 |
 | SlurmGpuStressWorkload
-| done
+| published
 |
 
 | [[SLURM08-01]]SLURM08-01
@@ -3057,7 +3369,7 @@ a|
 | M0
 |
 | SlurmNcclMultiNodeWorkload
-| done
+| published
 |
 
 | [[SLURM09-01]]SLURM09-01
@@ -3071,7 +3383,7 @@ a|
 | M0
 |
 | SlurmSbatchWorkload gpu and cpu
-| done
+| published
 |
 
 | [[SLURM10-01]]SLURM10-01
@@ -3085,7 +3397,7 @@ a|
 | M0
 |
 | SlurmSbatchWorkload-inline
-| done
+| published
 |
 
 .45+| Managed Kubernetes Control Plane
@@ -3102,7 +3414,7 @@ a|
 | M0
 |
 | Create a K8s Instance using the software platform (CLI, Terraform)
-| done
+| published
 |
 
 .3+| Full lifecycle management
@@ -3126,7 +3438,7 @@ a|
 |
 |
 |
-|
+| P2
 a|
 |
 |
@@ -3140,7 +3452,7 @@ a|
 | https://github.com/NVIDIA/ai-cloud-validation/issues/217[#217]
 | min_req
 |
-|
+| P2
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/217[#217]
 |
 |
@@ -3176,7 +3488,7 @@ a|
 | M0
 |
 | Be able to run k8s workloads
-| done
+| published
 |
 
 | [[K8S40-01]]K8S40-01
@@ -3190,7 +3502,7 @@ a|
 | M0
 |
 | K8s Nim Inference
-| done
+| published
 |
 
 | [[K8S32-01]]K8S32-01
@@ -3204,7 +3516,7 @@ a|
 | M0
 |
 | K8s Nim Helm
-| done
+| published
 |
 
 | Topology based placement
@@ -3268,7 +3580,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/233[#233]
 |
 |
 | get versions, topology, core APIs by: (a) pass CNCF k8s conformance: https://github.com/cncf/k8s-conformance (b) add AI conformance: [https://github.com/cncf/k8s-ai-conformance](https://github.com/cncf/k8s-ai-conformance)
-| pending
+| published
 |
 
 | k8s service account OIDC
@@ -3300,7 +3612,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/218[#218]
 |
 |
 | create a CRD, create webhook, and test validation/mutation requirement
-| approved
+| published
 |
 
 | TODO: L3 networking logging
@@ -3332,7 +3644,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/219[#219]
 |
 |
 | Apply a NetworkPolicy; verify pod connectivity is restricted as expected; verify IPv4 and IPv6 addresses are assigned on dual-stack nodes
-| approved
+| published
 |
 
 .6+| TODO: Dynamic provisioning, snapshots, and resizing
@@ -3376,7 +3688,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/273[#273]
 | M5
 |
 | Verify CSI supports block, shared filesystem, and NFS storage
-| pending
+| published
 |
 
 | [[K8S23-05]]K8S23-05
@@ -3390,7 +3702,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/274[#274]
 | M5
 |
 | Verify CSI supports both static and dynamic provisioning via PVs and PVCs
-| pending
+| published
 |
 
 | [[K8S23-06]]K8S23-06
@@ -3404,7 +3716,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/275[#275]
 | M5
 |
 | Verify CSI credentials are tenant cluster scoped (no cross-cluster access)
-| pending
+| published
 |
 
 | [[K8S23-07]]K8S23-07
@@ -3418,7 +3730,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/276[#276]
 | M5
 |
 | Verify APIs to query storage usage against overall cluster quota with per-PVC/Volume breakdown
-| pending
+| published
 |
 
 .2+| NVIDIA Operator support
@@ -3556,7 +3868,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/271[#271]
 | M5
 |
 | Verify the K8s API endpoint has network access controls (firewall/private link)
-| pending
+| published
 |
 
 | K8s Encryption
@@ -3588,7 +3900,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/301[#301]
 | M5
 |
 | Verify certificates are rotated on a 60-day cycle
-| pending
+| published
 |
 
 | [[SEC09-02]]SEC09-02
@@ -3602,7 +3914,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/302[#302]
 | M5
 |
 | Verify support for both provider-managed and customer-managed keys
-| pending
+| published
 |
 
 | Autoscaling
@@ -3615,10 +3927,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/302[#302]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/267[#267]
 |
-| M5
+| M6
 |
 | Verify Cluster Autoscaler integration (upstream)
-| pending
+| published
 |
 
 | Kubernetes Security Response
@@ -3651,7 +3963,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/221[#221]
 | M5
 |
 | Create a K8s node pool via API/CLI specifying node type (CPU or GPU instance type)
-| pending
+| published
 |
 
 | [[K8S06-02]]K8S06-02
@@ -3666,7 +3978,7 @@ https://github.com/NVIDIA/ai-cloud-validation/issues/222[#222]
 | M5
 |
 | Update a K8s node pool (e.g., scale to a target count)
-| pending
+| published
 |
 
 | [[K8S06-03]]K8S06-03
@@ -3680,7 +3992,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/223[#223]
 | M5
 |
 | Delete a K8s node pool
-| pending
+| published
 |
 
 | [[K8S06-04]]K8S06-04
@@ -3694,7 +4006,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/224[#224]
 | M5
 |
 | Verify default node labels and taints can be specified when a node joins the cluster via node pool
-| pending
+| published
 |
 
 | API Server Metrics
@@ -3710,7 +4022,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/225[#225]
 | M5
 |
 | Verify API Server metrics are available in a Prometheus-scrapable format for SLO measurement
-| pending
+| published
 |
 
 | Public OIDC Endpoint
@@ -3726,7 +4038,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/226[#226]
 | M5
 |
 | Verify the cluster exposes a cluster-specific OIDC Issuer endpoint for workload identity federation
-| pending
+| published
 |
 
 | K8s Control Plane Logging
@@ -3742,7 +4054,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/227[#227]
 | M5
 |
 | Verify ability to view or export Kubernetes control plane logs (apiserver, kcm)
-| pending
+| published
 |
 
 | K8s Performance
@@ -3771,10 +4083,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/268[#268]
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/277[#277]
 |
-| M5
+| M6
 |
 | Support multiple clusters in the same tenancy and in the same VPC
-| pending
+| published
 |
 
 | Power Policy Management
@@ -3861,7 +4173,7 @@ a|
 | M0
 |
 | Validate that an OTel endpoint is provided and some data can be pulled from it
-| done
+| published
 |
 
 | [[OBS02-01]]OBS02-01
@@ -3875,7 +4187,7 @@ a|
 | M0
 |
 | Logging information about the control plane is available
-| done
+| published
 |
 
 | [[OBS03-01]]OBS03-01
@@ -3889,7 +4201,7 @@ a|
 | M0
 |
 | Logging information from instances
-| done
+| published
 |
 
 | [[OBS04-01]]OBS04-01
@@ -3903,7 +4215,7 @@ a|
 | M0
 |
 | Alerts can be issued by the system in case of problems
-| done
+| published
 |
 
 | Telemetry Delivery
@@ -3916,10 +4228,10 @@ a|
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/342[#342]
 |
-| M5
+| M7
 |
 | Verify telemetry latency is no longer than 120 seconds
-| pending
+| published
 |
 
 .5+| Network Telemetry
@@ -3932,10 +4244,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/342[#342]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/343[#343]
 |
-| M5
+| M7
 |
 | Verify telemetry is available for North-South (front-end) network
-| pending
+| published
 |
 
 | [[OBS07-01]]OBS07-01
@@ -3946,10 +4258,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/343[#343]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/344[#344]
 |
-| M5
+| M7
 |
 | Verify telemetry is available for East-West (back-end / GPU interconnect) network
-| pending
+| published
 |
 
 | [[OBS08-01]]OBS08-01
@@ -3960,10 +4272,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/344[#344]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/345[#345]
 |
-| M5
+| M7
 |
 | Verify telemetry is available for Management network
-| pending
+| published
 |
 
 | [[OBS09-01]]OBS09-01
@@ -3974,10 +4286,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/345[#345]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/346[#346]
 |
-| M5
+| M7
 |
 | Verify telemetry is available for NVSwitch Fabric (GB200+)
-| pending
+| published
 |
 
 | [[OBS10-01]]OBS10-01
@@ -3988,10 +4300,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/346[#346]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/347[#347]
 |
-| M5
+| M7
 |
 | Verify telemetry is available for Host network (NIC-level)
-| pending
+| published
 |
 
 .9+| Required Logs
@@ -4004,10 +4316,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/347[#347]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/348[#348]
 |
-| M5
+| M7
 |
 | Verify Fabric Manager logs are available (where applicable)
-| pending
+| published
 |
 
 | [[OBS12-01]]OBS12-01
@@ -4018,10 +4330,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/348[#348]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/349[#349]
 |
-| M5
+| M7
 |
 | Verify Subnet Manager logs are available (where applicable)
-| pending
+| published
 |
 
 | [[OBS13-01]]OBS13-01
@@ -4032,10 +4344,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/349[#349]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/350[#350]
 |
-| M5
+| M7
 |
 | Verify UFM Event logs are available
-| pending
+| published
 |
 
 | [[OBS14-01]]OBS14-01
@@ -4046,10 +4358,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/350[#350]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/351[#351]
 |
-| M5
+| M7
 |
 | Verify general switch logs are available
-| pending
+| published
 |
 
 | [[OBS15-01]]OBS15-01
@@ -4060,10 +4372,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/351[#351]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/352[#352]
 |
-| M5
+| M7
 |
 | Verify switch syslogs are available
-| pending
+| published
 |
 
 | [[OBS16-01]]OBS16-01
@@ -4074,10 +4386,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/352[#352]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/353[#353]
 |
-| M5
+| M7
 |
 | Verify switch kernel logs are available
-| pending
+| published
 |
 
 | [[OBS17-01]]OBS17-01
@@ -4088,10 +4400,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/353[#353]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/354[#354]
 |
-| M5
+| M7
 |
 | Verify BMC SEL logs are available
-| pending
+| published
 |
 
 | [[OBS18-01]]OBS18-01
@@ -4102,10 +4414,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/354[#354]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/355[#355]
 |
-| M5
+| M7
 |
 | Verify host syslogs are available
-| pending
+| published
 |
 
 | [[OBS19-01]]OBS19-01
@@ -4116,10 +4428,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/355[#355]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/356[#356]
 |
-| M5
+| M7
 |
 | Verify VPC Flow logs (all ingress/egress traffic) are available
-| pending
+| published
 |
 
 .8+| Telemetry / Data Lakes
@@ -4150,7 +4462,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/120[#120]
 | M3
 |
 | Read only access to a BMaaS system's serial console
-| approved
+| published
 |
 
 | [[TELEM03-01]]TELEM03-01
@@ -4164,7 +4476,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/121[#121]
 | M3
 |
 | Read only access to a VM serial console
-| approved
+| published
 |
 
 | BMC/Redfish Telemetry
@@ -4177,10 +4489,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/121[#121]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/362[#362]
 |
-| M5
+| M7
 |
 | Verify BMC/Redfish telemetry is accessible via API for GPU metrics not available from the host OS
-| pending
+| published
 |
 
 .2+| Storage Telemetry
@@ -4258,7 +4570,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/306[#306]
 | M5
 |
 | Verify BMC management is on a dedicated, restricted network (physically separate or VLAN/VRF-isolated)
-| pending
+| published
 |
 
 | [[SEC12-02]]SEC12-02
@@ -4272,7 +4584,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/307[#307]
 | M5
 |
 | Verify BMC interfaces are not reachable from tenant networks
-| pending
+| published
 |
 
 | [[CNP10-01]]CNP10-01
@@ -4286,7 +4598,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/260[#260]
 | M5
 |
 | Verify IPMI is disabled; Redfish over TLS is used with AAA
-| pending
+| published
 |
 
 | [[SEC12-03]]SEC12-03
@@ -4300,7 +4612,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/308[#308]
 | M5
 |
 | Verify BMC is only accessible via a hardened bastion (jumphost) server; direct public/corporate network access is blocked
-| pending
+| published
 |
 
 | Network Traffic Encryption
@@ -4332,7 +4644,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/311[#311]
 | M5
 |
 | Verify no public internet access to API endpoints by default
-| pending
+| published
 |
 
 | [[SEC13-02]]SEC13-02
@@ -4343,10 +4655,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/311[#311]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/310[#310]
 |
-| M5
+| M6
 |
 | Verify insecure protocols (HTTP, SSLv3, TLSv1) are disabled
-| pending
+| published
 |
 
 .2+| InfiniBand Security
@@ -4359,10 +4671,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/310[#310]
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/287[#287]
 |
-| M5
+| M6
 |
 | Verify IB tenant isolation — compute dedicated to NVIDIA is isolated from other customers
-| pending
+| published
 |
 
 | [[SDN04-05]]SDN04-05
@@ -4373,10 +4685,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/287[#287]
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/288[#288]
 |
-| M5
+| M6
 |
 | Verify IB keys are configured: P_Key, Management Key, Aggregation Management Key, VendorSpecific Key, CongestionControl Key, Node2Node Key, Manager2Node Key
-| pending
+| published
 |
 
 | Tenancy Isolation
@@ -4392,7 +4704,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/305[#305]
 | M5
 |
 | Verify hard physical or logical isolation between tenants for network, data, compute, and storage resources
-| pending
+| published
 |
 
 .4+| Authentication
@@ -4409,7 +4721,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/293[#293]
 | M5
 |
 | Verify user authentication via OIDC for platform services
-| pending
+| published
 |
 
 | In-Cluster Authentication
@@ -4425,7 +4737,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/294[#294]
 | M5
 |
 | Verify workloads and nodes receive short-lived credentials/tokens
-| pending
+| published
 |
 
 | External Service Authentication
@@ -4441,7 +4753,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/295[#295]
 | M5
 |
 | Verify out-of-cluster service accounts can authenticate with long-lived credentials
-| pending
+| published
 |
 
 | Admin Interface Security
@@ -4457,7 +4769,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/298[#298]
 | M5
 |
 | Verify all administrative interfaces (UI, CLI, API) are protected by Multi-Factor Authentication
-| pending
+| published
 |
 
 | Authorization
@@ -4474,7 +4786,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/297[#297]
 | M5
 |
 | Assign a minimal role to a user; verify they cannot perform actions outside that role on Compute, Storage, and Network APIs
-| pending
+| published
 |
 
 .2+| Audit & Logging
@@ -4491,7 +4803,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/299[#299]
 | M5
 |
 | Perform a management API call; verify an audit log entry is generated with correct metadata
-| pending
+| published
 |
 
 | [[SEC08-02]]SEC08-02
@@ -4505,7 +4817,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/300[#300]
 | M5
 |
 | Verify audit logs are retained for at least 30 days
-| pending
+| published
 |
 
 .6+| Hardware Security & Compliance
@@ -4519,10 +4831,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/300[#300]
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/312[#312]
 |
-| M5
+| M6
 |
 | Verify memory sanitization between tenants
-| pending
+| published
 |
 
 | [[SEC21-05]]SEC21-05
@@ -4533,10 +4845,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/312[#312]
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/313[#313]
 |
-| M5
+| M6
 |
 | Verify SRAM/GPU memory is sanitized between tenants
-| pending
+| published
 |
 
 | [[SEC21-06]]SEC21-06
@@ -4547,10 +4859,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/313[#313]
 | P0
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/314[#314]
 |
-| M5
+| M6
 |
 | Verify TPM and BIOS are reset during tenant transitions or hardware replacement
-| pending
+| published
 |
 
 | At-Rest Encryption
@@ -4582,7 +4894,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/303[#303]
 | M5
 |
 | Verify a centralized KMS is used for all encryption keys and secrets
-| pending
+| published
 |
 
 | [[SEC09-04]]SEC09-04
@@ -4596,7 +4908,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/304[#304]
 | M5
 |
 | Verify support for Customer Managed Keys (BYOK)
-| pending
+| published
 |
 
 .7+| Network Transport
@@ -4614,7 +4926,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/278[#278]
 | M5
 |
 | Query the API for a compute node and verify it returns backend switch IDs (leaf, spine, core)
-| pending
+| published
 |
 
 | NVLink Domain API
@@ -4631,7 +4943,7 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/279[#279]
 | M5
 |
 | Query the NVLink domain ID for a compute node supporting NVLink
-| pending
+| published
 |
 
 .5+| Transport Connectivity
@@ -4723,10 +5035,10 @@ a|
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/251[#251]
 |
-| M5
+| M6
 |
 | Query and verify governance API returns Delivered, Healthy, Reserved, and Active metrics for nodes/GPUs
-| pending
+| published
 |
 
 .2+| Capacity Reservations
@@ -4740,10 +5052,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/251[#251]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/252[#252]
 |
-| M5
+| M6
 |
 | Verify a set of resources can be logically grouped and pinned to an account
-| pending
+| published
 |
 
 | [[CAP04-02]]CAP04-02
@@ -4754,10 +5066,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/252[#252]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/253[#253]
 |
-| M5
+| M6
 |
 | Verify atomic allocation of a topology block as a single unit
-| pending
+| published
 |
 
 .2+| Unified Health APIs
@@ -4771,10 +5083,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/253[#253]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/254[#254]
 |
-| M5
+| M6
 |
 | Verify per-host health API returns real-time GPU state, thermal status, memory health
-| pending
+| published
 |
 
 | [[CAP05-02]]CAP05-02
@@ -4785,10 +5097,10 @@ a| https://github.com/NVIDIA/ai-cloud-validation/issues/254[#254]
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/255[#255]
 |
-| M5
+| M6
 |
 | Verify primitive-level health aggregation (cluster, nodegroup, or reservation level)
-| pending
+| published
 |
 
 .4+| Benchmarking
@@ -4814,7 +5126,7 @@ a|
 |
 |
 | REVIEW
-|
+| P2
 a|
 |
 |
@@ -4845,10 +5157,10 @@ a|
 | P1
 a| https://github.com/NVIDIA/ai-cloud-validation/issues/249[#249]
 |
-| M5
+| M6
 |
 | Verify performance is within 5% of NVIDIA Reference
-| pending
+| published
 |
 
 |===
