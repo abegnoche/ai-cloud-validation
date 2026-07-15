@@ -175,8 +175,8 @@ commands:
         requires_available_validations:
           - HssLiveExpansionCheck
         args: ["--region", "{{region}}"]
-        # 1800 (create) + 1800 (capacity scale) + 900 (delete) + slack.
-        timeout: 4800
+        # 1800 (create) + 3600 (capacity scale) + 900 (delete) + slack.
+        timeout: 6600
 
       - name: root_squash
         phase: test

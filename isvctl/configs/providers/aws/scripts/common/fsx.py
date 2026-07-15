@@ -202,7 +202,7 @@ def wait_root_squash(fsx: Any, fs_id: str, expected: str, *, timeout: float = 60
     return False
 
 
-def wait_storage_capacity(fsx: Any, fs_id: str, at_least: int, *, timeout: float = 1800.0, delay: float = 15.0) -> int:
+def wait_storage_capacity(fsx: Any, fs_id: str, at_least: int, *, timeout: float = 3600.0, delay: float = 15.0) -> int:
     """Poll until StorageCapacity >= ``at_least`` and Lifecycle is AVAILABLE.
 
     FSx for Lustre may briefly enter ``UPDATING`` while adding capacity; the new
