@@ -120,4 +120,12 @@ def test_platform_registration_errors_flags_unregistered_suite(tmp_path: Path) -
     """
     (tmp_path / "newcap.yaml").write_text("tests:\n  validations: {}\n")
     errors = validate_suite_wiring.platform_registration_errors(tmp_path)
-    assert errors == ["suites/newcap.yaml: not registered in isvtest.catalog.PLATFORM_CONFIGS (catalog platform axis)"]
+    assert errors == [
+        "suites/newcap.yaml: not registered in isvtest.catalog_platforms.PLATFORM_CONFIGS (catalog platform axis)"
+    ]
+
+
+def test_registered_platforms_round_trip_through_isvreporter() -> None:
+    """Guardrail: every catalog platform is recognized by isvreporter."""
+    errors = validate_suite_wiring.registry_consistency_errors()
+    assert not errors, "registry consistency failed:\n  " + "\n  ".join(errors)
