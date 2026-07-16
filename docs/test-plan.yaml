@@ -3860,7 +3860,6 @@ domains:
                 status: published
               - summary: Verify BMC SEL logs are available
                 labels:
-                  - bare_metal
                   - min_req
                   - observability
                   - security
@@ -3875,7 +3874,6 @@ domains:
                 status: published
               - summary: Verify host syslogs are available
                 labels:
-                  - bare_metal
                   - min_req
                   - observability
                 priority: P1
@@ -3947,7 +3945,6 @@ domains:
             tests:
               - summary: Verify BMC/Redfish telemetry is accessible via API for GPU metrics not available from the host OS
                 labels:
-                  - bare_metal
                   - gpu
                   - min_req
                   - observability

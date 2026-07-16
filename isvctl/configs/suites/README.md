@@ -86,13 +86,15 @@ platform labels:
 # bare_metal.yaml    labels: ["bare_metal", "storage"]   reads {{steps.launch_instance.*}}
 ```
 
-Today only the K8s side exists (the `storage`-labeled CSI checks in `k8s.yaml`).
-Note that `storage` is only a **label** here, not a module: it is orthogonal to
-the module axis, so there is no `storage` matrix row until a `suites/storage.yaml`
-(`module: storage`) is added. Do **not** put both platforms' checks in one
-`storage.yaml` imported by both: a plain `-f eks.yaml` run would drag the BM
-checks in and they would SKIP (no `launch_instance` step), polluting the report.
-Keep them inline, or use one validation-only fragment per platform.
+The inline K8s side exists today (the `storage`-labeled CSI checks in
+`k8s.yaml`). Since `suites/storage.yaml` (`module: storage`) landed, `storage`
+is **both** a module row (the self-contained block-volume + high-speed-storage
+suite, which provisions its own subject) and a piggyback label on the inline
+CSI checks - the matrix's "By label" view unions the two. Do **not** put
+platform-inline checks in a suite imported by several platforms: a plain
+`-f eks.yaml` run would drag the other platform's checks in and they would
+SKIP (no `launch_instance` step), polluting the report. Keep them inline, or
+use one validation-only fragment per platform.
 
 ### Label governance
 

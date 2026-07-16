@@ -16,10 +16,12 @@
 # AWS Observability Validation Configuration
 #
 # Imports validations from the provider-agnostic observability canonical config.
-# AWS wires the VPC Flow Logs check plus the network/fabric/storage telemetry
-# checks here. Host syslog and BMC SEL/telemetry observability checks moved to
-# providers/aws/config/bare_metal.yaml (they need a live host/BMC and now
-# piggyback on the bare_metal platform run).
+# AWS wires every observability check here: VPC Flow Logs, network/fabric/
+# storage telemetry, and the host syslog + BMC SEL/telemetry checks. The run
+# provisions a single g4dn.metal host (launch_host) that serves all host-scoped
+# checks, so the module is self-contained. Customer-visible BMC SEL and Redfish
+# GPU telemetry are not exposed by AWS EC2/EKS, so the BMC steps emit
+# provider-hidden evidence following the AWS security BMC pattern.
 #
 # Required IAM permissions:
 #   - Permissions required by providers/aws/config/network.yaml create/teardown
@@ -186,9 +188,47 @@ commands:
           - "vpc_flow_logs"
         timeout: 120
 
-      # Host syslog + BMC SEL/telemetry checks moved to the bare_metal config -
-      # they piggyback on that platform's launched host instead of a dedicated
-      # observability host.
+      # Host syslog + BMC SEL/telemetry checks run against launch_host - the
+      # single g4dn.metal instance this run provisions for every host-scoped
+      # observability check.
+      - name: host_syslogs
+        phase: test
+        continue_on_failure: true
+        command: "python3 ../scripts/observability/log_availability_test.py"
+        args:
+          - "--region"
+          - "{{region}}"
+          - "--aspect"
+          - "host_syslogs"
+          - "--host"
+          - "{{steps.launch_host.public_ip}}"
+          - "--key-file"
+          - "{{steps.launch_host.key_file}}"
+          - "--ssh-user"
+          - "{{ssh_user}}"
+        timeout: 600
+
+      - name: bmc_sel_logs
+        phase: test
+        continue_on_failure: true
+        command: "python3 ../scripts/observability/log_availability_test.py"
+        args:
+          - "--region"
+          - "{{region}}"
+          - "--aspect"
+          - "bmc_sel_logs"
+        timeout: 60
+
+      - name: bmc_gpu_telemetry
+        phase: test
+        continue_on_failure: true
+        command: "python3 ../scripts/observability/log_availability_test.py"
+        args:
+          - "--region"
+          - "{{region}}"
+          - "--aspect"
+          - "bmc_gpu_telemetry"
+        timeout: 60
 
       - name: storage_capacity_telemetry
         phase: test
@@ -354,6 +394,7 @@ tests:
   settings:
     region: "us-west-2"
     instance_type: "g4dn.metal"
+    ssh_user: "ubuntu"
     host_teardown_flag: "{{(env.AWS_OBSERVABILITY_SKIP_TEARDOWN == 'true') | ternary('--skip-destroy', '')}}"
     observability_teardown_flag: "{{(env.AWS_OBSERVABILITY_SKIP_TEARDOWN == 'true') | ternary('--skip-destroy', '')}}"
     network_teardown_flag: "{{(env.AWS_OBSERVABILITY_SKIP_TEARDOWN == 'true') | ternary('--skip-destroy', '')}}"
