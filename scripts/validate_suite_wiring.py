@@ -48,7 +48,6 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-
 from isvreporter.platform import normalize_platform
 from isvtest.catalog_platforms import PLATFORM_CONFIGS
 
