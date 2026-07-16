@@ -48,6 +48,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+
 from isvreporter.platform import normalize_platform
 from isvtest.catalog_platforms import PLATFORM_CONFIGS
 
@@ -213,7 +214,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--check",
         action="store_true",
-        help="Exit 1 when any suite check is missing test_id or labels.",
+        help=(
+            "Exit 1 on wiring violations (missing test_id/labels, unregistered suites, "
+            "or isvreporter platform mismatches)."
+        ),
     )
     args = parser.parse_args(argv)
 
