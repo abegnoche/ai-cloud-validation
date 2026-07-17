@@ -262,7 +262,7 @@ def test_provider_label_discovery_dry_run_prints_plan_without_running(
 
     result = runner.invoke(
         test_cli.app,
-        ["run", "--provider", "aws", "--label", "network", "--dry-run", "--no-upload"],
+        ["run", "--provider", "aws", "--label", "network", "--dry-run", "--json", "--no-upload"],
     )
 
     assert result.exit_code == 0, result.output
@@ -272,6 +272,29 @@ def test_provider_label_discovery_dry_run_prints_plan_without_running(
     assert plan["labels"] == ["network"]
     assert [Path(item["config"]).name for item in plan["configs"]] == ["network.yaml", "observability.yaml"]
     assert [item["matched_checks"][0]["name"] for item in plan["configs"]] == ["NetworkCheck", "VpcFlowLogsCheck"]
+
+
+def test_provider_label_discovery_dry_run_text_default(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Without --json, the discovery dry-run prints a readable summary, not JSON."""
+    configs_root = tmp_path / "configs"
+    _write_suite(configs_root, "network.yaml", ["network"], "NetworkCheck")
+    _write_provider_config(configs_root, "aws", "network.yaml", "network.yaml", "network")
+    _FakeOrchestrator.calls = []
+    monkeypatch.setenv("ISVTEST_INCLUDE_UNRELEASED", "1")
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "aws", "--label", "network", "--dry-run", "--no-upload"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert _FakeOrchestrator.calls == []
+    assert "Dry run: provider label discovery" in result.output
+    assert "NetworkCheck" in result.output
+    with pytest.raises(json.JSONDecodeError):
+        json.loads(result.output)
 
 
 def test_platform_dispatches_platform_then_modules(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -321,7 +344,7 @@ def test_platform_dry_run_prints_plan(monkeypatch: pytest.MonkeyPatch, tmp_path:
 
     result = runner.invoke(
         test_cli.app,
-        ["run", "--provider", "acme", "--platform", "vm", "--dry-run", "--no-upload"],
+        ["run", "--provider", "acme", "--platform", "vm", "--dry-run", "--json", "--no-upload"],
     )
 
     assert result.exit_code == 0, result.output
@@ -338,6 +361,28 @@ def test_platform_dry_run_prints_plan(monkeypatch: pytest.MonkeyPatch, tmp_path:
         {"capability": "vm", "module": "iam"},
         {"capability": "vm", "module": "network"},
     ]
+
+
+def test_platform_dry_run_text_default(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Without --json, the platform dry-run prints a readable plan, not JSON."""
+    configs_root = tmp_path / "configs"
+    _build_platform_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "acme", "--platform", "vm", "--dry-run", "--no-upload"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert _FakeOrchestrator.calls == []
+    assert "Dry run: platform column" in result.output
+    assert "Platform: vm" in result.output
+    assert "Runs (3):" in result.output
+    with pytest.raises(json.JSONDecodeError):
+        json.loads(result.output)
 
 
 def test_module_dispatches_single_config(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:

@@ -21,6 +21,9 @@ Handles the test lifecycle: setup cluster, run tests, teardown.
 import json
 import logging
 import sys
+import textwrap
+from contextlib import contextmanager
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, Any, TextIO
@@ -28,6 +31,7 @@ from typing import Annotated, Any, TextIO
 import typer
 import yaml
 from isvtest.catalog import build_catalog, get_catalog_version
+from isvtest.core.resolution import State, parse_validations, resolve_entries
 from isvtest.release_manifest import load_released_test_filter
 
 from isvctl.cli import setup_logging
@@ -53,7 +57,7 @@ from isvctl.config.platform_resolution import (
     resolve_module_configs,
 )
 from isvctl.config.schema import RunConfig
-from isvctl.orchestrator.loop import Orchestrator, Phase
+from isvctl.orchestrator.loop import Orchestrator, Phase, _apply_step_validation_gates, _has_explicit_pytest_selection
 from isvctl.redaction import redact_dict
 from isvctl.reporting import check_upload_credentials, create_test_run, get_environment_config, update_test_run
 
@@ -140,6 +144,291 @@ def _planned_run_plan(provider: str, selection: dict[str, Any], runs: list[Plann
             for run in runs
         ],
     }
+
+
+_TEXT_WIDTH = 100
+
+
+def _wrap_field(prefix: str, value: str, width: int = _TEXT_WIDTH) -> list[str]:
+    """Wrap ``value`` at ``width``, hanging-indenting continuation lines to align under it.
+
+    Individual tokens (comma-separated names) are never split mid-word.
+    """
+    wrapper = textwrap.TextWrapper(
+        width=width,
+        initial_indent=prefix,
+        subsequent_indent=" " * len(prefix),
+        break_long_words=False,
+        break_on_hyphens=False,
+    )
+    return wrapper.wrap(value) or [prefix.rstrip()]
+
+
+@contextmanager
+def _suppress_dry_run_resolution_warnings():
+    """Silence expected Jinja ``default()`` warnings while planning without step output."""
+    resolution_logger = logging.getLogger("isvtest.core.resolution")
+    previous_level = resolution_logger.level
+    resolution_logger.setLevel(logging.ERROR)
+    try:
+        yield
+    finally:
+        resolution_logger.setLevel(previous_level)
+
+
+def _render_provider_discovery_text(provider: str, labels: list[str], matches: list[ProviderConfigMatch]) -> str:
+    """Render a provider label discovery dry-run plan as human-readable text."""
+    total_checks = sum(len(match.matched_checks) for match in matches)
+    lines = [
+        "Dry run: provider label discovery (nothing will be executed)",
+        f"  Provider: {provider}",
+        f"  Labels:   {', '.join(labels)}",
+        f"  Tests:    {total_checks} validation(s)",
+        f"  Matched configs ({len(matches)}):",
+    ]
+    for match in matches:
+        lines.append(f"    {match.config_path}")
+        for check in match.matched_checks:
+            lines.extend(
+                _wrap_field(f"      - [{check.category}] {check.name} (labels: ", f"{', '.join(check.labels)})")
+            )
+    return "\n".join(lines)
+
+
+@dataclass(frozen=True)
+class ValidationPlan:
+    """Validation names that would run in a dry-run, plus any that would be skipped."""
+
+    ready_by_category: dict[str, list[str]]
+    skipped: list[tuple[str, str]]  # (check name, reason phrase)
+
+
+def _planned_validations_by_category(
+    config: RunConfig,
+    *,
+    include_labels: list[str] | None,
+    exclude_labels: list[str] | None,
+    requested_phase: Phase,
+    extra_pytest_args: list[str],
+) -> ValidationPlan:
+    """Return validations that would run, plus any that would be skipped."""
+    if not config.tests or not config.tests.validations:
+        return ValidationPlan(ready_by_category={}, skipped=[])
+
+    platform = config.tests.platform
+    released_tests = load_released_test_filter()
+
+    step_phases: dict[str, str] = {}
+    config_phases: list[str] = []
+    if platform and platform in config.commands:
+        platform_cmds = config.commands[platform]
+        config_phases = list(platform_cmds.phases)
+        gated_steps = _apply_step_validation_gates(platform_cmds.steps, released_tests)
+        for step in gated_steps:
+            if step.skip:
+                continue
+            step_phases[step.name] = (step.phase or "setup").lower()
+
+    exclude_tests: list[str] = []
+    config_exclude_labels: list[str] = []
+    if config.tests.exclude:
+        exclude_tests = list(config.tests.exclude.get("tests", []))
+        config_exclude_labels = list(config.tests.exclude.get("labels", []))
+
+    skip_config_label_exclusions = bool(include_labels) or _has_explicit_pytest_selection(extra_pytest_args)
+    resolution_exclude_labels = list(
+        dict.fromkeys([*([] if skip_config_label_exclusions else config_exclude_labels), *(exclude_labels or [])])
+    )
+
+    if requested_phase == Phase.ALL:
+        requested_phase_names = set(config_phases) if config_phases else {"setup", "test", "teardown"}
+    else:
+        requested_phase_names = {requested_phase.value}
+
+    # Dry-run assumes configured steps will produce output so step-bound checks count.
+    step_outputs = {name: {} for name in step_phases}
+    render_context = {"steps": step_outputs, **(config.context or {})}
+
+    validation_entries = parse_validations(config.tests.validations)
+    with _suppress_dry_run_resolution_warnings():
+        resolved = resolve_entries(
+            validation_entries,
+            step_outputs=step_outputs,
+            step_phases=step_phases,
+            requested_phases=requested_phase_names,
+            include_labels=set(include_labels or []),
+            exclude_labels=set(resolution_exclude_labels),
+            exclude_tests=set(exclude_tests),
+            released_tests=released_tests,
+            render_context=render_context,
+        )
+
+    ready_by_category: dict[str, list[str]] = {}
+    skipped: list[tuple[str, str]] = []
+    for item in resolved:
+        if item.is_ready:
+            ready_by_category.setdefault(item.entry.category, []).append(item.entry.name)
+        elif item.state == State.SKIPPED:
+            reason = item.skip_reason.value.replace("_", " ") if item.skip_reason else "skipped"
+            skipped.append((item.entry.name, reason))
+    return ValidationPlan(ready_by_category=ready_by_category, skipped=skipped)
+
+
+def _short_config_path(config_path: Path) -> str:
+    """Return a config path relative to the configs root when possible."""
+    try:
+        return str(config_path.relative_to(CONFIGS_ROOT))
+    except ValueError:
+        return str(config_path)
+
+
+def _validation_plan_for_run(
+    run: PlannedRun,
+    *,
+    include_labels: list[str] | None,
+    user_exclude_labels: list[str] | None,
+    requested_phase: Phase,
+    extra_pytest_args: list[str],
+) -> ValidationPlan:
+    """Load one planned config and resolve which validations would run."""
+    merged_config = merge_yaml_files([str(run.config_path)])
+    config = RunConfig.model_validate(merged_config)
+    combined_excludes = list(dict.fromkeys([*run.exclude_labels, *(user_exclude_labels or [])]))
+    return _planned_validations_by_category(
+        config,
+        include_labels=include_labels,
+        exclude_labels=combined_excludes or None,
+        requested_phase=requested_phase,
+        extra_pytest_args=extra_pytest_args,
+    )
+
+
+def _format_validation_count(plan: ValidationPlan) -> str:
+    """Format a ready/skipped validation count for display."""
+    ready = sum(len(names) for names in plan.ready_by_category.values())
+    if plan.skipped:
+        return f"{ready} validation(s) ({len(plan.skipped)} skipped)"
+    return f"{ready} validation(s)"
+
+
+def _render_planned_run_text(
+    provider: str,
+    selection: dict[str, Any],
+    runs: list[PlannedRun],
+    *,
+    include_labels: list[str] | None = None,
+    exclude_labels: list[str] | None = None,
+    requested_phase: Phase = Phase.ALL,
+    extra_pytest_args: list[str] | None = None,
+) -> str:
+    """Render a platform/module selection dry-run plan as human-readable text."""
+    pytest_args = extra_pytest_args or []
+    is_column = "platform" in selection
+    title = (
+        "Dry run: platform column (nothing will be executed)"
+        if is_column
+        else "Dry run: module selection (nothing will be executed)"
+    )
+    if is_column:
+        header = f"  Platform: {selection['platform']}"
+    else:
+        header = f"  Modules:  {', '.join(selection.get('modules') or [])}"
+
+    run_summaries = [
+        (
+            run,
+            _validation_plan_for_run(
+                run,
+                include_labels=include_labels,
+                user_exclude_labels=exclude_labels,
+                requested_phase=requested_phase,
+                extra_pytest_args=pytest_args,
+            ),
+        )
+        for run in runs
+    ]
+    total_ready = sum(sum(len(names) for names in plan.ready_by_category.values()) for _, plan in run_summaries)
+    total_skipped = sum(len(plan.skipped) for _, plan in run_summaries)
+
+    lines = [title, f"  Provider: {provider}", header]
+    if total_skipped:
+        lines.append(f"  Tests:    {total_ready} validation(s) ({total_skipped} skipped) across {len(runs)} config(s)")
+    else:
+        lines.append(f"  Tests:    {total_ready} validation(s) across {len(runs)} config(s)")
+
+    module_excludes = sorted({label for run in runs if run.role == "module" for label in run.exclude_labels})
+    if module_excludes:
+        lines.extend(_wrap_field("  Module runs exclude: ", ", ".join(module_excludes)))
+
+    lines.append(f"  Runs ({len(runs)}):")
+    for run, plan in run_summaries:
+        lines.append(f"    {_short_config_path(run.config_path)} [{run.platform}] — {_format_validation_count(plan)}")
+
+    if pytest_args:
+        lines.append(f"  Extra pytest args: {' '.join(pytest_args)}")
+    return "\n".join(lines)
+
+
+def _render_config_text(
+    config: RunConfig,
+    extra_pytest_args: list[str],
+    *,
+    include_labels: list[str] | None = None,
+    exclude_labels: list[str] | None = None,
+    requested_phase: Phase = Phase.ALL,
+) -> str:
+    """Render a merged config dry-run as a human-readable summary of what would run."""
+    platform = config.tests.platform if config.tests else None
+    module = config.tests.module if config.tests else None
+    planned = _planned_validations_by_category(
+        config,
+        include_labels=include_labels,
+        exclude_labels=exclude_labels,
+        requested_phase=requested_phase,
+        extra_pytest_args=extra_pytest_args,
+    )
+    total_tests = sum(len(names) for names in planned.ready_by_category.values())
+    lines = ["Dry run: configuration (nothing will be executed)"]
+    lines.append(f"  Platform: {platform or 'not specified'}")
+    if module:
+        lines.append(f"  Module:   {module}")
+    if planned.skipped:
+        lines.append(f"  Tests:    {total_tests} validation(s) ({len(planned.skipped)} skipped)")
+    else:
+        lines.append(f"  Tests:    {total_tests} validation(s)")
+
+    platform_cmds = config.commands.get(platform) if platform else None
+    if platform_cmds:
+        lines.append(f"  Phases:   {', '.join(platform_cmds.phases)}")
+        steps_by_phase: dict[str, list[str]] = {}
+        for step in platform_cmds.steps:
+            label = f"{step.name}: {step.command}" + (" (skipped)" if step.skip else "")
+            steps_by_phase.setdefault(step.phase, []).append(label)
+        if steps_by_phase:
+            lines.append("  Steps:")
+            for phase in platform_cmds.phases:
+                for label in steps_by_phase.get(phase, []):
+                    lines.append(f"    [{phase}] {label}")
+
+    validations = config.tests.validations if config.tests else {}
+    if planned.ready_by_category:
+        lines.append(f"  Validations ({total_tests}):")
+        for category in validations:
+            names = planned.ready_by_category.get(category, [])
+            if names:
+                lines.extend(_wrap_field(f"    {category} ({len(names)}): ", ", ".join(names)))
+
+    if planned.skipped:
+        lines.append(f"  Skipped ({len(planned.skipped)}):")
+        skipped_by_reason: dict[str, list[str]] = {}
+        for name, reason in planned.skipped:
+            skipped_by_reason.setdefault(reason, []).append(name)
+        for reason, names in skipped_by_reason.items():
+            lines.extend(_wrap_field(f"    {reason}: ", ", ".join(names)))
+
+    if extra_pytest_args:
+        lines.append(f"  Extra pytest args: {' '.join(extra_pytest_args)}")
+    return "\n".join(lines)
 
 
 def _execute_planned_runs(
@@ -260,6 +549,13 @@ def run(
         typer.Option(
             "--dry-run",
             help="Validate configuration and show what would be executed without running",
+        ),
+    ] = False,
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            help="With --dry-run, emit the plan as JSON instead of human-readable text.",
         ),
     ] = False,
     working_dir: Annotated[
@@ -405,7 +701,23 @@ def run(
                 raise typer.Exit(code=1)
 
             if dry_run:
-                typer.echo(json.dumps(_planned_run_plan(provider, selection, runs), indent=2))
+                planned_pytest_args = list(ctx.args)
+                if color:
+                    planned_pytest_args.append(f"--color={color}")
+                if json_output:
+                    typer.echo(json.dumps(_planned_run_plan(provider, selection, runs), indent=2))
+                else:
+                    typer.echo(
+                        _render_planned_run_text(
+                            provider,
+                            selection,
+                            runs,
+                            include_labels=labels,
+                            exclude_labels=exclude_labels,
+                            requested_phase=phase,
+                            extra_pytest_args=planned_pytest_args,
+                        )
+                    )
                 return
 
             _execute_planned_runs(
@@ -434,7 +746,10 @@ def run(
             raise typer.Exit(code=1)
 
         if dry_run:
-            typer.echo(json.dumps(_provider_discovery_plan(provider, labels, matches), indent=2))
+            if json_output:
+                typer.echo(json.dumps(_provider_discovery_plan(provider, labels, matches), indent=2))
+            else:
+                typer.echo(_render_provider_discovery_text(provider, labels, matches))
             return
 
         print_progress(
@@ -500,13 +815,24 @@ def run(
         raise typer.Exit(code=1)
 
     if dry_run:
-        # Keep stdout as pure JSON so it can be consumed with `json.loads`;
-        # decorative headers and extra args go to stderr.
-        print_progress("\n--- Dry Run: Configuration ---")
-        redacted_config = redact_dict(config.model_dump(mode="json"))
-        typer.echo(json.dumps(redacted_config, indent=2))
-        if extra_pytest_args:
-            print_progress(f"\n--- Extra pytest args ---\n{extra_pytest_args}")
+        if json_output:
+            # Keep stdout as pure JSON so it can be consumed with `json.loads`;
+            # decorative headers and extra args go to stderr.
+            print_progress("\n--- Dry Run: Configuration ---")
+            redacted_config = redact_dict(config.model_dump(mode="json"))
+            typer.echo(json.dumps(redacted_config, indent=2))
+            if extra_pytest_args:
+                print_progress(f"\n--- Extra pytest args ---\n{extra_pytest_args}")
+        else:
+            typer.echo(
+                _render_config_text(
+                    config,
+                    extra_pytest_args,
+                    include_labels=labels,
+                    exclude_labels=exclude_labels,
+                    requested_phase=phase,
+                )
+            )
         return
 
     # Determine which phases to run
