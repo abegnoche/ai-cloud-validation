@@ -551,6 +551,13 @@ def run(
             help="Run a single module suite for --provider (can be repeated).",
         ),
     ] = None,
+    no_modules: Annotated[
+        bool,
+        typer.Option(
+            "--no-modules",
+            help="With --platform, run only the platform config (skip the module fan-out).",
+        ),
+    ] = False,
     exclude_labels: Annotated[
         list[str] | None,
         typer.Option(
@@ -678,6 +685,9 @@ def run(
     if (platform or modules) and not provider:
         print_error("--platform/--module require --provider.")
         raise typer.Exit(code=1)
+    if no_modules and not platform:
+        print_error("--no-modules requires --platform.")
+        raise typer.Exit(code=1)
 
     if provider:
         if config_files:
@@ -707,6 +717,8 @@ def run(
             try:
                 if platform:
                     runs = plan_platform_run(provider, platform, configs_root=CONFIGS_ROOT)
+                    if no_modules:
+                        runs = [run for run in runs if run.role == "platform"]
                     selection: dict[str, Any] = {"platform": platform}
                 else:
                     runs = resolve_module_configs(provider, modules or [], configs_root=CONFIGS_ROOT)

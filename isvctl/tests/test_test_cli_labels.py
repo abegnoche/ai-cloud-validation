@@ -315,6 +315,39 @@ def test_platform_dispatches_platform_then_modules(monkeypatch: pytest.MonkeyPat
     assert [call["run_kwargs"].get("column_platform") for call in _FakeOrchestrator.calls] == ["vm", "vm", "vm"]
 
 
+def test_platform_no_modules_runs_only_platform_config(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """`--platform vm --no-modules` runs only the platform config, skipping module fan-out."""
+    configs_root = tmp_path / "configs"
+    _build_platform_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app, ["run", "--provider", "acme", "--platform", "vm", "--no-modules", "--no-upload"]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert [call["platform"] for call in _FakeOrchestrator.calls] == ["vm"]
+
+
+def test_no_modules_requires_platform(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """`--no-modules` without `--platform` is rejected."""
+    configs_root = tmp_path / "configs"
+    _build_platform_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app, ["run", "--provider", "acme", "--module", "iam", "--no-modules", "--no-upload"]
+    )
+
+    assert result.exit_code == 1, result.output
+    assert "--no-modules requires --platform." in result.output
+    assert _FakeOrchestrator.calls == []
+
+
 def test_platform_composes_include_labels(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """`--platform vm --label min_req` forwards the include filter into every sub-run."""
     configs_root = tmp_path / "configs"
