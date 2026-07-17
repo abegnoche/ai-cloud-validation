@@ -43,7 +43,7 @@ class TestAxisTaxonomy:
     def test_derives_platform_and_module_axes_from_suites(self) -> None:
         """Platforms come from platform suites; modules from module suites."""
         platforms, modules = build_axis_taxonomy()
-        assert platforms == ["bare_metal", "kubernetes", "slurm", "vm"]
+        assert platforms == ["bare_metal", "foundational", "kubernetes", "slurm", "vm"]
         assert modules == [
             "control_plane",
             "iam",
@@ -61,7 +61,7 @@ class TestAxisTaxonomy:
         assert doc["schemaVersion"] == CATALOG_SCHEMA_VERSION
         assert doc["isvTestVersion"] == "1.2.3"
         assert doc["entries"] == entries
-        assert doc["platforms"] == ["bare_metal", "kubernetes", "slurm", "vm"]
+        assert doc["platforms"] == ["bare_metal", "foundational", "kubernetes", "slurm", "vm"]
         assert "iam" in doc["modules"]
         # The label universe is intentionally not summarized at the top level.
         assert "labels" not in doc
@@ -243,12 +243,23 @@ tests:
         ]
 
     def test_module_suite_checks_use_modules_axis(self) -> None:
-        """Checks wired in a module suite land on modules, not platforms."""
+        """Checks wired in a module suite land on modules; their platforms come
+        only from the declared ``platforms:`` field (foundational for iam /
+        control_plane)."""
         catalog = build_catalog(released_only=False)
         by_name = {e["name"]: e for e in catalog}
         entry = by_name["AccessKeyAuthenticatedCheck"]
         assert entry["modules"] == ["control_plane"]
-        assert entry["platforms"] == []
+        assert entry["platforms"] == ["foundational"]
+
+    def test_iam_and_control_plane_checks_declare_foundational(self) -> None:
+        """Every iam / control_plane suite check carries platforms ["foundational"]."""
+        catalog = build_catalog(released_only=False)
+        for entry in catalog:
+            if {"iam", "control_plane"} & set(entry["modules"]):
+                assert entry["platforms"] == ["foundational"], (
+                    f"{entry['name']}: expected ['foundational'], got {entry['platforms']}"
+                )
 
     def test_module_suite_platforms_declaration_sets_platform_axis(self, tmp_path) -> None:
         """A module-suite check's platforms: declaration is its platform placement."""

@@ -54,10 +54,12 @@ tests:
         FieldExistsCheck-iam_setup:
           test_id: "IAM01-01"
           labels: ["iam", "min_req"]
+          platforms: ["foundational"]
           fields: ["username", "access_key_id"]
         StepSuccessCheck-iam_setup:
           test_id: "N/A"
           labels: ["iam"]
+          platforms: ["foundational"]
 
     credentials:
       step: test_credentials
@@ -65,9 +67,11 @@ tests:
         IamCredentialAccessCheck:
           test_id: "IAM03-01"
           labels: ["iam"]
+          platforms: ["foundational"]
         StepSuccessCheck-iam_credentials:
           test_id: "N/A"
           labels: ["iam"]
+          platforms: ["foundational"]
 
     teardown_checks:
       step: teardown
@@ -75,6 +79,7 @@ tests:
         StepSuccessCheck-iam_teardown:
           test_id: "N/A"
           labels: ["iam"]
+          platforms: ["foundational"]
 
   exclude:
     labels: []

@@ -51,6 +51,7 @@ from isvctl.config.label_discovery import (
 )
 from isvctl.config.merger import merge_yaml_files
 from isvctl.config.platform_resolution import (
+    OmittedRun,
     PlannedRun,
     PlatformResolutionError,
     plan_platform_run,
@@ -125,9 +126,14 @@ def _junitxml_for_config(junitxml: Path, config_path: Path, total: int) -> Path:
     return junitxml.with_name(f"{junitxml.stem}-{config_path.stem}{junitxml.suffix}")
 
 
-def _planned_run_plan(provider: str, selection: dict[str, Any], runs: list[PlannedRun]) -> dict[str, Any]:
+def _planned_run_plan(
+    provider: str,
+    selection: dict[str, Any],
+    runs: list[PlannedRun],
+    omitted: list[OmittedRun] | None = None,
+) -> dict[str, Any]:
     """Return a JSON-serializable plan for a platform/module selection dry-run."""
-    return {
+    plan: dict[str, Any] = {
         "provider": provider,
         **selection,
         "runs": [
@@ -144,6 +150,11 @@ def _planned_run_plan(provider: str, selection: dict[str, Any], runs: list[Plann
             for run in runs
         ],
     }
+    if omitted is not None:
+        plan["omitted"] = [
+            {"config": str(entry.config_path), "module": entry.module, "reason": entry.reason} for entry in omitted
+        ]
+    return plan
 
 
 _TEXT_WIDTH = 100
@@ -373,19 +384,23 @@ def _render_planned_run_text(
     exclude_labels: list[str] | None = None,
     requested_phase: Phase = Phase.ALL,
     extra_pytest_args: list[str] | None = None,
+    omitted: list[OmittedRun] | None = None,
 ) -> str:
     """Render a platform/module selection dry-run plan as human-readable text."""
     pytest_args = extra_pytest_args or []
-    is_column = "platform" in selection
-    title = (
-        "Dry run: platform column (nothing will be executed)"
-        if is_column
-        else "Dry run: module selection (nothing will be executed)"
-    )
-    if is_column:
-        header = f"  Platform: {selection['platform']}"
+    has_platform = "platform" in selection
+    has_modules = "modules" in selection
+    if has_platform and has_modules:
+        title = "Dry run: module selection under platform column (nothing will be executed)"
+    elif has_platform:
+        title = "Dry run: platform column (nothing will be executed)"
     else:
-        header = f"  Modules:  {', '.join(selection.get('modules') or [])}"
+        title = "Dry run: module selection (nothing will be executed)"
+    header_lines = []
+    if has_platform:
+        header_lines.append(f"  Platform: {selection['platform']}")
+    if has_modules:
+        header_lines.append(f"  Modules:  {', '.join(selection.get('modules') or [])}")
 
     run_summaries = [
         (
@@ -403,7 +418,7 @@ def _render_planned_run_text(
     total_ready = sum(sum(len(names) for names in plan.ready_by_category.values()) for _, _, plan in run_summaries)
     total_skipped = sum(len(plan.skipped) for _, _, plan in run_summaries)
 
-    lines = [title, f"  Provider: {provider}", header]
+    lines = [title, f"  Provider: {provider}", *header_lines]
     if total_skipped:
         lines.append(f"  Tests:    {total_ready} validation(s) ({total_skipped} skipped) across {len(runs)} config(s)")
     else:
@@ -415,6 +430,11 @@ def _render_planned_run_text(
             f"  --- {_short_config_path(run.config_path)} [{run.platform}] — {_format_validation_count(plan)} ---"
         )
         lines.extend(_render_config_body_lines(config, plan, indent="    "))
+
+    if omitted:
+        lines.append("")
+        for entry in omitted:
+            lines.append(f"  omitted: {entry.module} ({entry.reason})")
 
     if pytest_args:
         lines.append(f"  Extra pytest args: {' '.join(pytest_args)}")
@@ -541,14 +561,20 @@ def run(
         str | None,
         typer.Option(
             "--platform",
-            help="Run a whole platform column (its config + every module config) for --provider.",
+            help=(
+                "Run a whole platform column (its config + every compatible module config) "
+                "for --provider; with --module, run only those modules under the column."
+            ),
         ),
     ] = None,
     modules: Annotated[
         list[str] | None,
         typer.Option(
             "--module",
-            help="Run a single module suite for --provider (can be repeated).",
+            help=(
+                "Run a single module suite for --provider (can be repeated). "
+                "With --platform, the module runs under that column."
+            ),
         ),
     ] = None,
     no_modules: Annotated[
@@ -676,9 +702,6 @@ def run(
     setup_logging(verbose)
     apply_user_config(no_user_config)
 
-    if platform and modules:
-        print_error("--platform and --module are mutually exclusive.")
-        raise typer.Exit(code=1)
     if (platform or modules) and config_files:
         print_error("--platform/--module cannot be combined with --config/-f.")
         raise typer.Exit(code=1)
@@ -687,6 +710,9 @@ def run(
         raise typer.Exit(code=1)
     if no_modules and not platform:
         print_error("--no-modules requires --platform.")
+        raise typer.Exit(code=1)
+    if no_modules and modules:
+        print_error("--no-modules cannot be combined with --module.")
         raise typer.Exit(code=1)
 
     if provider:
@@ -715,11 +741,21 @@ def run(
 
         if platform or modules:
             try:
-                if platform:
-                    runs = plan_platform_run(provider, platform, configs_root=CONFIGS_ROOT)
+                omitted: list[OmittedRun] | None = None
+                if platform and modules:
+                    # Intersect: only the requested modules, each under the
+                    # column (the platform config itself does not run).
+                    runs = resolve_module_configs(
+                        provider, modules or [], configs_root=CONFIGS_ROOT, column_platform=platform
+                    )
+                    selection: dict[str, Any] = {"platform": platform, "modules": modules}
+                elif platform:
+                    column_plan = plan_platform_run(provider, platform, configs_root=CONFIGS_ROOT)
+                    runs, omitted = column_plan.runs, column_plan.omitted
                     if no_modules:
                         runs = [run for run in runs if run.role == "platform"]
-                    selection: dict[str, Any] = {"platform": platform}
+                        omitted = None
+                    selection = {"platform": platform}
                 else:
                     runs = resolve_module_configs(provider, modules or [], configs_root=CONFIGS_ROOT)
                     selection = {"modules": modules}
@@ -732,7 +768,7 @@ def run(
                 if color:
                     planned_pytest_args.append(f"--color={color}")
                 if json_output:
-                    typer.echo(json.dumps(_planned_run_plan(provider, selection, runs), indent=2))
+                    typer.echo(json.dumps(_planned_run_plan(provider, selection, runs, omitted), indent=2))
                 else:
                     typer.echo(
                         _render_planned_run_text(
@@ -743,6 +779,7 @@ def run(
                             exclude_labels=exclude_labels,
                             requested_phase=phase,
                             extra_pytest_args=planned_pytest_args,
+                            omitted=omitted,
                         )
                     )
                 return

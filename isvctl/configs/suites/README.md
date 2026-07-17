@@ -20,7 +20,8 @@ Suites:
 [`slurm`](slurm.yaml),
 [`control-plane`](control-plane.yaml),
 [`image-registry`](image-registry.yaml),
-[`security`](security.yaml).
+[`security`](security.yaml),
+[`foundational`](foundational.yaml) (axis placeholder, no validations).
 For the domain / script-count / AWS-reference overview see the
 [my-isv scaffold README](../providers/my-isv/scripts/README.md#domains).
 
@@ -39,6 +40,12 @@ Every suite declares exactly one axis key in its `tests:` block:
 - **`platform: <name>`** - a **service-line platform**: `vm`, `bare_metal`,
   `kubernetes`, `slurm`. Owns a run's setup/test/teardown lifecycle. (`platform`
   is the long-standing runtime term - the `commands[...]` group to run.)
+  `foundational` is the exception: its suite wires **no validations** and
+  exists only to put the capability on the axis. A validation-less platform
+  suite's column has **no platform run** - providers ship no config for it,
+  and `--platform foundational` plans a modules-only column containing exactly
+  the modules whose checks declare `platforms: ["foundational"]` (iam,
+  control-plane: pure provider-API tests that fit no runtime environment).
 - **`module: <name>`** - an operational concern: `iam`, `network`, `security`,
   `observability`, `control_plane`, `image_registry`. Its value is also the
   runtime platform (derived), so a module suite needs no separate `platform:`.
@@ -88,7 +95,11 @@ platform, each carrying its own platform label plus the shared concern label**:
 A **module-suite** check that only applies to some platforms instead declares
 `platforms: [...]` on its wiring (e.g. `platforms: ["vm", "bare_metal"]`) -
 subsets are supported, and platform names never appear in a module-suite
-check's `labels:`.
+check's `labels:`. The planner uses the same declarations to prune whole
+configs: a module config with **no** check eligible for a column is omitted
+from that column's plan (dry-run reports
+`omitted: iam (no checks compatible with column 'vm')`), so a run never pays
+a module's setup/teardown to execute zero checks.
 
 The inline K8s side exists today (the `storage`-labeled CSI checks in
 `k8s.yaml`). Since `suites/storage.yaml` (`module: storage`) landed, `storage`
@@ -140,18 +151,27 @@ are not retro-carved.
 ### How selection works (CLI)
 
 ```bash
-# Run the whole VMaaS column: the vm platform config + every module config.
-# Each runs as its own orchestration (own JUnit); a combined summary prints and
-# the process exits 1 if any config failed. Module checks whose platforms:
-# declaration excludes the column (e.g. security's bare_metal-only CAP04
-# checks) are skipped.
+# Run the whole VMaaS column: the vm platform config + every compatible module
+# config. Each runs as its own orchestration (own JUnit); a combined summary
+# prints and the process exits 1 if any config failed. Module checks whose
+# platforms: declaration excludes the column (e.g. security's bare_metal-only
+# CAP04 checks) are skipped; a module with no column-compatible check at all
+# (e.g. iam, foundational-only) is omitted from the plan.
 isvctl test run --provider aws --platform vm
+
+# Run the foundational column: no platform run, just the modules declaring it
+# (iam, control-plane) - the once-per-lab provider-API checks.
+isvctl test run --provider aws --platform foundational
 
 # Min Req preset is just a label filter on the column.
 isvctl test run --provider aws --platform vm --label min_req
 
 # Run one module suite (path-free). Repeatable: --module iam --module network.
 isvctl test run --provider aws --module iam
+
+# Intersect: run only the storage module, under the kubernetes column (the
+# platform config does not run; upload reports the (kubernetes, storage) pair).
+isvctl test run --provider aws --platform kubernetes --module storage
 
 # Cross-file label discovery (PR 485): every config with an iam-labeled check.
 isvctl test run --provider aws --label iam
@@ -178,9 +198,11 @@ An `aws/config/eks.yaml` importing `k8s.yaml` is the `kubernetes` platform.
 ### Run-all vs run-a-slice: worked examples
 
 - **Host is VM, run everything:** `--provider aws --platform vm` runs
-  `vm.yaml` (platform) then `network`/`iam`/`security`/`control-plane`/
-  `image-registry`/`observability` (modules), each under the `vm` column so a
-  module check declaring `platforms:` without `vm` skips.
+  `vm.yaml` (platform) then `network`/`security`/`image-registry`/
+  `observability`/`storage` (modules), each under the `vm` column so a module
+  check declaring `platforms:` without `vm` skips. `iam` and `control-plane`
+  (foundational-only) are omitted - they run once, under
+  `--platform foundational`.
 - **Storage is a label, not a module (yet):** the `storage`-labeled K8s CSI
   checks in `k8s.yaml` are selectable via `--label storage`, but `storage` is
   not a module *axis* (no matrix row) - labels are orthogonal to modules. It

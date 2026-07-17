@@ -73,8 +73,10 @@ def test_classify_errors_on_missing_kind(tmp_path: Path) -> None:
 def test_plan_platform_run_orders_and_sets_column(tmp_path: Path) -> None:
     """A platform plan runs the platform first, then modules, all under the column."""
     _standard_provider(tmp_path)
-    runs = plan_platform_run("acme", "vm", configs_root=tmp_path)
+    plan = plan_platform_run("acme", "vm", configs_root=tmp_path)
+    runs = plan.runs
 
+    assert plan.omitted == []
     assert runs[0].role == "platform"
     assert runs[0].platform == "vm"
     assert runs[0].column_platform == "vm"
@@ -92,7 +94,7 @@ def test_plan_platform_run_k8s_alias(tmp_path: Path) -> None:
     """`--platform k8s` resolves to the kubernetes platform config."""
     _standard_provider(tmp_path)
     write_axis_provider_config(tmp_path, "acme", "eks.yaml", "k8s.yaml")
-    runs = plan_platform_run("acme", "k8s", configs_root=tmp_path)
+    runs = plan_platform_run("acme", "k8s", configs_root=tmp_path).runs
     assert runs[0].role == "platform"
     assert runs[0].platform == "kubernetes"
 
@@ -139,3 +141,86 @@ def test_resolve_module_configs_missing_lists_available(tmp_path: Path) -> None:
     assert "no 'storage' module" in str(exc.value)
     assert "iam" in str(exc.value)
     assert "network" in str(exc.value)
+
+
+def _foundational_provider(root: Path) -> None:
+    """Standard provider plus a validation-less foundational suite; iam declares it."""
+    _standard_provider(root)
+    write_axis_suite(root, "foundational.yaml", "foundational", "platform", validations=False)
+    write_axis_suite(root, "iam.yaml", "iam", "module", platforms=["foundational"])
+
+
+def test_plan_foundational_column_is_modules_only(tmp_path: Path) -> None:
+    """A validation-less platform suite plans no platform run and needs no provider config.
+
+    Only modules positively declaring the column join it; the rest are omitted.
+    """
+    _foundational_provider(tmp_path)
+    plan = plan_platform_run("acme", "foundational", configs_root=tmp_path)
+
+    assert [(r.role, r.platform) for r in plan.runs] == [("module", "iam")]
+    assert plan.runs[0].column_platform == "foundational"
+    assert [(o.module, o.reason) for o in plan.omitted] == [
+        ("network", "no checks compatible with column 'foundational'"),
+    ]
+
+
+def test_plan_platform_run_omits_column_incompatible_modules(tmp_path: Path) -> None:
+    """A module whose checks all exclude the column is omitted from its plan."""
+    _foundational_provider(tmp_path)
+    plan = plan_platform_run("acme", "vm", configs_root=tmp_path)
+
+    # iam's only check declares platforms: ["foundational"], so the vm column
+    # would pay iam's setup/teardown to run zero checks - it is omitted.
+    assert [(r.role, r.platform) for r in plan.runs] == [("platform", "vm"), ("module", "network")]
+    assert [(o.module, o.reason) for o in plan.omitted] == [("iam", "no checks compatible with column 'vm'")]
+    assert plan.omitted[0].config_path.name == "iam.yaml"
+
+
+def test_plan_platform_run_still_errors_when_real_platform_config_missing(tmp_path: Path) -> None:
+    """The no-platform-run rule applies only to validation-less suites."""
+    _foundational_provider(tmp_path)
+    # slurm's suite wires validations, so the missing provider config errors.
+    with pytest.raises(PlatformResolutionError) as exc:
+        plan_platform_run("acme", "slurm", configs_root=tmp_path)
+    assert "no 'slurm' platform" in str(exc.value)
+
+
+def test_resolve_module_configs_with_column_sets_normalized_column(tmp_path: Path) -> None:
+    """The --platform X --module m intersect carries the aliased column on each run."""
+    _standard_provider(tmp_path)
+    (run,) = resolve_module_configs("acme", ["iam"], configs_root=tmp_path, column_platform="k8s")
+    assert run.role == "module"
+    assert run.platform == "iam"
+    assert run.column_platform == "kubernetes"
+
+
+def test_resolve_module_configs_rejects_unknown_column(tmp_path: Path) -> None:
+    """An intersect column must be on the suite-derived platform axis."""
+    _standard_provider(tmp_path)
+    with pytest.raises(PlatformResolutionError) as exc:
+        resolve_module_configs("acme", ["iam"], configs_root=tmp_path, column_platform="mainframe")
+    assert "Unknown platform 'mainframe'" in str(exc.value)
+    assert "vm" in str(exc.value)
+
+
+REPO_CONFIGS_ROOT = Path(__file__).resolve().parents[1] / "configs"
+
+
+@pytest.mark.parametrize("provider", ["aws", "my-isv"])
+def test_repo_foundational_column_is_exactly_iam_and_control_plane(provider: str) -> None:
+    """The real foundational column is modules-only: control-plane + iam."""
+    plan = plan_platform_run(provider, "foundational", configs_root=REPO_CONFIGS_ROOT)
+    assert [(r.role, r.platform) for r in plan.runs] == [("module", "control_plane"), ("module", "iam")]
+    assert all(r.column_platform == "foundational" for r in plan.runs)
+
+
+@pytest.mark.parametrize("column", ["vm", "kubernetes"])
+def test_repo_runtime_columns_omit_iam_and_control_plane(column: str) -> None:
+    """iam / control-plane declare only foundational, so runtime columns omit them."""
+    plan = plan_platform_run("aws", column, configs_root=REPO_CONFIGS_ROOT)
+    assert {run.platform for run in plan.runs} >= {column, "network", "security"}
+    assert {(o.module, o.reason) for o in plan.omitted} == {
+        ("control_plane", f"no checks compatible with column '{column}'"),
+        ("iam", f"no checks compatible with column '{column}'"),
+    }

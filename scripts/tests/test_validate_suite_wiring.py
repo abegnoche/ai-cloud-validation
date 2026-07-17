@@ -179,6 +179,33 @@ tests:
     assert validate_suite_wiring.wiring_errors(tmp_path) == []
 
 
+def test_wiring_errors_accepts_validation_less_platform_suite(tmp_path: Path) -> None:
+    """A platform suite wiring no validations (foundational) is legal: it only
+    extends the platform axis, and its axis value is a legal platforms: target."""
+    _write_platform_axis_suites(tmp_path)
+    (tmp_path / "foundational.yaml").write_text(
+        """\
+tests:
+  platform: foundational
+  validations: {}
+"""
+    )
+    (tmp_path / "iam.yaml").write_text(
+        """\
+tests:
+  module: iam
+  validations:
+    example:
+      checks:
+        IamApiCheck:
+          test_id: "IAM01-01"
+          labels: ["iam"]
+          platforms: ["foundational"]
+"""
+    )
+    assert validate_suite_wiring.wiring_errors(tmp_path) == []
+
+
 def test_wiring_errors_flags_unknown_platforms_value(tmp_path: Path) -> None:
     """Every platforms: value must be a member of the derived platform axis."""
     _write_platform_axis_suites(tmp_path)

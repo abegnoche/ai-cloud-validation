@@ -31,8 +31,12 @@ uv run isvctl test run --provider aws --label storage             # cross-file l
 ```
 
 Selection: `--platform <env>` runs the environment's config plus every module
-config (module checks whose `platforms:` declaration excludes the column are
-skipped); `--module <mod>` runs one module suite (no platform filtering);
+config with at least one column-eligible check (a module whose checks all
+exclude the column is omitted from the plan, surfaced in `--dry-run`; eligible
+checks whose `platforms:` declaration excludes the column are skipped);
+`--module <mod>` runs one module suite (no platform filtering); combining
+`--platform X --module m` intersects: only the requested modules run, each
+under column X (the platform config does not run, upload reports `(X, m)`);
 `--label` filters within a run or drives
 cross-file discovery with `--provider`. `-f` is the override escape hatch. All
 are mutually exclusive with `-f`; `--platform`/`--module` require `--provider`.
@@ -135,7 +139,13 @@ applies only to some platforms declares `platforms: [...]` (a subset of the
 platform axis; omitted = compatible with every platform, subsets like
 `[vm, bare_metal]` are supported). `platforms:` is rejected on platform-suite
 checks (their column is fixed by file placement), and standalone `--module`
-runs apply no platform filtering. Labels are otherwise free-form (they
+runs apply no platform filtering. The `foundational` capability
+(`suites/foundational.yaml`, a platform suite wiring no validations) exists
+only to extend the axis: a validation-less platform suite's column has no
+platform run (providers ship no config for it) and plans only modules whose
+checks positively declare it - iam and control-plane declare
+`platforms: ["foundational"]` and run once there, not under runtime columns.
+Labels are otherwise free-form (they
 originate in the wiring YAML, so there is no external allowlist). Wiring names are globally unique
 across suites: a generic class wired in several places uses a distinct variant
 name per wiring (`StepSuccessCheck-iam_teardown`, `GpuCheck-bm_gpu`), so

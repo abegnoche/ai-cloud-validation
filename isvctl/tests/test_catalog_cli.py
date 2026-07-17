@@ -79,7 +79,7 @@ def test_catalog_list_json() -> None:
     assert payload["isvTestVersion"] == "1.2.3"
     assert payload["entries"] == _FAKE_ENTRIES
     # Axis lists are derived from the real suites and drive the UI matrix.
-    assert payload["platforms"] == ["bare_metal", "kubernetes", "slurm", "vm"]
+    assert payload["platforms"] == ["bare_metal", "foundational", "kubernetes", "slurm", "vm"]
     assert "iam" in payload["modules"]
 
 

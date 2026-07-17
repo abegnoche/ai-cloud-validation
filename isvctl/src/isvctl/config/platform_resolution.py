@@ -10,9 +10,15 @@ marks a platform suite (service line). Plans which configs to run:
 
 * ``--platform <platform>`` runs the whole matrix column: the one config whose
   ``platform`` is ``<platform>`` (and which declares no ``module``) first, then
-  every ``module:`` config. Each run carries the column platform so module
+  every ``module:`` config with at least one column-eligible check (the rest
+  are omitted from the plan). Each run carries the column platform so module
   checks declaring a ``platforms:`` restriction that excludes it are skipped.
+  A column whose platform suite wires no validations (e.g. ``foundational``)
+  has no platform run: the column is modules-only and admits only modules
+  whose checks positively declare it.
 * ``--module <mod>`` runs a single config declaring ``module: <mod>``.
+* Both together intersect: only the requested module configs, each under the
+  ``--platform`` column (the platform config itself does not run).
 
 Classification is by the axis key, never by filename: an ``aws/config/eks.yaml``
 that imports ``k8s.yaml`` inherits ``platform: kubernetes`` and is a platform suite.
@@ -25,6 +31,7 @@ from pathlib import Path
 from typing import Literal
 
 from isvreporter.platform import PLATFORM_ALIASES as _CANONICAL_ALIASES
+from isvtest.core.resolution import parse_validations
 
 from isvctl.config.label_discovery import provider_config_dir
 from isvctl.config.merger import merge_yaml_files
@@ -65,6 +72,23 @@ class PlannedRun:
     # restriction are filtered against it. None for standalone --module runs
     # (no column, hence no platform filtering).
     column_platform: str | None = None
+
+
+@dataclass(frozen=True)
+class OmittedRun:
+    """A module config left out of a column plan, with the operator-facing reason."""
+
+    config_path: Path
+    module: str
+    reason: str
+
+
+@dataclass(frozen=True)
+class ColumnPlan:
+    """The runs planned for a ``--platform`` column, plus the omitted modules."""
+
+    runs: list[PlannedRun]
+    omitted: list[OmittedRun]
 
 
 def _effective_kind_and_platform(config_path: Path) -> tuple[AxisKind | None, str | None]:
@@ -152,29 +176,98 @@ def _single_config(classified: list[ClassifiedConfig], kind: AxisKind, value: st
     return matches[0]
 
 
-def plan_platform_run(provider: str, platform: str, *, configs_root: Path) -> list[PlannedRun]:
+def _suite_platform_axis(configs_root: Path) -> dict[str, bool]:
+    """Map each platform-axis value to whether its suite wires any validations.
+
+    The axis is derived from the suite files' ``tests.platform`` keys under
+    ``configs_root/suites`` (the same source as isvtest's
+    ``build_axis_taxonomy``). A suite that wires no validations (e.g.
+    ``foundational``) exists purely to put its capability on the axis.
+    """
+    axis: dict[str, bool] = {}
+    suites_dir = configs_root / "suites"
+    if not suites_dir.is_dir():
+        return axis
+    for suite_path in sorted(suites_dir.glob("*.yaml")):
+        merged = merge_yaml_files([str(suite_path)])
+        tests = merged.get("tests") or {}
+        if not isinstance(tests, dict) or tests.get("module"):
+            continue
+        suite_platform = tests.get("platform")
+        if isinstance(suite_platform, str) and suite_platform:
+            axis[suite_platform] = bool(tests.get("validations"))
+    return axis
+
+
+def _has_column_eligible_check(config_path: Path, column: str, *, require_declaration: bool) -> bool:
+    """Return whether any check in the merged config may run under ``column``.
+
+    Eligibility mirrors the runtime ``platforms:`` filter in
+    :mod:`isvtest.core.resolution`: an undeclared check runs everywhere, a
+    declared subset must contain the column. For a modules-only column (no
+    platform run, e.g. ``foundational``) ``require_declaration`` flips the
+    default: an undeclared check belongs to every real environment column, so
+    only checks positively declaring the synthetic column run under it.
+    """
+    merged = merge_yaml_files([str(config_path)])
+    validations = (merged.get("tests") or {}).get("validations")
+    if not isinstance(validations, dict):
+        return False
+    for entry in parse_validations(validations):
+        if column in entry.platforms:
+            return True
+        if not require_declaration and not entry.platforms:
+            return True
+    return False
+
+
+def plan_platform_run(provider: str, platform: str, *, configs_root: Path) -> ColumnPlan:
     """Plan the configs to run for ``--platform <platform>``.
 
-    The platform config runs first; each module config follows. Every run
-    carries the column platform, so module checks whose ``platforms:``
+    The platform config runs first; each module config with at least one
+    column-eligible check follows (the rest are omitted, with a reason, so a
+    run never pays a module's setup/teardown to execute zero checks). Every
+    run carries the column platform, so module checks whose ``platforms:``
     declaration excludes it are skipped under this column.
+
+    A column whose platform suite wires no validations (e.g. ``foundational``)
+    has no platform run: providers are not expected to ship a config for it,
+    so a missing provider platform config is not an error and the column is
+    modules-only.
 
     Raises:
         PlatformResolutionError: On unknown/duplicate platform configs.
     """
     normalized = PLATFORM_ALIASES.get(platform, platform)
     classified = classify_provider_configs(provider, configs_root=configs_root)
-    platform_config = _single_config(classified, "platform", normalized, provider)
+    # False = validation-less suite defines the column (no platform run);
+    # True/None (real platform / column not on the suite axis) keeps today's
+    # behavior: the provider must ship a platform config or we error.
+    modules_only = _suite_platform_axis(configs_root).get(normalized) is False
 
-    runs: list[PlannedRun] = [
-        PlannedRun(
-            config_path=platform_config.config_path,
-            role="platform",
-            platform=normalized,
-            column_platform=normalized,
+    runs: list[PlannedRun] = []
+    if not modules_only:
+        platform_config = _single_config(classified, "platform", normalized, provider)
+        runs.append(
+            PlannedRun(
+                config_path=platform_config.config_path,
+                role="platform",
+                platform=normalized,
+                column_platform=normalized,
+            )
         )
-    ]
+
+    omitted: list[OmittedRun] = []
     for module_config in sorted((c for c in classified if c.kind == "module"), key=lambda c: c.config_path):
+        if not _has_column_eligible_check(module_config.config_path, normalized, require_declaration=modules_only):
+            omitted.append(
+                OmittedRun(
+                    config_path=module_config.config_path,
+                    module=module_config.platform,
+                    reason=f"no checks compatible with column '{normalized}'",
+                )
+            )
+            continue
         runs.append(
             PlannedRun(
                 config_path=module_config.config_path,
@@ -183,24 +276,42 @@ def plan_platform_run(provider: str, platform: str, *, configs_root: Path) -> li
                 column_platform=normalized,
             )
         )
-    return runs
+    return ColumnPlan(runs=runs, omitted=omitted)
 
 
-def resolve_module_configs(provider: str, modules: list[str], *, configs_root: Path) -> list[PlannedRun]:
+def resolve_module_configs(
+    provider: str, modules: list[str], *, configs_root: Path, column_platform: str | None = None
+) -> list[PlannedRun]:
     """Resolve the single ``kind: module`` config for each ``--module <module>``.
 
-    Module runs are standalone (no platform column), so no platform filtering
-    applies. The provider is classified once for the whole selection.
+    Standalone module runs (``column_platform`` None) have no platform column,
+    so no platform filtering applies. With ``column_platform`` (the
+    ``--platform X --module m`` intersect form) each run executes under that
+    column: checks whose ``platforms:`` declaration excludes it are skipped
+    and result upload reports the ``(column, module)`` pair. The platform
+    config itself is not part of the plan, and a module with zero eligible
+    checks still runs (its checks all resolve to skips). The provider is
+    classified once for the whole selection.
 
     Raises:
-        PlatformResolutionError: On unknown/duplicate module configs.
+        PlatformResolutionError: On unknown/duplicate module configs, or a
+            ``column_platform`` not on the suite-derived platform axis.
     """
+    normalized_column: str | None = None
+    if column_platform:
+        normalized_column = PLATFORM_ALIASES.get(column_platform, column_platform)
+        axis = _suite_platform_axis(configs_root)
+        if normalized_column not in axis:
+            raise PlatformResolutionError(
+                f"Unknown platform {column_platform!r}. Platform axis: {', '.join(sorted(axis)) or '(none)'}."
+            )
     classified = classify_provider_configs(provider, configs_root=configs_root)
     return [
         PlannedRun(
             config_path=_single_config(classified, "module", module, provider).config_path,
             role="module",
             platform=module,
+            column_platform=normalized_column,
         )
         for module in modules
     ]

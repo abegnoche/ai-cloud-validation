@@ -536,8 +536,10 @@ def test_config_file_platform_suite_uploads_capability_only(monkeypatch: pytest.
     assert [(call["platform"], call["module"]) for call in upload_calls] == [("kubernetes", None)]
 
 
-def test_platform_and_module_mutually_exclusive(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    """`--platform` and `--module` cannot be combined."""
+def test_platform_and_module_intersect_runs_module_under_column(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """`--platform vm --module iam` runs only the iam config, under the vm column."""
     configs_root = tmp_path / "configs"
     _build_platform_provider(configs_root)
     _FakeOrchestrator.calls = []
@@ -549,8 +551,153 @@ def test_platform_and_module_mutually_exclusive(monkeypatch: pytest.MonkeyPatch,
         ["run", "--provider", "acme", "--platform", "vm", "--module", "iam", "--no-upload"],
     )
 
+    assert result.exit_code == 0, result.output
+    # the platform config does not run; the module runs under the column
+    assert [call["platform"] for call in _FakeOrchestrator.calls] == ["iam"]
+    assert _FakeOrchestrator.calls[0]["run_kwargs"].get("column_platform") == "vm"
+
+
+def test_platform_and_module_intersect_normalizes_alias(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """`--platform k8s --module iam` normalizes the column to kubernetes."""
+    configs_root = tmp_path / "configs"
+    _build_platform_provider(configs_root)
+    write_axis_suite(configs_root, "k8s.yaml", "kubernetes", "platform")
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "acme", "--platform", "k8s", "--module", "iam", "--no-upload"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert [call["platform"] for call in _FakeOrchestrator.calls] == ["iam"]
+    assert _FakeOrchestrator.calls[0]["run_kwargs"].get("column_platform") == "kubernetes"
+
+
+def test_platform_and_module_intersect_uploads_column_module_pair(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """An intersect run reports the (column, module) pair on upload."""
+    configs_root = tmp_path / "configs"
+    _build_platform_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+    upload_calls: list[dict[str, Any]] = []
+    _patch_upload(monkeypatch, upload_calls)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "acme", "--platform", "vm", "--module", "iam", "--lab-id", "7"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert [(call["platform"], call["module"]) for call in upload_calls] == [("vm", "iam")]
+
+
+def test_platform_and_module_intersect_dry_run_shows_both(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """The intersect dry-run plan carries both the platform and the modules."""
+    configs_root = tmp_path / "configs"
+    _build_platform_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "acme", "--platform", "vm", "--module", "iam", "--dry-run", "--json", "--no-upload"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert _FakeOrchestrator.calls == []
+    plan = json.loads(result.output)
+    assert plan["platform"] == "vm"
+    assert plan["modules"] == ["iam"]
+    assert [(r["role"], r["platform"], r["column_platform"]) for r in plan["runs"]] == [("module", "iam", "vm")]
+    assert plan["runs"][0]["upload"] == {"capability": "vm", "module": "iam"}
+
+    text = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "acme", "--platform", "vm", "--module", "iam", "--dry-run", "--no-upload"],
+    )
+    assert text.exit_code == 0, text.output
+    assert "Platform: vm" in text.output
+    assert "Modules:  iam" in text.output
+
+
+def test_platform_column_omits_incompatible_modules(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """A module with no column-compatible check is omitted, with the reason surfaced."""
+    configs_root = tmp_path / "configs"
+    _build_platform_provider(configs_root)
+    write_axis_suite(configs_root, "foundational.yaml", "foundational", "platform", validations=False)
+    write_axis_suite(configs_root, "iam.yaml", "iam", "module", platforms=["foundational"])
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "acme", "--platform", "vm", "--dry-run", "--json", "--no-upload"],
+    )
+
+    assert result.exit_code == 0, result.output
+    plan = json.loads(result.output)
+    assert [r["platform"] for r in plan["runs"]] == ["vm", "network"]
+    assert [(o["module"], o["reason"]) for o in plan["omitted"]] == [
+        ("iam", "no checks compatible with column 'vm'"),
+    ]
+
+    text = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "acme", "--platform", "vm", "--dry-run", "--no-upload"],
+    )
+    assert text.exit_code == 0, text.output
+    assert "omitted: iam (no checks compatible with column 'vm')" in text.output
+
+
+def test_platform_foundational_column_plans_declared_modules_only(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """`--platform foundational` plans a modules-only column of declared modules."""
+    configs_root = tmp_path / "configs"
+    _build_platform_provider(configs_root)
+    write_axis_suite(configs_root, "foundational.yaml", "foundational", "platform", validations=False)
+    write_axis_suite(configs_root, "iam.yaml", "iam", "module", platforms=["foundational"])
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "acme", "--platform", "foundational", "--dry-run", "--json", "--no-upload"],
+    )
+
+    assert result.exit_code == 0, result.output
+    plan = json.loads(result.output)
+    # no platform run (the suite wires no validations), only declared modules
+    assert [(r["role"], r["platform"], r["column_platform"]) for r in plan["runs"]] == [
+        ("module", "iam", "foundational"),
+    ]
+    assert [o["module"] for o in plan["omitted"]] == ["network"]
+
+
+def test_no_modules_rejected_with_module(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """`--no-modules` contradicts an explicit --module selection."""
+    configs_root = tmp_path / "configs"
+    _build_platform_provider(configs_root)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "acme", "--platform", "vm", "--module", "iam", "--no-modules", "--no-upload"],
+    )
+
     assert result.exit_code == 1, result.output
-    assert "mutually exclusive" in result.output
+    assert "--no-modules cannot be combined with --module." in result.output
     assert _FakeOrchestrator.calls == []
 
 
