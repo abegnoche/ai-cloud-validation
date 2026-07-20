@@ -255,7 +255,15 @@ tests:
     def test_foundational_module_checks_declare_foundational(self) -> None:
         """Once-per-lab API module checks carry platforms ["foundational"]."""
         catalog = build_catalog(released_only=False)
-        foundational_modules = {"iam", "control_plane", "image_registry", "network", "observability", "security"}
+        foundational_modules = {
+            "iam",
+            "control_plane",
+            "image_registry",
+            "network",
+            "observability",
+            "security",
+            "storage",
+        }
         for entry in catalog:
             if foundational_modules & set(entry["modules"]):
                 assert entry["platforms"] == ["foundational"], (
@@ -297,23 +305,6 @@ tests:
             assert entry["platforms"] == ["foundational"]
             assert entry["modules"] == ["security"]
             assert "bare_metal" not in entry["labels"]
-
-    def test_storage_suite_checks_carry_runtime_platforms(self) -> None:
-        """Every check in the self-contained storage suite supports each runtime column."""
-        from isvtest.catalog import _build_axis_maps
-
-        runtime_platforms = ["bare_metal", "kubernetes", "slurm", "vm"]
-        _, suite_modules = _build_axis_maps()
-        checked = 0
-        for entry in build_catalog(released_only=False):
-            name = entry["name"]
-            if "storage" not in suite_modules.get(name, set()):
-                continue
-            checked += 1
-            assert entry["platforms"] == runtime_platforms, (
-                f"{name}: expected {runtime_platforms}, got {entry['platforms']}"
-            )
-        assert checked > 0
 
     def test_platform_suite_checks_use_platforms_axis(self) -> None:
         """Checks wired in a platform suite land on platforms, not modules."""

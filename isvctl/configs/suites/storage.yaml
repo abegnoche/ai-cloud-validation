@@ -66,6 +66,8 @@ tests:
 
   # ─── Validations ─────────────────────────────────────────────────
   # These are PROVIDER-AGNOSTIC. They only check JSON field names/values.
+  # The suite provisions its own VM, volumes, and filesystems, so every check
+  # runs once in the foundational column.
   validations:
     # ─── Fixture: instance + attached, formatted, seeded volume ──────
     instance_launched:
@@ -74,7 +76,7 @@ tests:
         InstanceStateCheck:
           test_id: "N/A"
           labels: ["storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           expected_state: "running"
 
     fixture_volume:
@@ -83,16 +85,16 @@ tests:
         StepSuccessCheck-storage_fixture_volume:
           test_id: "N/A"
           labels: ["storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
         FieldExistsCheck-storage_fixture_volume:
           test_id: "N/A"
           labels: ["storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           fields: ["volume_id", "mount_point", "operations"]
         CrudOperationsCheck-storage_fixture_volume:
           test_id: "N/A"
           labels: ["storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           operations: ["create", "attach", "format", "mount", "write_sentinel"]
 
     # ─── DATASVC-XX-02: volume snapshots (issue #321) ────────────────
@@ -102,16 +104,16 @@ tests:
         StepSuccessCheck-storage_snapshot_lifecycle:
           test_id: "N/A"
           labels: ["storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
         FieldExistsCheck-storage_snapshot_lifecycle:
           test_id: "N/A"
           labels: ["storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           fields: ["volume_id", "snapshot_id", "operations"]
         CrudOperationsCheck-storage_snapshot_lifecycle:
           test_id: "DATASVC02-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           operations: ["create_snapshot", "restore_volume", "verify_data"]
 
     # ─── DATASVC-XX-03: volume resizing (issue #322) ─────────────────
@@ -121,16 +123,16 @@ tests:
         StepSuccessCheck-storage_volume_resize:
           test_id: "N/A"
           labels: ["storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
         FieldExistsCheck-storage_volume_resize:
           test_id: "N/A"
           labels: ["storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           fields: ["volume_id", "operations"]
         CrudOperationsCheck-storage_volume_resize:
           test_id: "DATASVC03-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           operations: ["modify_volume", "grow_partition", "resize_filesystem", "verify_size"]
 
     # ─── DATASVC-XX-04: persistence across restarts (issue #323) ─────
@@ -140,16 +142,16 @@ tests:
         StepSuccessCheck-storage_volume_persistence:
           test_id: "N/A"
           labels: ["storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
         FieldExistsCheck-storage_volume_persistence:
           test_id: "N/A"
           labels: ["storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           fields: ["volume_id", "operations"]
         CrudOperationsCheck-storage_volume_persistence:
           test_id: "DATASVC04-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           operations: ["stop", "start", "verify_attached", "verify_data"]
 
     # ─── Home directory storage ──────────────────────────────────────
@@ -159,15 +161,15 @@ tests:
         DirectoryFilesystemQuotaCheck:
           test_id: "DIR01-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
         DirectoryUsageAccountingCheck:
           test_id: "DIR01-02"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
         DirectoryNfsAvailabilityCheck:
           test_id: "DIR02-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
 
     # ─── High-speed storage: SDS controller ──────────────────────────
     sds_controller:
@@ -175,22 +177,22 @@ tests:
         HssStorageProvisioningCheck:
           test_id: "HSS01-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           step: provision_storage
         HssQosThroughputCheck:
           test_id: "HSS02-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           step: qos_throughput
         HssNonDisruptiveUpgradeCheck:
           test_id: "HSS05-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           step: non_disruptive_upgrade
         HssRdmaMemoryProtectionCheck:
           test_id: "HSS06-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           step: rdma_memory_protection
 
     # ─── High-speed storage: parallel file system services ───────────
@@ -199,42 +201,42 @@ tests:
         HssParallelFsProvisioningCheck:
           test_id: "HSS07-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           step: provision_parallel_fs
         HssMultipleFilesystemsCheck:
           test_id: "HSS09-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           step: multiple_filesystems
         HssLiveExpansionCheck:
           test_id: "HSS10-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           step: live_expansion
         HssQuotaEnforcementCheck:
           test_id: "HSS12-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           step: quota_enforcement
         HssRootSquashCheck:
           test_id: "HSS13-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           step: root_squash
         HssFlockMountCheck:
           test_id: "HSS14-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           step: flock_mount
         HssChangelogAuditCheck:
           test_id: "HSS15-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           step: changelog_audit
         HssMultipathCheck:
           test_id: "HSS18-01"
           labels: ["min_req", "storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
           step: multipath
 
     # ─── Teardown ────────────────────────────────────────────────────
@@ -244,7 +246,7 @@ tests:
         StepSuccessCheck-storage_teardown:
           test_id: "N/A"
           labels: ["storage"]
-          platforms: ["bare_metal", "kubernetes", "slurm", "vm"]
+          platforms: ["foundational"]
 
   exclude:
     labels: []
