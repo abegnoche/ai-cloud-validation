@@ -245,7 +245,7 @@ tests:
     def test_module_suite_checks_use_modules_axis(self) -> None:
         """Checks wired in a module suite land on modules; their platforms come
         only from the declared ``platforms:`` field (foundational for iam /
-        control_plane / image_registry)."""
+        control_plane / image_registry / network)."""
         catalog = build_catalog(released_only=False)
         by_name = {e["name"]: e for e in catalog}
         entry = by_name["AccessKeyAuthenticatedCheck"]
@@ -253,9 +253,9 @@ tests:
         assert entry["platforms"] == ["foundational"]
 
     def test_foundational_module_checks_declare_foundational(self) -> None:
-        """iam / control_plane / image_registry checks carry platforms ["foundational"]."""
+        """Once-per-lab API module checks carry platforms ["foundational"]."""
         catalog = build_catalog(released_only=False)
-        foundational_modules = {"iam", "control_plane", "image_registry"}
+        foundational_modules = {"iam", "control_plane", "image_registry", "network"}
         for entry in catalog:
             if foundational_modules & set(entry["modules"]):
                 assert entry["platforms"] == ["foundational"], (
@@ -299,14 +299,13 @@ tests:
             assert "bare_metal" not in entry["labels"]
 
     def test_filled_module_suites_carry_runtime_platforms(self) -> None:
-        """Strict mode fill: every check wired in the network/security/observability/
-        storage suites positively declares its platforms - the four runtime columns
+        """Security/observability/storage checks declare the four runtime columns
         unless a narrower subset is intended (the CAP04 pair)."""
         from isvtest.catalog import _build_axis_maps
 
         runtime_platforms = ["bare_metal", "kubernetes", "slurm", "vm"]
         bare_metal_only = {"CapacityReservationGroupingCheck", "CapacityTopologyBlockAtomicAllocationCheck"}
-        filled_modules = {"network", "security", "observability", "storage"}
+        filled_modules = {"security", "observability", "storage"}
 
         _, suite_modules = _build_axis_maps()
         checked = 0
