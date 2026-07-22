@@ -32,7 +32,7 @@ import yaml
 from isvreporter.version import get_version
 
 from isvtest.core.discovery import discover_all_tests
-from isvtest.core.resolution import resolve_class_key
+from isvtest.core.resolution import DECLARABLE_CAPABILITIES, resolve_class_key
 from isvtest.release_manifest import INCLUDE_UNRELEASED_ENV, load_released_test_filter
 
 logger = logging.getLogger(__name__)
@@ -305,21 +305,43 @@ def build_catalog(*, released_only: bool = True) -> list[dict[str, Any]]:
 def build_capability_vocabulary() -> list[str]:
     """Return declarable capabilities derived from platform suite YAML."""
     suite_map = _build_suite_map()
-    return sorted({entry["platform"] for entry in suite_map.values() if entry["platform"]})
+    return sorted(
+        platform
+        for platform in {entry["platform"] for entry in suite_map.values() if entry["platform"]}
+        if platform in DECLARABLE_CAPABILITIES
+    )
+
+
+def build_suite_vocabulary() -> list[str]:
+    """Return plain suite names declared by canonical suite YAML."""
+    configs_dir = _find_configs_dir()
+    if not configs_dir:
+        return []
+
+    suites: set[str] = set()
+    for config_path in sorted((configs_dir / "suites").glob("*.yaml")):
+        data = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        tests = data.get("tests") or {}
+        platform = tests.get("platform") if isinstance(tests, dict) else None
+        if isinstance(platform, str) and platform in DECLARABLE_CAPABILITIES:
+            continue
+        suites.add(config_path.stem.replace("-", "_"))
+    return sorted(suites)
 
 
 def catalog_document(entries: list[dict[str, Any]], version: str) -> dict[str, Any]:
     """Wrap catalog ``entries`` in the versioned upload/artifact envelope.
 
-    Adds the schema version, the isvtest package version, and the declarable
-    capability vocabulary. The per-entry ``labels`` are
-    intentionally not summarized at the top level - a consumer can derive the
-    label universe from the entries when needed.
+    Adds the schema version, the isvtest package version, and the catalog axis
+    vocabulary expected by the backend upload contract. The per-entry
+    ``labels`` are intentionally not summarized at the top level - a consumer
+    can derive the label universe from the entries when needed.
     """
     return {
         "schemaVersion": CATALOG_SCHEMA_VERSION,
         "isvTestVersion": version,
-        "capabilities": build_capability_vocabulary(),
+        "platforms": build_capability_vocabulary(),
+        "suites": build_suite_vocabulary(),
         "entries": entries,
     }
 

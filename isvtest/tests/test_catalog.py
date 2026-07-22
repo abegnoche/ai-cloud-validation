@@ -21,6 +21,7 @@ from isvtest.catalog import (
     CATALOG_SCHEMA_VERSION,
     build_capability_vocabulary,
     build_catalog,
+    build_suite_vocabulary,
     catalog_document,
     get_catalog_version,
 )
@@ -44,14 +45,24 @@ class TestCatalogDocument:
         """Only real platform suite keys are declarable capabilities."""
         assert build_capability_vocabulary() == ["bare_metal", "kubernetes", "slurm", "vm"]
 
+    def test_derives_suite_vocabulary_from_plain_suites(self) -> None:
+        """Plain suite YAML files are listed separately from platform suites."""
+        suites = build_suite_vocabulary()
+        assert "iam" in suites
+        assert "storage" in suites
+        assert "kubernetes" not in suites
+        assert "vm" not in suites
+
     def test_catalog_document_wraps_entries_with_metadata(self) -> None:
-        """The envelope carries schema version, package version, and capabilities."""
+        """The envelope carries schema version, package version, and axis lists."""
         entries = [{"name": "X", "labels": ["iam"]}]
         doc = catalog_document(entries, "1.2.3")
         assert doc["schemaVersion"] == CATALOG_SCHEMA_VERSION
         assert doc["isvTestVersion"] == "1.2.3"
         assert doc["entries"] == entries
-        assert doc["capabilities"] == build_capability_vocabulary()
+        assert doc["platforms"] == build_capability_vocabulary()
+        assert doc["suites"] == build_suite_vocabulary()
+        assert "capabilities" not in doc
         # The label universe is intentionally not summarized at the top level.
         assert "labels" not in doc
 

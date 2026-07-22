@@ -82,7 +82,8 @@ class TestUploadTestCatalog:
         payload = json.loads(request.data.decode())
         assert payload["isvTestVersion"] == "1.2.3"
         assert payload["schemaVersion"] == 2
-        assert payload["capabilities"] == []
+        assert payload["platforms"] == []
+        assert payload["suites"] == []
         assert len(payload["entries"]) == 2
         assert payload["entries"][0]["name"] == "TestA"
         assert payload["entries"][0]["labels"] == ["k8s"]
@@ -198,8 +199,8 @@ class TestUploadTestCatalog:
         assert entry["test_ids"] == []
 
     @patch("isvreporter.client.urlopen")
-    def test_forwards_capability_vocabulary(self, mock_urlopen: MagicMock) -> None:
-        """Schema version and declarable capabilities are sent in the envelope."""
+    def test_forwards_catalog_axis_vocabulary(self, mock_urlopen: MagicMock) -> None:
+        """Schema version and catalog axis lists are sent in the envelope."""
         get_response = MagicMock()
         get_response.read.return_value = json.dumps([]).encode()
         get_response.__enter__ = MagicMock(return_value=get_response)
@@ -216,13 +217,15 @@ class TestUploadTestCatalog:
             isv_test_version="1.2.3",
             entries=[{"name": "TestA"}],
             schema_version=2,
-            capabilities=["kubernetes", "vm"],
+            platforms=["kubernetes", "vm"],
+            suites=["storage", "iam"],
         )
 
         request = mock_urlopen.call_args_list[1][0][0]
         payload = json.loads(request.data.decode())
         assert payload["schemaVersion"] == 2
-        assert payload["capabilities"] == ["kubernetes", "vm"]
+        assert payload["platforms"] == ["kubernetes", "vm"]
+        assert payload["suites"] == ["storage", "iam"]
 
     @patch("isvreporter.client.urlopen")
     def test_markers_field_is_not_forwarded(self, mock_urlopen: MagicMock) -> None:

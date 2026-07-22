@@ -283,7 +283,8 @@ def upload_test_catalog(
     entries: list[dict[str, Any]],
     *,
     schema_version: int = 2,
-    capabilities: list[str] | None = None,
+    platforms: list[str] | None = None,
+    suites: list[str] | None = None,
 ) -> bool:
     """Upload test catalog for a suite version (idempotent per version).
 
@@ -298,7 +299,8 @@ def upload_test_catalog(
         entries: List of catalog entry dicts with keys:
             name, description, labels, source, suite, platform, requires, test_ids
         schema_version: Catalog document schema version.
-        capabilities: Declarable capability vocabulary.
+        platforms: Declarable capability vocabulary (platform suites).
+        suites: Plain suite names declared by the catalog.
 
     Returns:
         True if catalog was uploaded or already exists, False on error
@@ -320,7 +322,8 @@ def upload_test_catalog(
     payload = {
         "schemaVersion": schema_version,
         "isvTestVersion": isv_test_version,
-        "capabilities": capabilities or [],
+        "platforms": platforms or [],
+        "suites": suites or [],
         "entries": [
             {
                 "name": e["name"],

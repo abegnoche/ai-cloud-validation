@@ -80,7 +80,8 @@ def test_catalog_list_json() -> None:
     assert payload["schemaVersion"] == 2
     assert payload["isvTestVersion"] == "1.2.3"
     assert payload["entries"] == _FAKE_ENTRIES
-    assert "kubernetes" in payload["capabilities"]
+    assert "kubernetes" in payload["platforms"]
+    assert "storage" in payload["suites"]
 
 
 def test_catalog_labels_table() -> None:

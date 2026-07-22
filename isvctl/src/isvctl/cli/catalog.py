@@ -224,7 +224,8 @@ def push(
         isv_test_version=catalog_version,
         entries=catalog_entries,
         schema_version=document["schemaVersion"],
-        capabilities=document["capabilities"],
+        platforms=document["platforms"],
+        suites=document["suites"],
     ):
         print_progress(typer.style("[OK]", fg=typer.colors.GREEN) + " Catalog push complete")
     else:
