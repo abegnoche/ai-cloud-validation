@@ -49,6 +49,11 @@ commands:
   storage:
     phases: ["setup", "test", "teardown"]
     steps:
+      - name: ensure_cluster
+        phase: setup
+        command: "python ../scripts/storage/ensure_cluster.py"
+        timeout: 60
+
       - name: launch_instance
         phase: setup
         command: "python ../scripts/vm/launch_instance.py"

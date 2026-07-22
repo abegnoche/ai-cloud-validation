@@ -51,6 +51,13 @@ commands:
   storage:
     phases: ["setup", "test", "teardown"]
     steps:
+      # Idempotent reference implementation: the EKS setup reuses Terraform
+      # state and emits kubeconfig + CSI StorageClass names.
+      - name: ensure_cluster
+        phase: setup
+        command: "../scripts/eks/setup.sh"
+        timeout: 5400
+
       # ─── Block volume (EBS) ────────────────────────────────────────
       - name: launch_instance
         phase: setup

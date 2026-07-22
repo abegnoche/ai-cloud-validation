@@ -382,7 +382,6 @@ commands:
         timeout: 900
 
 tests:
-  platform: observability
   cluster_name: "aws-observability-validation"
   description: "AWS observability validation for VPC Flow Logs and host syslogs"
 
