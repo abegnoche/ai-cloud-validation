@@ -70,7 +70,7 @@ tests:
     instance_launched:
       step: launch_instance
       checks:
-        InstanceStateCheck-storage_instance_launched:
+        InstanceStateCheck:
           test_id: "N/A"
           labels: ["storage"]
           requires: [vm, bare_metal]
@@ -79,16 +79,16 @@ tests:
     fixture_volume:
       step: create_volume
       checks:
-        StepSuccessCheck-storage_fixture_volume:
+        StepSuccessCheck:
           test_id: "N/A"
           labels: ["storage"]
           requires: [vm, bare_metal]
-        FieldExistsCheck-storage_fixture_volume:
+        FieldExistsCheck:
           test_id: "N/A"
           labels: ["storage"]
           requires: [vm, bare_metal]
           fields: ["volume_id", "mount_point", "operations"]
-        CrudOperationsCheck-storage_fixture_volume:
+        CrudOperationsCheck:
           test_id: "N/A"
           labels: ["storage"]
           requires: [vm, bare_metal]
@@ -98,16 +98,16 @@ tests:
     snapshot_lifecycle:
       step: snapshot_lifecycle
       checks:
-        StepSuccessCheck-storage_snapshot_lifecycle:
+        StepSuccessCheck:
           test_id: "N/A"
           labels: ["storage"]
           requires: [vm, bare_metal]
-        FieldExistsCheck-storage_snapshot_lifecycle:
+        FieldExistsCheck:
           test_id: "N/A"
           labels: ["storage"]
           requires: [vm, bare_metal]
           fields: ["volume_id", "snapshot_id", "operations"]
-        CrudOperationsCheck-storage_snapshot_lifecycle:
+        CrudOperationsCheck:
           test_id: "DATASVC02-01"
           labels: ["min_req", "storage"]
           requires: [vm, bare_metal]
@@ -117,16 +117,16 @@ tests:
     volume_resize:
       step: volume_resize
       checks:
-        StepSuccessCheck-storage_volume_resize:
+        StepSuccessCheck:
           test_id: "N/A"
           labels: ["storage"]
           requires: [vm, bare_metal]
-        FieldExistsCheck-storage_volume_resize:
+        FieldExistsCheck:
           test_id: "N/A"
           labels: ["storage"]
           requires: [vm, bare_metal]
           fields: ["volume_id", "operations"]
-        CrudOperationsCheck-storage_volume_resize:
+        CrudOperationsCheck:
           test_id: "DATASVC03-01"
           labels: ["min_req", "storage"]
           requires: [vm, bare_metal]
@@ -136,16 +136,16 @@ tests:
     volume_persistence:
       step: volume_persistence
       checks:
-        StepSuccessCheck-storage_volume_persistence:
+        StepSuccessCheck:
           test_id: "N/A"
           labels: ["storage"]
           requires: [vm, bare_metal]
-        FieldExistsCheck-storage_volume_persistence:
+        FieldExistsCheck:
           test_id: "N/A"
           labels: ["storage"]
           requires: [vm, bare_metal]
           fields: ["volume_id", "operations"]
-        CrudOperationsCheck-storage_volume_persistence:
+        CrudOperationsCheck:
           test_id: "DATASVC04-01"
           labels: ["min_req", "storage"]
           requires: [vm, bare_metal]
@@ -240,7 +240,7 @@ tests:
     teardown_checks:
       step: teardown_volume
       checks:
-        StepSuccessCheck-storage_teardown:
+        StepSuccessCheck:
           test_id: "N/A"
           labels: ["storage"]
           requires: []

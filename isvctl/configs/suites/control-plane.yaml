@@ -56,7 +56,7 @@ tests:
     api_health:
       step: check_api
       checks:
-        FieldExistsCheck-cp_api_health:
+        FieldExistsCheck:
           test_id: "N/A"
           labels: ["control_plane"]
           requires: []
@@ -65,7 +65,7 @@ tests:
         # authenticated-endpoint half - a successful authenticated check_api
         # response. The data-path half is the CrudOperationsCheck in the
         # "s3_object_lifecycle" section, which declares the same test_id.
-        FieldValueCheck-cp_api_health:
+        FieldValueCheck:
           test_id: "DATASVC01-01"
           labels: ["control_plane", "min_req"]
           requires: []
@@ -121,16 +121,16 @@ tests:
       checks:
         # Data-path half of DATASVC-XX-01 (object put/get/delete); the
         # authenticated-endpoint half is the FieldValueCheck in "api_health".
-        StepSuccessCheck-cp_s3_object_lifecycle:
+        StepSuccessCheck:
           test_id: "N/A"
           labels: ["control_plane"]
           requires: []
-        FieldExistsCheck-cp_s3_object_lifecycle:
+        FieldExistsCheck:
           test_id: "N/A"
           labels: ["control_plane"]
           requires: []
           fields: ["bucket_name", "object_key", "operations"]
-        CrudOperationsCheck-cp_s3_object_lifecycle:
+        CrudOperationsCheck:
           test_id: "DATASVC01-01"
           labels: ["control_plane", "min_req"]
           requires: []

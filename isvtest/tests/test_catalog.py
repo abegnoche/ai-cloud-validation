@@ -71,7 +71,7 @@ class TestBuildCatalog:
     """Tests for build_catalog function."""
 
     def test_entries_have_suite_contract(self) -> None:
-        """Every catalog row is one globally unique canonical suite wiring."""
+        """Catalog rows expose suite placement and requirement metadata."""
         catalog = build_catalog(released_only=False)
         names = [entry["name"] for entry in catalog]
         assert catalog
@@ -165,8 +165,8 @@ tests:
             catalog = build_catalog()
 
         names = {e["name"] for e in catalog}
-        assert "StepSuccessCheck-storage_fixture_volume" in names
-        assert "FieldExistsCheck-storage_fixture_volume" in names
+        assert "StepSuccessCheck" in names
+        assert "FieldExistsCheck" in names
 
     def test_labels_are_lists_of_strings(self) -> None:
         """Test that labels are lists of strings."""

@@ -262,7 +262,7 @@ tests:
     teardown_checks:
       step: teardown
       checks:
-        StepSuccessCheck-network_teardown:
+        StepSuccessCheck:
           test_id: "N/A"
           labels: ["network"]
           requires: []

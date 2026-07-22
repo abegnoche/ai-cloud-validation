@@ -234,7 +234,7 @@ tests:
     teardown_checks:
       step: teardown
       checks:
-        StepSuccessCheck-security_teardown:
+        StepSuccessCheck:
           test_id: "N/A"
           labels: ["security"]
           requires: []

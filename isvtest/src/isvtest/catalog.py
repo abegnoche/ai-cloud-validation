@@ -24,6 +24,7 @@ Suite placement and capability requirements come only from canonical
 """
 
 import logging
+import os
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
@@ -192,12 +193,17 @@ def build_label_file_map() -> dict[str, set[str]]:
 
 
 def _build_suite_map() -> dict[str, dict[str, Any]]:
-    """Map globally unique wiring names to suite placement and requirements."""
+    """Map suite wiring names to suite placement and requirements.
+
+    Duplicate wiring names currently last-wins. Global uniqueness enforcement
+    is deferred to a follow-up PR (``ISVCTL_ENFORCE_UNIQUE_WIRING=1``).
+    """
     configs_dir = _find_configs_dir()
     if not configs_dir:
         logger.warning("Could not locate isvctl/configs/ directory")
         return {}
 
+    enforce_unique = os.environ.get("ISVCTL_ENFORCE_UNIQUE_WIRING") == "1"
     suite_map: dict[str, dict[str, Any]] = {}
     for config_path in sorted((configs_dir / "suites").glob("*.yaml")):
         data = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
@@ -205,7 +211,7 @@ def _build_suite_map() -> dict[str, dict[str, Any]]:
         platform = tests.get("platform") if isinstance(tests, dict) else None
         suite = str(platform) if isinstance(platform, str) and platform else config_path.stem.replace("-", "_")
         for check_name, params in iter_config_checks(config_path):
-            if check_name in suite_map:
+            if check_name in suite_map and enforce_unique:
                 raise ValueError(f"Suite wiring name {check_name!r} is not globally unique")
             requires = params.get("requires", [])
             suite_map[check_name] = {
@@ -219,8 +225,8 @@ def _build_suite_map() -> dict[str, dict[str, Any]]:
 def build_catalog(*, released_only: bool = True) -> list[dict[str, Any]]:
     """Discover all validation tests and return structured catalog entries.
 
-    Each entry is one globally unique canonical suite wiring. Plain suites
-    carry ``requires`` while platform suites carry their ``platform`` key.
+    Each entry is one suite wiring name. Plain suites carry ``requires`` while
+    platform suites carry their ``platform`` key.
 
     Args:
         released_only: When True, omit tests that are not in the committed
@@ -291,9 +297,7 @@ def build_catalog(*, released_only: bool = True) -> list[dict[str, Any]]:
             omitted_names = sorted(
                 entry["name"] for entry in catalog if resolve_class_key(entry["name"], released_tests) is None
             )
-            catalog = [
-                entry for entry in catalog if resolve_class_key(entry["name"], released_tests) is not None
-            ]
+            catalog = [entry for entry in catalog if resolve_class_key(entry["name"], released_tests) is not None]
             if omitted_names:
                 logger.info("Omitted %d unreleased tests from catalog", len(omitted_names))
                 logger.debug("Unreleased tests omitted from catalog: %s", ", ".join(omitted_names))

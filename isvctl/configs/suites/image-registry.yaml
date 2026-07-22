@@ -53,11 +53,11 @@ tests:
     image_upload:
       step: upload_image
       checks:
-        StepSuccessCheck-img_image_upload:
+        StepSuccessCheck:
           test_id: "N/A"
           labels: ["image_registry"]
           requires: []
-        FieldExistsCheck-img_image_upload:
+        FieldExistsCheck:
           test_id: "BOOT01-01"
           labels: ["image_registry", "min_req"]
           requires: []
@@ -67,16 +67,16 @@ tests:
     image_crud:
       step: crud_image
       checks:
-        StepSuccessCheck-img_image_crud:
+        StepSuccessCheck:
           test_id: "N/A"
           labels: ["image_registry"]
           requires: []
-        FieldExistsCheck-img_image_crud:
+        FieldExistsCheck:
           test_id: "N/A"
           labels: ["image_registry"]
           requires: []
           fields: ["image_id", "operations"]
-        CrudOperationsCheck-img_image_crud:
+        CrudOperationsCheck:
           test_id: "BOOT03-02"
           labels: ["image_registry", "min_req"]
           requires: []
@@ -86,16 +86,16 @@ tests:
     vm_from_image:
       step: launch_instance
       checks:
-        StepSuccessCheck-img_vm_from_image:
+        StepSuccessCheck:
           test_id: "BOOT01-05"
           labels: ["image_registry", "min_req"]
           requires: [vm]
-        FieldExistsCheck-img_vm_from_image:
+        FieldExistsCheck:
           test_id: "N/A"
           labels: ["image_registry"]
           requires: [vm]
           fields: ["instance_id", "public_ip", "key_path"]
-        InstanceStateCheck-img_vm_from_image:
+        InstanceStateCheck:
           test_id: "N/A"
           labels: ["image_registry"]
           requires: [vm]
@@ -104,11 +104,11 @@ tests:
     vm_ssh:
       step: launch_instance
       checks:
-        ConnectivityCheck-img_vm_ssh:
+        ConnectivityCheck:
           test_id: "N/A"
           labels: ["image_registry", "ssh"]
           requires: [vm]
-        OsCheck-img_vm_ssh:
+        OsCheck:
           test_id: "N/A"
           labels: ["image_registry", "ssh"]
           requires: [vm]
@@ -118,11 +118,11 @@ tests:
     install_config_crud:
       step: crud_install_config
       checks:
-        StepSuccessCheck-img_install_config_crud:
+        StepSuccessCheck:
           test_id: "N/A"
           labels: ["image_registry"]
           requires: []
-        FieldExistsCheck-img_install_config_crud:
+        FieldExistsCheck:
           test_id: "BOOT01-02"
           labels: ["image_registry"]
           requires: []
@@ -132,16 +132,16 @@ tests:
     bm_from_image:
       step: install_image_bm
       checks:
-        StepSuccessCheck-img_bm_from_image:
+        StepSuccessCheck:
           test_id: "BOOT01-03"
           labels: ["image_registry", "min_req"]
           requires: [bare_metal]
-        FieldExistsCheck-img_bm_from_image:
+        FieldExistsCheck:
           test_id: "N/A"
           labels: ["image_registry"]
           requires: [bare_metal]
           fields: ["instance_id", "image_id", "instance_state"]
-        InstanceStateCheck-img_bm_from_image:
+        InstanceStateCheck:
           test_id: "N/A"
           labels: ["image_registry"]
           requires: [bare_metal]
@@ -151,16 +151,16 @@ tests:
     bm_from_config:
       step: install_config_bm
       checks:
-        StepSuccessCheck-img_bm_from_config:
+        StepSuccessCheck:
           test_id: "BOOT01-04"
           labels: ["image_registry", "min_req"]
           requires: [bare_metal]
-        FieldExistsCheck-img_bm_from_config:
+        FieldExistsCheck:
           test_id: "N/A"
           labels: ["image_registry"]
           requires: [bare_metal]
           fields: ["instance_id", "config_id", "instance_state"]
-        InstanceStateCheck-img_bm_from_config:
+        InstanceStateCheck:
           test_id: "N/A"
           labels: ["image_registry"]
           requires: [bare_metal]
@@ -169,7 +169,7 @@ tests:
     teardown_checks:
       step: teardown
       checks:
-        StepSuccessCheck-img_teardown:
+        StepSuccessCheck:
           test_id: "N/A"
           labels: ["image_registry"]
           requires: []

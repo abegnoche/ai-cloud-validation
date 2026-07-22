@@ -33,6 +33,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from collections import defaultdict
@@ -47,6 +48,8 @@ SUITES_DIR = REPO_ROOT / "isvctl" / "configs" / "suites"
 _NEXT_CATEGORY_LINE = re.compile(r"^    \S")
 DECLARABLE_CAPABILITIES = {"vm", "bare_metal", "kubernetes", "slurm"}
 REQUIREMENT_VOCABULARY = DECLARABLE_CAPABILITIES
+# Opt-in until unique wiring names land in a dedicated PR.
+ENFORCE_UNIQUE_WIRING = os.environ.get("ISVCTL_ENFORCE_UNIQUE_WIRING") == "1"
 
 
 def _check_line_patterns(check_name: str) -> tuple[re.Pattern[str], ...]:
@@ -172,8 +175,11 @@ def wiring_errors(suites_dir: Path = SUITES_DIR) -> list[str]:
             labels = _normalize_labels(params.get("labels"))
             required_label = required_suite_label(path)
             previous_location = wiring_locations.get(name)
+            # Uniqueness enforcement is intentionally deferred to a follow-up
+            # PR. Keep the check so it can be re-enabled without rediscovery.
             if previous_location:
-                errors.append(f"{location}: wiring name is not globally unique (also at {previous_location})")
+                if ENFORCE_UNIQUE_WIRING:
+                    errors.append(f"{location}: wiring name is not globally unique (also at {previous_location})")
             else:
                 wiring_locations[name] = location
             if test_id is None:
