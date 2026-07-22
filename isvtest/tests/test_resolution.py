@@ -64,6 +64,7 @@ def _entry(
     step: str | None = None,
     phase: str | None = None,
     labels: tuple[str, ...] = (),
+    requires: tuple[str, ...] = (),
 ) -> ValidationEntry:
     """Build a minimal validation entry."""
     return ValidationEntry(
@@ -73,6 +74,7 @@ def _entry(
         step=step,
         phase=phase,
         labels=labels,
+        requires=requires,
     )
 
 
@@ -87,6 +89,7 @@ def _resolve(
     exclude_tests: set[str] | None = None,
     released_tests: set[str] | None = None,
     render_context: dict[str, Any] | None = None,
+    capabilities: set[str] | None = None,
 ) -> ResolvedEntry:
     """Resolve one entry and return the single result."""
     results = resolve_entries(
@@ -99,9 +102,32 @@ def _resolve(
         exclude_tests=set() if exclude_tests is None else exclude_tests,
         released_tests=released_tests,
         render_context={} if render_context is None else render_context,
+        capabilities=capabilities,
     )
     assert len(results) == 1
     return results[0]
+
+
+def test_compute_requirement_expands_from_vm_or_bare_metal() -> None:
+    """Either concrete compute capability satisfies a compute prerequisite."""
+    entry = _entry(requires=("compute",))
+
+    assert _resolve(entry, capabilities={"vm"}).is_ready
+    assert _resolve(entry, capabilities={"bare_metal"}).is_ready
+
+
+def test_capability_filter_has_explicit_skip_reason() -> None:
+    """An unmet prerequisite reports both the requirement and active context."""
+    resolved = _resolve(_entry(requires=("compute",)), capabilities={"kubernetes"})
+
+    assert resolved.state == State.SKIPPED
+    assert resolved.skip_reason == SkipReason.CAPABILITY_REQUIREMENT
+    assert resolved.message == "requires compute (context: kubernetes)"
+
+
+def test_omitted_capabilities_disables_requirement_filtering() -> None:
+    """Local development without a capability context runs every check."""
+    assert _resolve(_entry(requires=("kubernetes",)), capabilities=None).is_ready
 
 
 @pytest.mark.parametrize(

@@ -33,6 +33,8 @@ logger = logging.getLogger(__name__)
 
 ADAPTER_HANDLED_CATEGORIES = {"reframe"}
 DEFAULT_VALIDATION_PHASE = "test"
+DECLARABLE_CAPABILITIES = frozenset({"vm", "bare_metal", "kubernetes", "slurm"})
+REQUIREMENT_VOCABULARY = DECLARABLE_CAPABILITIES | {"compute"}
 
 
 class State(StrEnum):
@@ -53,6 +55,7 @@ class SkipReason(StrEnum):
     STEP_NO_OUTPUT = "step_no_output"  # step ran but produced no JSON output
     STEP_NOT_CONFIGURED = "step_not_configured"  # step the entry binds to isn't in the platform's step list
     UNRELEASED = "unreleased"  # not in released_tests.json (gated until release)
+    CAPABILITY_REQUIREMENT = "capability_requirement"  # declared capabilities do not satisfy ``requires``
 
 
 class ErrorReason(StrEnum):
@@ -73,6 +76,7 @@ class ValidationEntry:
     step: str | None = None
     phase: str | None = None
     labels: tuple[str, ...] = ()
+    requires: tuple[str, ...] = ()
 
 
 @dataclass
@@ -110,6 +114,22 @@ def _wiring_labels(params_template: Any) -> tuple[str, ...]:
     return tuple(labels)
 
 
+def _wiring_requires(params_template: Any) -> tuple[str, ...]:
+    """Return the capability prerequisites declared on a check's YAML wiring."""
+    value = params_template.get("requires") if isinstance(params_template, dict) else None
+    if not isinstance(value, list):
+        return ()
+    return tuple(item for item in value if isinstance(item, str))
+
+
+def expand_capabilities(declared: Iterable[str]) -> frozenset[str]:
+    """Expand declarable capabilities with requirement-only aliases."""
+    expanded = set(declared)
+    if expanded & {"vm", "bare_metal"}:
+        expanded.add("compute")
+    return frozenset(expanded)
+
+
 def parse_validations(raw_config: Mapping[str, Any]) -> list[ValidationEntry]:
     """Parse raw validation config into ordered validation entries.
 
@@ -144,6 +164,7 @@ def parse_validations(raw_config: Mapping[str, Any]) -> list[ValidationEntry]:
                 params_template = copy.deepcopy(params_template)
 
             labels = _wiring_labels(params_template)
+            requires = _wiring_requires(params_template)
             entries.append(
                 ValidationEntry(
                     name=name,
@@ -152,6 +173,7 @@ def parse_validations(raw_config: Mapping[str, Any]) -> list[ValidationEntry]:
                     step=entry_step if isinstance(entry_step, str) else None,
                     phase=entry_phase if isinstance(entry_phase, str) else None,
                     labels=labels,
+                    requires=requires,
                 )
             )
 
@@ -169,6 +191,7 @@ def resolve_entries(
     exclude_tests: AbstractSet[str],
     released_tests: AbstractSet[str] | None,
     render_context: Mapping[str, Any],
+    capabilities: AbstractSet[str] | None = None,
 ) -> list[ResolvedEntry]:
     """Resolve validation entries into ready or terminal outcomes.
 
@@ -182,12 +205,14 @@ def resolve_entries(
         exclude_tests: Validation names excluded by config.
         released_tests: Released test manifest, or None when unreleased checks are included.
         render_context: Jinja context for validation parameter rendering.
+        capabilities: Declared capability context, or None to disable requirement filtering.
 
     Returns:
         A resolved entry for every input entry, in input order.
     """
     resolved: list[ResolvedEntry] = []
     env = _create_jinja_env()
+    expanded_capabilities = expand_capabilities(capabilities or ()) if capabilities is not None else None
 
     for entry in entries:
         config_error = _validate_entry_shape(entry)
@@ -210,6 +235,18 @@ def resolve_entries(
 
         if entry.name in exclude_tests:
             resolved.append(_skip(entry, SkipReason.EXCLUDED, f"validation '{entry.name}' is excluded by name"))
+            continue
+
+        if expanded_capabilities is not None and not set(entry.requires).issubset(expanded_capabilities):
+            requirement_list = ", ".join(entry.requires) or "(none)"
+            context_list = ", ".join(sorted(capabilities or ())) or "(none)"
+            resolved.append(
+                _skip(
+                    entry,
+                    SkipReason.CAPABILITY_REQUIREMENT,
+                    f"requires {requirement_list} (context: {context_list})",
+                )
+            )
             continue
 
         missing_include_labels = sorted(set(include_labels).difference(entry.labels))
@@ -293,6 +330,7 @@ def resolve_entries(
             rendered_params.pop("step", None)
             rendered_params["step_output"] = copy.deepcopy(step_outputs[entry.step])
         rendered_params.pop("phase", None)
+        rendered_params.pop("requires", None)
         rendered_params["_category"] = entry.category
 
         resolved.append(ResolvedEntry(entry=entry, rendered_params=rendered_params))
@@ -414,6 +452,17 @@ def _validate_entry_shape(entry: ValidationEntry) -> str | None:
     invalid_message = entry.params_template.get("_invalid_config")
     if invalid_message:
         return str(invalid_message)
+    raw_requires = entry.params_template.get("requires")
+    if raw_requires is not None:
+        if not isinstance(raw_requires, list) or any(
+            not isinstance(value, str) or value not in REQUIREMENT_VOCABULARY for value in raw_requires
+        ):
+            return (
+                f"validation '{entry.name}' requires must be a list containing only: "
+                f"{', '.join(sorted(REQUIREMENT_VOCABULARY))}"
+            )
+        if len(raw_requires) != len(set(raw_requires)):
+            return f"validation '{entry.name}' requires must not contain duplicates"
     return None
 
 
