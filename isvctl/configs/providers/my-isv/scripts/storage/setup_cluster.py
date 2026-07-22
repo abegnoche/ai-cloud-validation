@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-"""Ensure a Kubernetes cluster with the provider's CSI drivers is available."""
+"""Set up a Kubernetes cluster with the provider's CSI drivers."""
 
 import json
 import os
@@ -28,8 +28,8 @@ def main() -> int:
         },
     }
 
-    # TODO: Idempotently reuse or create a cluster with your CSI drivers,
-    # then return its kubeconfig and StorageClass names using this contract.
+    # TODO: Provision (or reuse) a cluster with your CSI drivers, then return
+    # its kubeconfig and StorageClass names using this contract.
     if DEMO_MODE:
         result.update(
             {
@@ -46,7 +46,7 @@ def main() -> int:
             }
         )
     else:
-        result["error"] = "Not implemented - ensure a Kubernetes cluster with CSI installed"
+        result["error"] = "Not implemented - set up a Kubernetes cluster with CSI installed"
 
     print(json.dumps(result, indent=2))
     return 0 if result["success"] else 1
