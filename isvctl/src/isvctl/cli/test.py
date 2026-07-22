@@ -131,16 +131,23 @@ def _human_readable_dry_run(config: RunConfig, capabilities: set[str] | None) ->
         f"  Checks: {len(entries)}",
     ]
     for entry in entries:
-        requirement = ", ".join(entry.requires) or "core"
         if capabilities is not None and not requirements_satisfied(entry.requires, capabilities):
+            requirement = ", ".join(entry.requires)
             declared = ", ".join(sorted(capabilities or ())) or "(none)"
             lines.append(f"  [SKIP] {entry.name}: requires {requirement} (context: {declared})")
+        elif entry.requires:
+            lines.append(f"  [RUN]  {entry.name}: requires {', '.join(entry.requires)}")
         else:
-            lines.append(f"  [RUN]  {entry.name}: requires {requirement}")
+            lines.append(f"  [RUN]  {entry.name}")
     return "\n".join(lines)
 
 
-@app.command("run", context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
+@app.command(
+    "run",
+    # Allow pytest args after `--`, but reject unknown options before it so
+    # stale flags like `--platform` fail loudly instead of being forwarded.
+    context_settings={"allow_extra_args": True, "ignore_unknown_options": False},
+)
 def run(
     ctx: typer.Context,
     config_files: Annotated[
@@ -159,7 +166,7 @@ def run(
         str | None,
         typer.Option(
             "--provider",
-            help="Provider name for label discovery when no --config/-f files are supplied.",
+            help="Provider name for --suite selection or --label discovery when no --config/-f is supplied.",
         ),
     ] = None,
     suite: Annotated[
@@ -289,6 +296,8 @@ def run(
     Use -- to pass additional arguments to pytest/isvtest.
 
     Examples:
+        isvctl test run --provider aws --suite k8s
+        isvctl test run --provider aws --label network
         isvctl test run -f lab.yaml -f commands.yaml -f suites/k8s.yaml
         isvctl test run -f config.yaml --set context.node_count=8
         isvctl test run -f config.yaml --phase setup
@@ -328,7 +337,7 @@ def run(
             print_error("--provider discovery cannot be combined with --config/-f.")
             raise typer.Exit(code=1)
         if not labels:
-            print_error("--provider requires at least one --label/-l for discovery.")
+            print_error("--provider requires either --suite NAME or at least one --label/-l.")
             raise typer.Exit(code=1)
 
         known_providers = list_providers(CONFIGS_ROOT)

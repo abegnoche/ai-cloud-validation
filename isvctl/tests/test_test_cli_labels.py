@@ -256,3 +256,49 @@ def test_provider_label_discovery_dry_run_prints_plan_without_running(
     assert plan["labels"] == ["network"]
     assert [Path(item["config"]).name for item in plan["configs"]] == ["network.yaml", "observability.yaml"]
     assert [item["matched_checks"][0]["name"] for item in plan["configs"]] == ["NetworkCheck", "VpcFlowLogsCheck"]
+
+
+def test_provider_without_suite_or_label_mentions_both_options(monkeypatch: pytest.MonkeyPatch) -> None:
+    """`--provider` alone tells the user to pick `--suite` or `--label`."""
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(test_cli.app, ["run", "--provider", "aws", "--dry-run", "--no-upload"])
+
+    assert result.exit_code == 1, result.output
+    assert "--suite NAME" in result.output
+    assert "--label/-l" in result.output
+    assert _FakeOrchestrator.calls == []
+
+
+def test_unknown_option_before_separator_is_rejected(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Stale flags like `--platform` fail before they can be forwarded to pytest."""
+    config = _write_config(tmp_path)
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "-f", str(config), "--platform", "k8s", "--no-upload", "--dry-run"],
+    )
+
+    assert result.exit_code != 0, result.output
+    assert "No such option" in result.output or "no such option" in result.output.lower()
+    assert "--platform" in result.output
+    assert _FakeOrchestrator.calls == []
+
+
+def test_pytest_args_after_separator_are_forwarded(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Args after `--` still reach the orchestrator as pytest extras."""
+    config = _write_config(tmp_path)
+    _FakeOrchestrator.captured = {}
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "-f", str(config), "--no-upload", "--", "-k", "K8sNodeCountCheck"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert _FakeOrchestrator.captured["extra_pytest_args"] == ["-k", "K8sNodeCountCheck"]
