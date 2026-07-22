@@ -108,21 +108,22 @@ def _resolve(
     return results[0]
 
 
-def test_compute_requirement_expands_from_vm_or_bare_metal() -> None:
-    """Either concrete compute capability satisfies a compute prerequisite."""
-    entry = _entry(requires=("compute",))
+def test_any_declared_requirement_satisfies_capability_filter() -> None:
+    """Orthogonal platform requirements use OR semantics."""
+    entry = _entry(requires=("vm", "bare_metal"))
 
     assert _resolve(entry, capabilities={"vm"}).is_ready
     assert _resolve(entry, capabilities={"bare_metal"}).is_ready
+    assert _resolve(_entry(requires=()), capabilities={"kubernetes"}).is_ready
 
 
 def test_capability_filter_has_explicit_skip_reason() -> None:
     """An unmet prerequisite reports both the requirement and active context."""
-    resolved = _resolve(_entry(requires=("compute",)), capabilities={"kubernetes"})
+    resolved = _resolve(_entry(requires=("vm", "bare_metal")), capabilities={"kubernetes"})
 
     assert resolved.state == State.SKIPPED
     assert resolved.skip_reason == SkipReason.CAPABILITY_REQUIREMENT
-    assert resolved.message == "requires compute (context: kubernetes)"
+    assert resolved.message == "requires vm, bare_metal (context: kubernetes)"
 
 
 def test_omitted_capabilities_disables_requirement_filtering() -> None:

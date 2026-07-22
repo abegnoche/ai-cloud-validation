@@ -185,7 +185,7 @@ tests:
                     "ExplicitLabelCatalogCheck": {
                         "suite": "demo",
                         "platform": None,
-                        "requires": ["compute"],
+                        "requires": ["vm", "bare_metal"],
                     }
                 },
             ),
@@ -207,7 +207,7 @@ tests:
                 "source": __name__,
                 "suite": "demo",
                 "platform": None,
-                "requires": ["compute"],
+                "requires": ["vm", "bare_metal"],
             }
         ]
 

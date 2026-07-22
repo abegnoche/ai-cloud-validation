@@ -41,11 +41,12 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SUITES_DIR = REPO_ROOT / "isvctl" / "configs" / "suites"
 _NEXT_CATEGORY_LINE = re.compile(r"^    \S")
 DECLARABLE_CAPABILITIES = {"vm", "bare_metal", "kubernetes", "slurm"}
-REQUIREMENT_VOCABULARY = DECLARABLE_CAPABILITIES | {"compute"}
+REQUIREMENT_VOCABULARY = DECLARABLE_CAPABILITIES
 
 
 def _check_line_patterns(check_name: str) -> tuple[re.Pattern[str], ...]:
@@ -159,9 +160,7 @@ def wiring_errors(suites_dir: Path = SUITES_DIR) -> list[str]:
         if module is not None:
             errors.append(f"{path}: tests.module is no longer supported")
         if platform is not None and platform not in DECLARABLE_CAPABILITIES:
-            errors.append(
-                f"{path}: tests.platform must be one of: {', '.join(sorted(DECLARABLE_CAPABILITIES))}"
-            )
+            errors.append(f"{path}: tests.platform must be one of: {', '.join(sorted(DECLARABLE_CAPABILITIES))}")
         for category, name, params in checks:
             key = (path, category, name)
             line_numbers = find_check_line_numbers(lines, category, name)
@@ -227,9 +226,7 @@ def main(argv: list[str] | None = None) -> int:
         print(message)
         return 0
 
-    ok = (
-        f"OK: all wired checks in {SUITES_DIR.relative_to(REPO_ROOT)} declare valid suite metadata."
-    )
+    ok = f"OK: all wired checks in {SUITES_DIR.relative_to(REPO_ROOT)} declare valid suite metadata."
     print(ok)
     return 0
 

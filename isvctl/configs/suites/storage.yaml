@@ -73,7 +73,7 @@ tests:
         InstanceStateCheck-storage_instance_launched:
           test_id: "N/A"
           labels: ["storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           expected_state: "running"
 
     fixture_volume:
@@ -82,16 +82,16 @@ tests:
         StepSuccessCheck-storage_fixture_volume:
           test_id: "N/A"
           labels: ["storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
         FieldExistsCheck-storage_fixture_volume:
           test_id: "N/A"
           labels: ["storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           fields: ["volume_id", "mount_point", "operations"]
         CrudOperationsCheck-storage_fixture_volume:
           test_id: "N/A"
           labels: ["storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           operations: ["create", "attach", "format", "mount", "write_sentinel"]
 
     # ─── DATASVC-XX-02: volume snapshots (issue #321) ────────────────
@@ -101,16 +101,16 @@ tests:
         StepSuccessCheck-storage_snapshot_lifecycle:
           test_id: "N/A"
           labels: ["storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
         FieldExistsCheck-storage_snapshot_lifecycle:
           test_id: "N/A"
           labels: ["storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           fields: ["volume_id", "snapshot_id", "operations"]
         CrudOperationsCheck-storage_snapshot_lifecycle:
           test_id: "DATASVC02-01"
           labels: ["min_req", "storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           operations: ["create_snapshot", "restore_volume", "verify_data"]
 
     # ─── DATASVC-XX-03: volume resizing (issue #322) ─────────────────
@@ -120,16 +120,16 @@ tests:
         StepSuccessCheck-storage_volume_resize:
           test_id: "N/A"
           labels: ["storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
         FieldExistsCheck-storage_volume_resize:
           test_id: "N/A"
           labels: ["storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           fields: ["volume_id", "operations"]
         CrudOperationsCheck-storage_volume_resize:
           test_id: "DATASVC03-01"
           labels: ["min_req", "storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           operations: ["modify_volume", "grow_partition", "resize_filesystem", "verify_size"]
 
     # ─── DATASVC-XX-04: persistence across restarts (issue #323) ─────
@@ -139,16 +139,16 @@ tests:
         StepSuccessCheck-storage_volume_persistence:
           test_id: "N/A"
           labels: ["storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
         FieldExistsCheck-storage_volume_persistence:
           test_id: "N/A"
           labels: ["storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           fields: ["volume_id", "operations"]
         CrudOperationsCheck-storage_volume_persistence:
           test_id: "DATASVC04-01"
           labels: ["min_req", "storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           operations: ["stop", "start", "verify_attached", "verify_data"]
 
     # ─── Home directory storage ──────────────────────────────────────
@@ -158,15 +158,15 @@ tests:
         DirectoryFilesystemQuotaCheck:
           test_id: "DIR01-01"
           labels: ["min_req", "storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
         DirectoryUsageAccountingCheck:
           test_id: "DIR01-02"
           labels: ["min_req", "storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
         DirectoryNfsAvailabilityCheck:
           test_id: "DIR02-01"
           labels: ["min_req", "storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
 
     # ─── High-speed storage: SDS controller ──────────────────────────
     sds_controller:
@@ -179,7 +179,7 @@ tests:
         HssQosThroughputCheck:
           test_id: "HSS02-01"
           labels: ["min_req", "storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: qos_throughput
         HssNonDisruptiveUpgradeCheck:
           test_id: "HSS05-01"
@@ -189,7 +189,7 @@ tests:
         HssRdmaMemoryProtectionCheck:
           test_id: "HSS06-01"
           labels: ["min_req", "storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: rdma_memory_protection
 
     # ─── High-speed storage: parallel file system services ───────────
@@ -198,7 +198,7 @@ tests:
         HssParallelFsProvisioningCheck:
           test_id: "HSS07-01"
           labels: ["min_req", "storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: provision_parallel_fs
         HssMultipleFilesystemsCheck:
           test_id: "HSS09-01"
@@ -213,7 +213,7 @@ tests:
         HssQuotaEnforcementCheck:
           test_id: "HSS12-01"
           labels: ["min_req", "storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: quota_enforcement
         HssRootSquashCheck:
           test_id: "HSS13-01"
@@ -223,17 +223,17 @@ tests:
         HssFlockMountCheck:
           test_id: "HSS14-01"
           labels: ["min_req", "storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: flock_mount
         HssChangelogAuditCheck:
           test_id: "HSS15-01"
           labels: ["min_req", "storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: changelog_audit
         HssMultipathCheck:
           test_id: "HSS18-01"
           labels: ["min_req", "storage"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: multipath
 
     # ─── Teardown ────────────────────────────────────────────────────

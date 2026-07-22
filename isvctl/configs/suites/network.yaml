@@ -132,12 +132,12 @@ tests:
         NetworkConnectivityCheck:
           test_id: "N/A"
           labels: ["network"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: connectivity_test
         TrafficFlowCheck:
           test_id: "N/A"
           labels: ["network"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: traffic_validation
         VpcIpConfigCheck:
           test_id: "IPAM02-01"
@@ -147,7 +147,7 @@ tests:
         DhcpIpManagementCheck:
           test_id: "IPAM01-01"
           labels: ["network", "ssh"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: dhcp_ip_test
 
     sg_scoping:
@@ -215,17 +215,17 @@ tests:
         StablePrivateIpCheck:
           test_id: "SDN11-01"
           labels: ["min_req", "network"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: stable_ip_test
         StableEgressIpCheck:
           test_id: "DMS05-01"
           labels: ["min_req", "network"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: stable_egress_ip_test
         FloatingIpCheck:
           test_id: "SDN05-01"
           labels: ["min_req", "network"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: floating_ip_test
           max_switch_seconds: 10
         LocalizedDnsCheck:
@@ -241,7 +241,7 @@ tests:
         StorageL3RoutingCheck:
           test_id: "SDN08-01"
           labels: ["min_req", "network"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: storage_l3_routing
 
     # Read-only metadata/API checks for provider-reported backend fabric
@@ -251,12 +251,12 @@ tests:
         BackendSwitchFabricCheck:
           test_id: "NET01-01"
           labels: ["min_req", "network"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: backend_switch_fabric
         NvlinkDomainCheck:
           test_id: "NET02-02"
           labels: ["min_req", "network"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: nvlink_domain
 
     teardown_checks:

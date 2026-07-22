@@ -35,9 +35,9 @@ from isvtest.core.resolution import (
     SkipReason,
     State,
     ValidationEntry,
-    expand_capabilities,
     get_entry_phase,
     parse_validations,
+    requirements_satisfied,
     resolve_class_key,
     resolve_entries,
 )
@@ -343,11 +343,10 @@ def _apply_capability_step_gates(
     """Skip a step when every validation bound to it is requirement-filtered."""
     if capabilities is None:
         return steps
-    expanded = expand_capabilities(capabilities)
     gated_steps: list[Any] = []
     for step in steps:
         bound_entries = [entry for entry in validation_entries if entry.step == step.name]
-        if bound_entries and all(not set(entry.requires).issubset(expanded) for entry in bound_entries):
+        if bound_entries and all(not requirements_satisfied(entry.requires, capabilities) for entry in bound_entries):
             logger.info("Skipping step '%s' because all bound validations are capability-filtered", step.name)
             gated_steps.append(step.model_copy(update={"skip": True}))
         else:

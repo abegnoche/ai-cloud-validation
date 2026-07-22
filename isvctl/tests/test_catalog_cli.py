@@ -43,7 +43,7 @@ _FAKE_ENTRIES = [
         "source": "isvtest.validations.beta",
         "suite": "storage",
         "platform": None,
-        "requires": ["compute"],
+        "requires": ["vm", "bare_metal"],
     },
 ]
 

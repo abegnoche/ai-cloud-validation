@@ -39,7 +39,7 @@ tests:
         TelemetryDeliveryLatencyCheck:
           test_id: "OBS05-01"
           labels: ["min_req", "observability"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: telemetry_delivery_latency
           max_delivery_seconds: "{{max_delivery_seconds}}"
 
@@ -48,7 +48,7 @@ tests:
         NorthSouthNetworkTelemetryCheck:
           test_id: "OBS06-01"
           labels: ["min_req", "network", "observability"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: north_south_network_telemetry
         EastWestNetworkTelemetryCheck:
           test_id: "OBS07-01"
@@ -68,7 +68,7 @@ tests:
         HostNicNetworkTelemetryCheck:
           test_id: "OBS10-01"
           labels: ["min_req", "network", "observability"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: host_nic_network_telemetry
 
     network_logs:
@@ -84,7 +84,7 @@ tests:
         HostSyslogCheck:
           test_id: "OBS18-01"
           labels: ["bare_metal", "min_req", "observability"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: host_syslogs
 
     bmc_logs:
@@ -116,7 +116,7 @@ tests:
         StoragePerformanceTelemetryCheck:
           test_id: "TELEM06-01"
           labels: ["min_req", "observability"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: storage_performance_telemetry
 
     gpu_nvlink_telemetry:

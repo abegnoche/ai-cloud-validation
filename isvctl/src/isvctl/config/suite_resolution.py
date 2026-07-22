@@ -46,7 +46,7 @@ def platform_vocabulary(configs_root: Path) -> frozenset[str]:
 
 
 def parse_capabilities(value: str | None, configs_root: Path) -> set[str] | None:
-    """Parse a comma-separated capability context, rejecting aliases like compute."""
+    """Parse a comma-separated capability context using platform suite names."""
     if value is None:
         return None
     capabilities = {_normalize_name(item) for item in value.split(",") if item.strip()}
@@ -100,22 +100,17 @@ def resolve_suite(provider: str, suite: str, *, configs_root: Path) -> ResolvedS
 
     requested = _normalize_name(suite)
     declarable = platform_vocabulary(configs_root)
-    classified = [
-        (path, *_suite_name(path, declarable))
-        for path in sorted(config_dir.glob("*.yaml"))
-    ]
+    classified = [(path, *_suite_name(path, declarable)) for path in sorted(config_dir.glob("*.yaml"))]
     matches = [item for item in classified if item[1] == requested]
     if not matches:
         available = sorted({name for _, name, _ in classified})
         raise SuiteResolutionError(
-            f"Provider {provider!r} has no {requested!r} suite. "
-            f"Available suites: {', '.join(available) or '(none)'}."
+            f"Provider {provider!r} has no {requested!r} suite. Available suites: {', '.join(available) or '(none)'}."
         )
     if len(matches) > 1:
         paths = ", ".join(str(path) for path, _, _ in matches)
         raise SuiteResolutionError(
-            f"Provider {provider!r} has multiple {requested!r} suite configs ({paths}). "
-            "Disambiguate with --config/-f."
+            f"Provider {provider!r} has multiple {requested!r} suite configs ({paths}). Disambiguate with --config/-f."
         )
     path, name, platform = matches[0]
     return ResolvedSuite(config_path=path, name=name, platform=platform)

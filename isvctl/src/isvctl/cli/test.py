@@ -28,7 +28,7 @@ from typing import Annotated, Any, TextIO
 import typer
 import yaml
 from isvtest.catalog import build_catalog, catalog_document, get_catalog_version
-from isvtest.core.resolution import expand_capabilities, parse_validations
+from isvtest.core.resolution import parse_validations, requirements_satisfied
 from isvtest.release_manifest import load_released_test_filter
 
 from isvctl.cli import setup_logging
@@ -50,7 +50,6 @@ from isvctl.config.merger import merge_yaml_files
 from isvctl.config.schema import RunConfig
 from isvctl.config.suite_resolution import SuiteResolutionError, parse_capabilities, resolve_suite
 from isvctl.orchestrator.loop import Orchestrator, Phase
-from isvctl.redaction import redact_dict
 from isvctl.reporting import check_upload_credentials, create_test_run, get_environment_config, update_test_run
 
 logger = logging.getLogger(__name__)
@@ -122,7 +121,6 @@ def _human_readable_dry_run(config: RunConfig, capabilities: set[str] | None) ->
     platform = config.tests.platform if config.tests and config.tests.platform else None
     suite_type = f"platform ({platform})" if platform else "plain"
     context = "not filtered" if capabilities is None else ", ".join(sorted(capabilities)) or "(none)"
-    expanded = expand_capabilities(capabilities or ()) if capabilities is not None else None
     validations = config.tests.validations if config.tests else {}
     entries = parse_validations(validations)
 
@@ -134,7 +132,7 @@ def _human_readable_dry_run(config: RunConfig, capabilities: set[str] | None) ->
     ]
     for entry in entries:
         requirement = ", ".join(entry.requires) or "core"
-        if expanded is not None and not set(entry.requires).issubset(expanded):
+        if capabilities is not None and not requirements_satisfied(entry.requires, capabilities):
             declared = ", ".join(sorted(capabilities or ())) or "(none)"
             lines.append(f"  [SKIP] {entry.name}: requires {requirement} (context: {declared})")
         else:
@@ -472,7 +470,9 @@ def run(
     # Create test run before running tests
     if upload_results and lab_id:
         print_progress("Creating test run in ISV Lab Service...")
-        platform = config.tests.platform if config.tests and config.tests.platform else next(iter(config.commands), "unknown")
+        platform = (
+            config.tests.platform if config.tests and config.tests.platform else next(iter(config.commands), "unknown")
+        )
         test_run_id = create_test_run(
             lab_id=lab_id,
             platform=platform,
@@ -515,9 +515,7 @@ def run(
                     catalog_version = get_catalog_version()
                     print_progress(f"Built test catalog: {len(catalog_entries)} tests (version: {catalog_version})")
                     catalog_path = output_dir / "test_catalog.json"
-                    catalog_path.write_text(
-                        json.dumps(catalog_document(catalog_entries, catalog_version), indent=2)
-                    )
+                    catalog_path.write_text(json.dumps(catalog_document(catalog_entries, catalog_version), indent=2))
                     print_progress(f"  Saved test catalog to: {catalog_path}")
                 except Exception as e:
                     logger.warning("Failed to build test catalog: %s", e)

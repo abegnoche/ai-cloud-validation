@@ -24,9 +24,8 @@ JSON that matches these schemas, which then become the inventory for tests.
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
-
 from isvtest.core.resolution import DECLARABLE_CAPABILITIES, parse_validations
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class LabConfig(BaseModel):
@@ -382,12 +381,8 @@ class ValidationConfig(BaseModel):
         """Reject legacy axes and requirements on platform suite checks."""
         if self.model_extra and "module" in self.model_extra:
             raise ValueError("tests.module is no longer supported; plain suites have no axis key")
-        if self.platform == "compute":
-            raise ValueError("compute is requirement-only and cannot be declared as tests.platform")
         if self.platform and self.platform not in DECLARABLE_CAPABILITIES:
-            raise ValueError(
-                f"tests.platform must be one of: {', '.join(sorted(DECLARABLE_CAPABILITIES))}"
-            )
+            raise ValueError(f"tests.platform must be one of: {', '.join(sorted(DECLARABLE_CAPABILITIES))}")
         entries = parse_validations(self.validations)
         if self.platform and any("requires" in entry.params_template for entry in entries):
             raise ValueError("requires is not allowed in platform suites")

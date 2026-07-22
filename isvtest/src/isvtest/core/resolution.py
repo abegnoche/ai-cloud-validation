@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 ADAPTER_HANDLED_CATEGORIES = {"reframe"}
 DEFAULT_VALIDATION_PHASE = "test"
 DECLARABLE_CAPABILITIES = frozenset({"vm", "bare_metal", "kubernetes", "slurm"})
-REQUIREMENT_VOCABULARY = DECLARABLE_CAPABILITIES | {"compute"}
+REQUIREMENT_VOCABULARY = DECLARABLE_CAPABILITIES
 
 
 class State(StrEnum):
@@ -122,12 +122,10 @@ def _wiring_requires(params_template: Any) -> tuple[str, ...]:
     return tuple(item for item in value if isinstance(item, str))
 
 
-def expand_capabilities(declared: Iterable[str]) -> frozenset[str]:
-    """Expand declarable capabilities with requirement-only aliases."""
-    expanded = set(declared)
-    if expanded & {"vm", "bare_metal"}:
-        expanded.add("compute")
-    return frozenset(expanded)
+def requirements_satisfied(requires: Iterable[str], capabilities: AbstractSet[str]) -> bool:
+    """Return whether any required platform is present in the capability context."""
+    required = set(requires)
+    return not required or not required.isdisjoint(capabilities)
 
 
 def parse_validations(raw_config: Mapping[str, Any]) -> list[ValidationEntry]:
@@ -212,7 +210,6 @@ def resolve_entries(
     """
     resolved: list[ResolvedEntry] = []
     env = _create_jinja_env()
-    expanded_capabilities = expand_capabilities(capabilities or ()) if capabilities is not None else None
 
     for entry in entries:
         config_error = _validate_entry_shape(entry)
@@ -237,7 +234,7 @@ def resolve_entries(
             resolved.append(_skip(entry, SkipReason.EXCLUDED, f"validation '{entry.name}' is excluded by name"))
             continue
 
-        if expanded_capabilities is not None and not set(entry.requires).issubset(expanded_capabilities):
+        if capabilities is not None and not requirements_satisfied(entry.requires, capabilities):
             requirement_list = ", ".join(entry.requires) or "(none)"
             context_list = ", ".join(sorted(capabilities or ())) or "(none)"
             resolved.append(

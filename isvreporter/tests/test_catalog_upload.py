@@ -60,7 +60,7 @@ class TestUploadTestCatalog:
                 "source": "mod.b",
                 "suite": "storage",
                 "platform": None,
-                "requires": ["compute"],
+                "requires": ["vm", "bare_metal"],
             },
         ]
 

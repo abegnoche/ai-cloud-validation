@@ -41,8 +41,8 @@ def test_one_suite_flag_resolves_platform_and_plain_suites(tmp_path: Path) -> No
     assert plain.platform is None
 
 
-def test_capabilities_use_catalog_vocabulary_and_reject_compute(tmp_path: Path) -> None:
-    """Compute remains requirement-only while omitted context disables filtering."""
+def test_capabilities_use_catalog_vocabulary(tmp_path: Path) -> None:
+    """Unknown capabilities are rejected while omitted context disables filtering."""
     _write_catalog(tmp_path)
 
     assert parse_capabilities(None, tmp_path) is None
@@ -51,11 +51,11 @@ def test_capabilities_use_catalog_vocabulary_and_reject_compute(tmp_path: Path) 
         parse_capabilities("compute", tmp_path)
 
 
-def test_platform_suites_reject_requires_and_compute_context() -> None:
+def test_platform_suites_reject_requires_and_unknown_platforms() -> None:
     """Platform placement is its obligation; it cannot declare check requirements."""
     validation = {"sample": {"checks": {"PlainCheck": {"requires": []}}}}
 
     with pytest.raises(ValidationError, match="requires is not allowed in platform suites"):
         RunConfig.model_validate({"tests": {"platform": "kubernetes", "validations": validation}})
-    with pytest.raises(ValidationError, match="compute is requirement-only"):
+    with pytest.raises(ValidationError, match=r"tests\.platform must be one of"):
         RunConfig.model_validate({"tests": {"platform": "compute", "validations": {}}})

@@ -206,7 +206,7 @@ tests:
         TenantIsolationCheck:
           test_id: "SEC11-01"
           labels: ["iam", "min_req", "network", "security"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: tenant_isolation_test
 
     # Verify capacity is logically grouped and pinned to one tenant/account
@@ -216,7 +216,7 @@ tests:
         CapacityReservationGroupingCheck:
           test_id: "CAP04-01"
           labels: ["bare_metal", "capacity", "min_req", "security"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           step: capacity_reservation_grouping
           min_resources: "{{min_resources}}"
 
@@ -228,7 +228,7 @@ tests:
         CapacityTopologyBlockAtomicAllocationCheck:
           test_id: "CAP04-02"
           labels: ["bare_metal", "capacity", "min_req", "security"]
-          requires: [compute]
+          requires: [vm, bare_metal]
           min_resources: 2
 
     teardown_checks:
