@@ -62,8 +62,6 @@ commands:
   {platform}:
     phases: [test]
     steps: []
-tests:
-  platform: {platform}
 """,
         encoding="utf-8",
     )
@@ -224,7 +222,7 @@ def test_provider_label_discovery_dispatches_each_matching_config(
     result = runner.invoke(test_cli.app, ["run", "--provider", "aws", "--label", "network", "--no-upload"])
 
     assert result.exit_code == 0, result.output
-    assert [call["platform"] for call in _FakeOrchestrator.calls] == ["network", "observability"]
+    assert [call["platform"] for call in _FakeOrchestrator.calls] == [None, None]
     assert [call["working_dir"] for call in _FakeOrchestrator.calls] == [
         network_config.parent,
         observability_config.parent,

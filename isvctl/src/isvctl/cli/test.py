@@ -27,7 +27,8 @@ from typing import Annotated, Any, TextIO
 
 import typer
 import yaml
-from isvtest.catalog import build_catalog, get_catalog_version
+from isvtest.catalog import build_catalog, catalog_document, get_catalog_version
+from isvtest.core.resolution import expand_capabilities, parse_validations
 from isvtest.release_manifest import load_released_test_filter
 
 from isvctl.cli import setup_logging
@@ -47,6 +48,7 @@ from isvctl.config.label_discovery import (
 )
 from isvctl.config.merger import merge_yaml_files
 from isvctl.config.schema import RunConfig
+from isvctl.config.suite_resolution import SuiteResolutionError, parse_capabilities, resolve_suite
 from isvctl.orchestrator.loop import Orchestrator, Phase
 from isvctl.redaction import redact_dict
 from isvctl.reporting import check_upload_credentials, create_test_run, get_environment_config, update_test_run
@@ -115,6 +117,31 @@ def _junitxml_for_discovered_config(junitxml: Path, match: ProviderConfigMatch, 
     return junitxml.with_name(f"{junitxml.stem}-{match.config_path.stem}{junitxml.suffix}")
 
 
+def _human_readable_dry_run(config: RunConfig, capabilities: set[str] | None) -> str:
+    """Render the validation requirement plan without executing lifecycle steps."""
+    platform = config.tests.platform if config.tests and config.tests.platform else None
+    suite_type = f"platform ({platform})" if platform else "plain"
+    context = "not filtered" if capabilities is None else ", ".join(sorted(capabilities)) or "(none)"
+    expanded = expand_capabilities(capabilities or ()) if capabilities is not None else None
+    validations = config.tests.validations if config.tests else {}
+    entries = parse_validations(validations)
+
+    lines = [
+        "Dry-run plan",
+        f"  Suite type: {suite_type}",
+        f"  Capabilities: {context}",
+        f"  Checks: {len(entries)}",
+    ]
+    for entry in entries:
+        requirement = ", ".join(entry.requires) or "core"
+        if expanded is not None and not set(entry.requires).issubset(expanded):
+            declared = ", ".join(sorted(capabilities or ())) or "(none)"
+            lines.append(f"  [SKIP] {entry.name}: requires {requirement} (context: {declared})")
+        else:
+            lines.append(f"  [RUN]  {entry.name}: requires {requirement}")
+    return "\n".join(lines)
+
+
 @app.command("run", context_settings={"allow_extra_args": True, "ignore_unknown_options": True})
 def run(
     ctx: typer.Context,
@@ -135,6 +162,20 @@ def run(
         typer.Option(
             "--provider",
             help="Provider name for label discovery when no --config/-f files are supplied.",
+        ),
+    ] = None,
+    suite: Annotated[
+        str | None,
+        typer.Option(
+            "--suite",
+            help="Run one platform or plain suite from the selected provider.",
+        ),
+    ] = None,
+    capabilities: Annotated[
+        str | None,
+        typer.Option(
+            "--capabilities",
+            help="Comma-separated capability context used to filter check requirements.",
         ),
     ] = None,
     set_values: Annotated[
@@ -158,6 +199,13 @@ def run(
             "--label",
             "-l",
             help="Label to filter validations (can be repeated; all selected labels must match)",
+        ),
+    ] = None,
+    exclude_labels: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--exclude-label",
+            help="Exclude validations carrying this label (can be repeated).",
         ),
     ] = None,
     dry_run: Annotated[
@@ -252,6 +300,31 @@ def run(
     setup_logging(verbose)
     apply_user_config(no_user_config)
 
+    try:
+        capability_context = parse_capabilities(capabilities, CONFIGS_ROOT)
+    except SuiteResolutionError as exc:
+        print_error(str(exc))
+        raise typer.Exit(code=1)
+
+    if suite:
+        if not provider:
+            print_error("--suite requires --provider.")
+            raise typer.Exit(code=1)
+        if config_files:
+            print_error("--suite cannot be combined with --config/-f.")
+            raise typer.Exit(code=1)
+        if labels:
+            print_error("--suite cannot be combined with --label/-l; use labels after -- with pytest selection.")
+            raise typer.Exit(code=1)
+        try:
+            selected_suite = resolve_suite(provider, suite, configs_root=CONFIGS_ROOT)
+        except SuiteResolutionError as exc:
+            print_error(str(exc))
+            raise typer.Exit(code=1)
+        print_progress(f"Selected {selected_suite.name!r} suite for provider {provider!r}.")
+        config_files = [selected_suite.config_path]
+        provider = None
+
     if provider:
         if config_files:
             print_error("--provider discovery cannot be combined with --config/-f.")
@@ -289,9 +362,12 @@ def run(
                 ctx,
                 config_files=[match.config_path],
                 provider=None,
+                suite=None,
+                capabilities=capabilities,
                 set_values=set_values,
                 phase=phase,
                 labels=labels,
+                exclude_labels=exclude_labels,
                 dry_run=False,
                 working_dir=working_dir,
                 verbose=verbose,
@@ -351,11 +427,7 @@ def run(
         raise typer.Exit(code=1)
 
     if dry_run:
-        # Keep stdout as pure JSON so it can be consumed with `json.loads`;
-        # decorative headers and extra args go to stderr.
-        print_progress("\n--- Dry Run: Configuration ---")
-        redacted_config = redact_dict(config.model_dump(mode="json"))
-        typer.echo(json.dumps(redacted_config, indent=2))
+        typer.echo(_human_readable_dry_run(config, capability_context))
         if extra_pytest_args:
             print_progress(f"\n--- Extra pytest args ---\n{extra_pytest_args}")
         return
@@ -400,7 +472,7 @@ def run(
     # Create test run before running tests
     if upload_results and lab_id:
         print_progress("Creating test run in ISV Lab Service...")
-        platform = config.tests.platform if config.tests and config.tests.platform else "kubernetes"
+        platform = config.tests.platform if config.tests and config.tests.platform else next(iter(config.commands), "unknown")
         test_run_id = create_test_run(
             lab_id=lab_id,
             platform=platform,
@@ -432,6 +504,8 @@ def run(
                 phases=phases,
                 extra_pytest_args=extra_pytest_args,
                 include_labels=labels,
+                exclude_labels=exclude_labels,
+                capabilities=capability_context,
                 verbose=verbose,
                 junitxml=str(junitxml),
             )
@@ -442,7 +516,7 @@ def run(
                     print_progress(f"Built test catalog: {len(catalog_entries)} tests (version: {catalog_version})")
                     catalog_path = output_dir / "test_catalog.json"
                     catalog_path.write_text(
-                        json.dumps({"isvTestVersion": catalog_version, "entries": catalog_entries}, indent=2)
+                        json.dumps(catalog_document(catalog_entries, catalog_version), indent=2)
                     )
                     print_progress(f"  Saved test catalog to: {catalog_path}")
                 except Exception as e:
