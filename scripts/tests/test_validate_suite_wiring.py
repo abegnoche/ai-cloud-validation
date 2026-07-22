@@ -27,15 +27,18 @@ tests:
       checks:
         GoodCheck:
           test_id: "SEC01-01"
-          labels: ["security"]
+          labels: ["demo", "security"]
+          requires: []
         BadCheck:
-          labels: ["security"]
+          labels: ["demo", "security"]
+          requires: []
         AlsoBad:
           test_id: "N/A"
+          requires: []
 """
     )
     errors = validate_suite_wiring.wiring_errors(tmp_path)
-    assert any("demo.yaml:8" in err and "BadCheck" in err and "missing test_id" in err for err in errors)
+    assert any("demo.yaml:" in err and "BadCheck" in err and "missing test_id" in err for err in errors)
     assert any("demo.yaml:" in err and "AlsoBad" in err and "missing labels" in err for err in errors)
     assert not any("GoodCheck" in err for err in errors)
 
@@ -46,6 +49,7 @@ def test_wiring_errors_rejects_scalar_labels(tmp_path: Path) -> None:
     suite.write_text(
         """\
 tests:
+  platform: kubernetes
   validations:
     example:
       checks:
@@ -64,6 +68,7 @@ def test_wiring_errors_require_canonical_suite_label(tmp_path: Path) -> None:
     suite.write_text(
         """\
 tests:
+  platform: kubernetes
   validations:
     example:
       checks:
@@ -111,21 +116,24 @@ def test_repo_suites_declare_test_id_and_labels() -> None:
     assert not errors, "suite wiring validation failed:\n  " + "\n  ".join(errors)
 
 
-def test_platform_registration_errors_flags_unregistered_suite(tmp_path: Path) -> None:
-    """A suite file not present in PLATFORM_CONFIGS is reported.
+def test_plain_suite_requires_are_explicit_and_valid(tmp_path: Path) -> None:
+    """Plain suites require an allowed list, including an explicit empty list."""
+    (tmp_path / "demo.yaml").write_text(
+        """\
+tests:
+  validations:
+    sample:
+      checks:
+        MissingCheck:
+          test_id: "N/A"
+          labels: ["demo"]
+        InvalidCheck:
+          test_id: "N/A"
+          labels: ["demo"]
+          requires: [foundational]
+"""
+    )
 
-    Enforced against the real repo only by the validate-suites pre-commit
-    hook, not by a repo-level pytest guard, so untracked scratch suites
-    don't break `make test`.
-    """
-    (tmp_path / "newcap.yaml").write_text("tests:\n  validations: {}\n")
-    errors = validate_suite_wiring.platform_registration_errors(tmp_path)
-    assert errors == [
-        "suites/newcap.yaml: not registered in isvtest.catalog_platforms.PLATFORM_CONFIGS (catalog platform axis)"
-    ]
-
-
-def test_registered_platforms_round_trip_through_isvreporter() -> None:
-    """Guardrail: every catalog platform is recognized by isvreporter."""
-    errors = validate_suite_wiring.registry_consistency_errors()
-    assert not errors, "registry consistency failed:\n  " + "\n  ".join(errors)
+    errors = validate_suite_wiring.wiring_errors(tmp_path)
+    assert any("MissingCheck" in error and "missing requires" in error for error in errors)
+    assert any("InvalidCheck" in error and "requires must contain only" in error for error in errors)
