@@ -437,23 +437,25 @@ class TestImportEndToEnd:
         assert "credentials" in validations
         assert "teardown_checks" in validations
         assert result["tests"]["cluster_name"] == "aws-iam-validation"
-        assert result["tests"]["platform"] == "iam"
+        assert "platform" not in result["tests"]
+        assert list(result["commands"]) == ["iam"]
 
-    def test_my_isv_observability_declares_raw_platform_for_report_upload(self) -> None:
-        """Raw observability config exposes platform for upload paths that skip imports."""
+    def test_my_isv_observability_is_a_plain_suite(self) -> None:
+        """Plain-suite provider configs do not recreate a platform axis."""
         config_path = self.CONFIGS_DIR / "providers" / "my-isv" / "config" / "observability.yaml"
 
         raw_config = yaml.safe_load(config_path.read_text()) or {}
-        assert raw_config.get("tests", {}).get("platform") == "observability"
+        assert "platform" not in raw_config.get("tests", {})
 
         result = merge_yaml_files([config_path])
-        assert result["tests"]["platform"] == "observability"
+        assert "platform" not in result["tests"]
+        assert list(result["commands"]) == ["observability"]
 
     def test_aws_observability_inherits_supported_validations(self) -> None:
         """AWS observability imports the canonical suite and wires supported steps."""
         result = merge_yaml_files([self.CONFIGS_DIR / "providers" / "aws" / "config" / "observability.yaml"])
 
-        assert result["tests"]["platform"] == "observability"
+        assert "platform" not in result["tests"]
         assert result["tests"]["cluster_name"] == "aws-observability-validation"
 
         steps = result["commands"]["observability"]["steps"]
@@ -594,7 +596,7 @@ class TestImportEndToEnd:
         result = merge_yaml_files([self.CONFIGS_DIR / "providers" / "aws" / "config" / "bare_metal.yaml"])
 
         checks = result["tests"]["validations"]["serial_console"]["checks"]
-        assert checks == [{"SerialConsoleCheck": {}}]
+        assert checks == [{"SerialConsoleCheck-bm_serial_console": {}}]
 
     def test_microk8s_inherits_k8s_validations(self) -> None:
         """providers/microk8s.yaml imports suites/k8s.yaml and adds overrides."""
