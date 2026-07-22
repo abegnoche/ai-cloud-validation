@@ -282,8 +282,8 @@ def upload_test_catalog(
     isv_test_version: str,
     entries: list[dict[str, Any]],
     *,
-    schema_version: int = 1,
-    platforms: list[str] | None = None,
+    schema_version: int = 2,
+    capabilities: list[str] | None = None,
 ) -> bool:
     """Upload test catalog for a suite version (idempotent per version).
 
@@ -296,10 +296,9 @@ def upload_test_catalog(
         jwt_token: JWT access token
         isv_test_version: Test suite version string (e.g. "1.2.3")
         entries: List of catalog entry dicts with keys:
-            name, description, labels, module, platforms, test_ids
+            name, description, labels, source, suite, platform, requires, test_ids
         schema_version: Catalog document schema version.
-        platforms: Platform axis labels (e.g. ["KUBERNETES", "VM"]) - the
-            matrix columns; empty list when unknown.
+        capabilities: Declarable capability vocabulary.
 
     Returns:
         True if catalog was uploaded or already exists, False on error
@@ -321,14 +320,16 @@ def upload_test_catalog(
     payload = {
         "schemaVersion": schema_version,
         "isvTestVersion": isv_test_version,
-        "platforms": platforms or [],
+        "capabilities": capabilities or [],
         "entries": [
             {
                 "name": e["name"],
                 "description": e.get("description", ""),
                 "labels": e.get("labels", []),
-                "module": e.get("module", ""),
-                "platforms": e.get("platforms", []),
+                "source": e.get("source", ""),
+                "suite": e.get("suite", ""),
+                "platform": e.get("platform"),
+                "requires": e.get("requires", []),
                 "test_ids": e.get("test_ids", []),
             }
             for e in entries
