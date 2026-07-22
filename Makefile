@@ -1,5 +1,5 @@
-MY_ISV_DOMAINS := bare_metal control-plane iam image-registry network observability security storage vm
-DEMO_TARGETS := $(addprefix demo-,$(MY_ISV_DOMAINS))
+MY_ISV_SUITES := bare_metal control-plane iam image-registry network observability security storage vm
+DEMO_TARGETS := $(addprefix demo-,$(MY_ISV_SUITES))
 
 .PHONY: help pre-commit build test coverage clean lint format install bump-patch bump-fix bump-minor bump-feat bump-major bump bump-check \
 	security-trivy security-trivy-detail security-trufflehog ci-security demo-test demo-all $(DEMO_TARGETS) plan plan-coverage validate-suites \
@@ -97,14 +97,14 @@ endef
 
 demo-test: demo-all ## Alias for demo-all (backward compat)
 
-demo-all: ## Run all my-isv living examples (or demo-<domain> for one, e.g. demo-security)
+demo-all: ## Run all my-isv living examples (or demo-<suite> for one, e.g. demo-security)
 	@echo "Running my-isv living examples in demo mode..."
-	@for domain in $(MY_ISV_DOMAINS); do \
-		$(MAKE) --no-print-directory demo-$$domain || exit 1; \
+	@for suite in $(MY_ISV_SUITES); do \
+		$(MAKE) --no-print-directory demo-$$suite || exit 1; \
 	done
 	@echo ""
 	@echo "✅ All my-isv living examples passed in demo mode!"
-	@echo "Domains: $(MY_ISV_DOMAINS)"
+	@echo "Suites: $(MY_ISV_SUITES)"
 
 $(DEMO_TARGETS): demo-%:
 	$(call run_demo,$*)
