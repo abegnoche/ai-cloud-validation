@@ -17,8 +17,11 @@
 
 from unittest.mock import patch
 
+import pytest
+
 from isvtest.catalog import (
     CATALOG_SCHEMA_VERSION,
+    _assert_disjoint_vocabulary,
     build_capability_vocabulary,
     build_catalog,
     build_suite_vocabulary,
@@ -65,6 +68,20 @@ class TestCatalogDocument:
         assert "capabilities" not in doc
         # The label universe is intentionally not summarized at the top level.
         assert "labels" not in doc
+
+    def test_disjoint_vocabulary_accepts_distinct_namespaces(self) -> None:
+        """Plain suite names that are not capability words pass the guard."""
+        _assert_disjoint_vocabulary(["vm", "kubernetes"], ["storage", "iam", "network"])
+
+    def test_disjoint_vocabulary_rejects_suite_named_after_capability(self) -> None:
+        """A plain suite named after any declarable capability is a namespace collision."""
+        with pytest.raises(ValueError, match="kubernetes"):
+            _assert_disjoint_vocabulary(["vm", "kubernetes"], ["storage", "kubernetes"])
+
+    def test_disjoint_vocabulary_rejects_undeclared_capability_word(self) -> None:
+        """Collision is checked against the full reserved set, not just declared platforms."""
+        with pytest.raises(ValueError, match="slurm"):
+            _assert_disjoint_vocabulary(["vm"], ["slurm"])
 
 
 class TestBuildCatalog:

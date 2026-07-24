@@ -333,6 +333,26 @@ def build_suite_vocabulary() -> list[str]:
     return sorted(suites)
 
 
+def _assert_disjoint_vocabulary(platforms: list[str], suites: list[str]) -> None:
+    """Reject a plain suite named after a declarable capability.
+
+    Capabilities and plain suites share one uppercased namespace downstream: the
+    frontend merges ``platforms`` and ``suites`` into a single selectable
+    "test target" list, and the backend re-splits a flat selection by
+    intersecting it with the declared ``platforms``. Both are unambiguous only
+    while the two namespaces are disjoint, so enforce it at the upload
+    chokepoint (checked against the full reserved set, not just declared
+    platforms, so an undeclared capability word like ``slurm`` is caught too).
+    """
+    collisions = sorted(set(suites) & (set(platforms) | DECLARABLE_CAPABILITIES))
+    if collisions:
+        raise ValueError(
+            "plain suite names collide with declarable capabilities: "
+            f"{', '.join(collisions)}; rename the suite file(s) so the capability "
+            "and suite namespaces stay disjoint"
+        )
+
+
 def catalog_document(entries: list[dict[str, Any]], version: str) -> dict[str, Any]:
     """Wrap catalog ``entries`` in the versioned upload/artifact envelope.
 
@@ -341,11 +361,14 @@ def catalog_document(entries: list[dict[str, Any]], version: str) -> dict[str, A
     ``labels`` are intentionally not summarized at the top level - a consumer
     can derive the label universe from the entries when needed.
     """
+    platforms = build_capability_vocabulary()
+    suites = build_suite_vocabulary()
+    _assert_disjoint_vocabulary(platforms, suites)
     return {
         "schemaVersion": CATALOG_SCHEMA_VERSION,
         "isvTestVersion": version,
-        "platforms": build_capability_vocabulary(),
-        "suites": build_suite_vocabulary(),
+        "platforms": platforms,
+        "suites": suites,
         "entries": entries,
     }
 

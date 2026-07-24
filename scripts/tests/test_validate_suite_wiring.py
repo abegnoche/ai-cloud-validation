@@ -137,3 +137,41 @@ tests:
     errors = validate_suite_wiring.wiring_errors(tmp_path)
     assert any("MissingCheck" in error and "missing requires" in error for error in errors)
     assert any("InvalidCheck" in error and "requires must contain only" in error for error in errors)
+
+
+def test_wiring_errors_rejects_plain_suite_named_after_capability(tmp_path: Path) -> None:
+    """A plain suite file named like a declarable capability is a namespace collision."""
+    (tmp_path / "kubernetes.yaml").write_text(
+        """\
+tests:
+  validations:
+    sample:
+      checks:
+        SomeCheck:
+          test_id: "N/A"
+          labels: ["demo"]
+          requires: []
+"""
+    )
+
+    errors = validate_suite_wiring.wiring_errors(tmp_path)
+    assert any("kubernetes" in error and "collides with a declarable capability" in error for error in errors)
+
+
+def test_wiring_errors_allows_platform_suite_named_after_capability(tmp_path: Path) -> None:
+    """The kubernetes *platform* suite (declares tests.platform) is not a collision."""
+    (tmp_path / "k8s.yaml").write_text(
+        """\
+tests:
+  platform: kubernetes
+  validations:
+    sample:
+      checks:
+        SomeCheck:
+          test_id: "N/A"
+          labels: ["kubernetes"]
+"""
+    )
+
+    errors = validate_suite_wiring.wiring_errors(tmp_path)
+    assert not any("collides with a declarable capability" in error for error in errors)

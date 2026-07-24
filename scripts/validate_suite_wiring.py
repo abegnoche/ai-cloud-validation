@@ -164,6 +164,14 @@ def wiring_errors(suites_dir: Path = SUITES_DIR) -> list[str]:
             errors.append(f"{path}: tests.module is no longer supported")
         if platform is not None and platform not in DECLARABLE_CAPABILITIES:
             errors.append(f"{path}: tests.platform must be one of: {', '.join(sorted(DECLARABLE_CAPABILITIES))}")
+        suite_is_platform = isinstance(platform, str) and platform in DECLARABLE_CAPABILITIES
+        if not suite_is_platform:
+            suite_name = path.stem.replace("-", "_")
+            if suite_name in DECLARABLE_CAPABILITIES:
+                errors.append(
+                    f"{path}: plain suite name {suite_name!r} collides with a declarable "
+                    "capability; rename the file so capability and suite namespaces stay disjoint"
+                )
         for category, name, params in checks:
             key = (path, category, name)
             line_numbers = find_check_line_numbers(lines, category, name)
