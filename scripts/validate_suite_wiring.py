@@ -42,12 +42,11 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from isvtest.core.resolution import DECLARABLE_CAPABILITIES
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SUITES_DIR = REPO_ROOT / "isvctl" / "configs" / "suites"
 _NEXT_CATEGORY_LINE = re.compile(r"^    \S")
-DECLARABLE_CAPABILITIES = {"vm", "bare_metal", "kubernetes", "slurm"}
-REQUIREMENT_VOCABULARY = DECLARABLE_CAPABILITIES
 # Opt-in until unique wiring names land in a dedicated PR.
 ENFORCE_UNIQUE_WIRING = os.environ.get("ISVCTL_ENFORCE_UNIQUE_WIRING") == "1"
 
@@ -108,7 +107,11 @@ def iter_suite_checks(config_path: Path) -> Iterator[tuple[str, str, dict[str, A
         data = yaml.safe_load(config_path.read_text())
     except (OSError, yaml.YAMLError) as exc:
         raise ValueError(f"failed to read/parse {config_path}: {exc}") from exc
+    yield from iter_checks_from_data(data)
 
+
+def iter_checks_from_data(data: Any) -> Iterator[tuple[str, str, dict[str, Any]]]:
+    """Yield ``(category, check_name, params)`` from an already-parsed suite doc."""
     validations = (data or {}).get("tests", {}).get("validations", {})
     if not isinstance(validations, dict):
         return
@@ -149,27 +152,31 @@ def wiring_errors(suites_dir: Path = SUITES_DIR) -> list[str]:
     occurrence: dict[tuple[Path, str, str], int] = defaultdict(int)
     wiring_locations: dict[str, str] = {}
 
+    # Read and parse each suite once; both the dead-requirement pre-pass and the
+    # per-check loop below work off these parsed documents.
+    parsed: list[tuple[Path, list[str], dict[str, Any]]] = []
+    for path in sorted(suites_dir.glob("*.yaml")):
+        try:
+            text = path.read_text()
+            parsed.append((path, text.splitlines(), yaml.safe_load(text) or {}))
+        except (OSError, yaml.YAMLError) as exc:
+            errors.append(f"failed to read/parse {path}: {exc}")
+
     # A `requires` value is only satisfiable if an ISV can declare that
     # capability, which requires a platform suite to exist for it. Collect the
     # platform capabilities that actually have a suite so unreachable (dead)
     # requirements can be flagged below.
     declared_platforms: set[str] = set()
-    for path in sorted(suites_dir.glob("*.yaml")):
-        try:
-            data = yaml.safe_load(path.read_text()) or {}
-        except (OSError, yaml.YAMLError):
-            continue
+    for _, _, data in parsed:
         tests = data.get("tests") if isinstance(data, dict) else None
         platform = tests.get("platform") if isinstance(tests, dict) else None
         if isinstance(platform, str) and platform in DECLARABLE_CAPABILITIES:
             declared_platforms.add(platform)
 
-    for path in sorted(suites_dir.glob("*.yaml")):
+    for path, lines, data in parsed:
         try:
-            lines = path.read_text().splitlines()
-            data = yaml.safe_load(path.read_text()) or {}
-            checks = list(iter_suite_checks(path))
-        except (ValueError, yaml.YAMLError) as exc:
+            checks = list(iter_checks_from_data(data))
+        except (ValueError, AttributeError) as exc:
             errors.append(f"failed to read/parse {path}: {exc}")
             continue
         tests = data.get("tests") or {}
@@ -221,11 +228,11 @@ def wiring_errors(suites_dir: Path = SUITES_DIR) -> list[str]:
                 if not isinstance(requires, list):
                     errors.append(f"{location}: missing requires (use [] for core checks)")
                 elif any(
-                    not isinstance(requirement, str) or requirement not in REQUIREMENT_VOCABULARY
+                    not isinstance(requirement, str) or requirement not in DECLARABLE_CAPABILITIES
                     for requirement in requires
                 ):
                     errors.append(
-                        f"{location}: requires must contain only: {', '.join(sorted(REQUIREMENT_VOCABULARY))}"
+                        f"{location}: requires must contain only: {', '.join(sorted(DECLARABLE_CAPABILITIES))}"
                     )
                 elif len(requires) != len(set(requires)):
                     errors.append(f"{location}: requires must not contain duplicates")

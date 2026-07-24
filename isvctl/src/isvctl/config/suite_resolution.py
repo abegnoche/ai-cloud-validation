@@ -4,6 +4,7 @@
 """Resolve one platform or plain suite to a provider configuration."""
 
 from dataclasses import dataclass
+from functools import cache
 from pathlib import Path
 from typing import Any
 
@@ -31,8 +32,13 @@ def _normalize_name(value: str) -> str:
     return "kubernetes" if normalized == "k8s" else normalized
 
 
+@cache
 def platform_vocabulary(configs_root: Path) -> frozenset[str]:
-    """Return declarable capabilities from canonical platform suite YAML."""
+    """Return declarable capabilities from canonical platform suite YAML.
+
+    Cached: the suite directory is fixed for the life of a CLI invocation, and
+    several entry points ask for the vocabulary two or three times per run.
+    """
     platforms: set[str] = set()
     for path in (configs_root / "suites").glob("*.yaml"):
         try:
@@ -45,6 +51,7 @@ def platform_vocabulary(configs_root: Path) -> frozenset[str]:
     return frozenset(platforms)
 
 
+@cache
 def suite_vocabulary(configs_root: Path) -> frozenset[str]:
     """Return plain suite names declared by canonical suite YAML."""
     declarable = platform_vocabulary(configs_root)

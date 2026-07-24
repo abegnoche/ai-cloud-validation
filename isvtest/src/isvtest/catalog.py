@@ -68,7 +68,15 @@ def iter_config_checks(config_path: Path) -> Iterator[tuple[str, dict[str, Any]]
         data = yaml.safe_load(config_path.read_text())
     except Exception:
         return
+    yield from iter_checks_from_data(data)
 
+
+def iter_checks_from_data(data: Any) -> Iterator[tuple[str, dict[str, Any]]]:
+    """Yield ``(check_name, params)`` from an already-parsed config document.
+
+    Lets callers that have parsed the YAML for other reasons avoid a second
+    read and parse of the same file.
+    """
     validations = (data or {}).get("tests", {}).get("validations", {})
     if not isinstance(validations, dict):
         return
@@ -210,7 +218,7 @@ def _build_suite_map() -> dict[str, dict[str, Any]]:
         tests = data.get("tests") or {}
         platform = tests.get("platform") if isinstance(tests, dict) else None
         suite = str(platform) if isinstance(platform, str) and platform else config_path.stem.replace("-", "_")
-        for check_name, params in iter_config_checks(config_path):
+        for check_name, params in iter_checks_from_data(data):
             if check_name in suite_map and enforce_unique:
                 raise ValueError(f"Suite wiring name {check_name!r} is not globally unique")
             requires = params.get("requires", [])

@@ -34,7 +34,6 @@ logger = logging.getLogger(__name__)
 ADAPTER_HANDLED_CATEGORIES = {"reframe"}
 DEFAULT_VALIDATION_PHASE = "test"
 DECLARABLE_CAPABILITIES = frozenset({"vm", "bare_metal", "kubernetes", "slurm"})
-REQUIREMENT_VOCABULARY = DECLARABLE_CAPABILITIES
 
 
 class State(StrEnum):
@@ -457,11 +456,11 @@ def _validate_entry_shape(entry: ValidationEntry) -> str | None:
     raw_requires = entry.params_template.get("requires")
     if raw_requires is not None:
         if not isinstance(raw_requires, list) or any(
-            not isinstance(value, str) or value not in REQUIREMENT_VOCABULARY for value in raw_requires
+            not isinstance(value, str) or value not in DECLARABLE_CAPABILITIES for value in raw_requires
         ):
             return (
                 f"validation '{entry.name}' requires must be a list containing only: "
-                f"{', '.join(sorted(REQUIREMENT_VOCABULARY))}"
+                f"{', '.join(sorted(DECLARABLE_CAPABILITIES))}"
             )
         if len(raw_requires) != len(set(raw_requires)):
             return f"validation '{entry.name}' requires must not contain duplicates"
