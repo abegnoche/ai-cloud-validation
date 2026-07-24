@@ -193,7 +193,8 @@ Validations use `sinfo`/`srun` directly: partitions, GPU allocation, job schedul
 | `crud_install_config` | test | `providers/my-isv/scripts/image-registry/crud_install_config.py` | `config_id`, `config_name`, `operations` |
 | `install_image_bm` | test | `providers/my-isv/scripts/image-registry/install_image_bm.py` | `instance_id`, `image_id`, `instance_state` |
 | `install_config_bm` | test | `providers/my-isv/scripts/image-registry/install_config_bm.py` | `instance_id`, `config_id`, `instance_state`, `state` |
-| `teardown` | teardown | `providers/my-isv/scripts/image-registry/teardown.py` | `resources_deleted`, `message` |
+| `teardown_instance` | teardown | `providers/my-isv/scripts/image-registry/teardown.py` | `resources_deleted`, `message` (instance, key pair, security group, instance profile — only under `vm`) |
+| `teardown_image` | teardown | `providers/my-isv/scripts/image-registry/teardown.py` | `resources_deleted`, `message` (image, disks, bucket — always) |
 
 ### Security (`security.yaml`)
 

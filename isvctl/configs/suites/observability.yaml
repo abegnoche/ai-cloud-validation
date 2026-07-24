@@ -108,7 +108,11 @@ tests:
         StorageCapacityTelemetryCheck:
           test_id: "TELEM05-01"
           labels: ["min_req", "observability"]
-          requires: []
+          # Probes the volumes attached to a running instance, exactly like its
+          # StoragePerformanceTelemetryCheck twin (same script, different
+          # --aspect). Without one it reports "no volumes attached", so it can
+          # never pass as a core check.
+          requires: [vm, bare_metal]
           step: storage_capacity_telemetry
 
     storage_performance_telemetry:

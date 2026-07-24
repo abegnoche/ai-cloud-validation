@@ -166,8 +166,11 @@ tests:
           requires: [bare_metal]
           expected_state: "running"
 
+    # Bound to the image half of teardown: it is ungated, so this stays a core
+    # check. The instance half (teardown_instance) only runs under vm and owns
+    # nothing an ISV must prove, so it carries no check of its own.
     teardown_checks:
-      step: teardown
+      step: teardown_image
       checks:
         StepSuccessCheck:
           test_id: "N/A"
