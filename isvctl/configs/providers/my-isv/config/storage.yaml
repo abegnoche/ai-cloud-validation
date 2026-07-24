@@ -240,6 +240,7 @@ commands:
       - name: teardown_volume
         phase: teardown
         command: "python ../scripts/storage/teardown_volume.py"
+        requires: [vm, bare_metal]
         args:
           - "--region"
           - "{{region}}"
@@ -251,6 +252,7 @@ commands:
       - name: teardown
         phase: teardown
         command: "python ../scripts/vm/teardown.py"
+        requires: [vm, bare_metal]
         args:
           - "--instance-id"
           - "{{steps.launch_instance.instance_id}}"

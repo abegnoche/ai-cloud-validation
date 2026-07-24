@@ -86,11 +86,15 @@ def test_plain_suite_accepts_valid_requires() -> None:
     RunConfig.model_validate({"tests": {"validations": validation}})
 
 
-def test_aws_storage_eks_lifecycle_requires_kubernetes() -> None:
-    """Both sides of the destructive EKS lifecycle carry the same capability gate."""
-    config_path = CONFIGS_ROOT / "providers" / "aws" / "config" / "storage.yaml"
+@pytest.mark.parametrize("provider", ["aws", "my-isv"])
+def test_storage_cleanup_steps_have_explicit_capability_gates(provider: str) -> None:
+    """Destructive storage cleanup runs only in the context that owns its resources."""
+    config_path = CONFIGS_ROOT / "providers" / provider / "config" / "storage.yaml"
     config = RunConfig.model_validate(merge_yaml_files([str(config_path)]))
     steps = {step.name: step for step in config.get_steps("storage")}
 
-    assert steps["setup_cluster"].requires == ["kubernetes"]
-    assert steps["teardown_cluster"].requires == ["kubernetes"]
+    assert steps["teardown_volume"].requires == ["vm", "bare_metal"]
+    assert steps["teardown"].requires == ["vm", "bare_metal"]
+    if provider == "aws":
+        assert steps["setup_cluster"].requires == ["kubernetes"]
+        assert steps["teardown_cluster"].requires == ["kubernetes"]

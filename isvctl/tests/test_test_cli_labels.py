@@ -271,6 +271,69 @@ def test_provider_without_suite_or_label_mentions_both_options(monkeypatch: pyte
     assert _FakeOrchestrator.calls == []
 
 
+def test_plain_suite_without_capability_defaults_to_core(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """A declared plain suite runs core checks unless a capability is selected."""
+    configs_root = tmp_path / "configs"
+    suite_path = configs_root / "suites" / "storage.yaml"
+    suite_path.parent.mkdir(parents=True)
+    suite_path.write_text(
+        """\
+tests:
+  validations:
+    core:
+      checks:
+        CoreCheck:
+          test_id: "N/A"
+          labels: ["storage"]
+          requires: []
+    vm:
+      checks:
+        VmCheck:
+          test_id: "N/A"
+          labels: ["storage"]
+          requires: [vm]
+""",
+        encoding="utf-8",
+    )
+    (configs_root / "suites" / "vm.yaml").write_text(
+        "tests:\n  platform: vm\n  validations: {}\n",
+        encoding="utf-8",
+    )
+    _write_provider_config(configs_root, "aws", "storage.yaml", "storage.yaml", "storage")
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+
+    core_result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "aws", "--suite", "storage", "--dry-run", "--no-upload"],
+    )
+    vm_result = runner.invoke(
+        test_cli.app,
+        [
+            "run",
+            "--provider",
+            "aws",
+            "--suite",
+            "storage",
+            "--capability",
+            "vm",
+            "--dry-run",
+            "--no-upload",
+        ],
+    )
+
+    assert core_result.exit_code == 0, core_result.output
+    assert "Capability: core" in core_result.stdout
+    assert "[RUN]  CoreCheck" in core_result.stdout
+    assert "[SKIP] VmCheck" in core_result.stdout
+    assert vm_result.exit_code == 0, vm_result.output
+    assert "Capability: vm" in vm_result.stdout
+    assert "[RUN]  CoreCheck" in vm_result.stdout
+    assert "[RUN]  VmCheck" in vm_result.stdout
+
+
 def test_unknown_option_before_separator_is_rejected(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """Stale flags like `--platform` fail before they can be forwarded to pytest."""
     config = _write_config(tmp_path)

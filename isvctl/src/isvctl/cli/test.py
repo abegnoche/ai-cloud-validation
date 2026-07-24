@@ -54,6 +54,7 @@ from isvctl.reporting import check_upload_credentials, create_test_run, get_envi
 
 logger = logging.getLogger(__name__)
 CONFIGS_ROOT = Path(__file__).resolve().parents[3] / "configs"
+CORE_REQUIREMENT_CONTEXT = "core"
 
 
 class TeeWriter:
@@ -172,7 +173,10 @@ def run(
         str | None,
         typer.Option(
             "--suite",
-            help="Run one platform or plain suite from the selected provider.",
+            help=(
+                "Run one platform or plain suite from the selected provider. "
+                "Plain suites default to core checks unless --capability is set."
+            ),
         ),
     ] = None,
     capability: Annotated[
@@ -328,6 +332,9 @@ def run(
             print_error(str(exc))
             raise typer.Exit(code=1)
         print_progress(f"Selected {selected_suite.name!r} suite for provider {provider!r}.")
+        if selected_suite.platform is None and capability_context is None:
+            capability_context = CORE_REQUIREMENT_CONTEXT
+            print_progress("No capability selected; running the plain suite's core checks.")
         config_files = [selected_suite.config_path]
         provider = None
 

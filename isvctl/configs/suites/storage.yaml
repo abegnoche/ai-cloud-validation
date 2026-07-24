@@ -243,7 +243,7 @@ tests:
         StepSuccessCheck:
           test_id: "N/A"
           labels: ["storage"]
-          requires: []
+          requires: [vm, bare_metal]
 
     # Kubernetes storage checks use a normal provider-owned cluster fixture.
     k8s_storage:
