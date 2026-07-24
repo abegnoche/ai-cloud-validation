@@ -377,6 +377,134 @@ tests:
     assert "[RUN]  VmCheck" in vm_result.stdout
 
 
+def test_every_entry_path_resolves_the_same_capability_context(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """One config runs the same checks whether reached via --suite or -f.
+
+    The context models what an ISV declared, which cannot depend on how the
+    config was named on the command line.
+    """
+    configs_root = tmp_path / "configs"
+    suite_path = configs_root / "suites" / "storage.yaml"
+    suite_path.parent.mkdir(parents=True)
+    suite_path.write_text(
+        """\
+tests:
+  validations:
+    core:
+      checks:
+        CoreCheck:
+          test_id: "N/A"
+          labels: ["storage"]
+          requires: []
+    vm:
+      checks:
+        VmCheck:
+          test_id: "N/A"
+          labels: ["storage"]
+          requires: [vm]
+""",
+        encoding="utf-8",
+    )
+    (configs_root / "suites" / "vm.yaml").write_text(
+        "tests:\n  platform: vm\n  validations: {}\n",
+        encoding="utf-8",
+    )
+    provider_config = _write_provider_config(configs_root, "aws", "storage.yaml", "storage.yaml", "storage")
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+
+    via_suite = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "aws", "--suite", "storage", "--dry-run", "--no-upload"],
+    )
+    via_file = runner.invoke(
+        test_cli.app,
+        ["run", "-f", str(provider_config), "--dry-run", "--no-upload"],
+    )
+
+    assert via_suite.exit_code == 0, via_suite.output
+    assert via_file.exit_code == 0, via_file.output
+    for output in (via_suite.stdout, via_file.stdout):
+        assert "Capability: core" in output
+        assert "[RUN]  CoreCheck" in output
+        assert "[SKIP] VmCheck" in output
+
+
+def test_platform_suite_keeps_the_unfiltered_context(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Platform suites declare no requires, so the core default must not apply."""
+    configs_root = tmp_path / "configs"
+    suites = configs_root / "suites"
+    suites.mkdir(parents=True)
+    (suites / "vm.yaml").write_text(
+        """\
+tests:
+  platform: vm
+  validations:
+    vm:
+      checks:
+        PlatformCheck:
+          test_id: "N/A"
+          labels: ["vm"]
+""",
+        encoding="utf-8",
+    )
+    _write_provider_config(configs_root, "aws", "vm.yaml", "vm.yaml", "vm")
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "aws", "--suite", "vm", "--dry-run", "--no-upload"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "Capability: not filtered" in result.stdout
+    assert "[RUN]  PlatformCheck" in result.stdout
+
+
+def test_capability_with_no_matching_check_warns(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """A capability no check in the suite requires is a likely mistake."""
+    configs_root = tmp_path / "configs"
+    suite_path = configs_root / "suites" / "iam.yaml"
+    suite_path.parent.mkdir(parents=True)
+    suite_path.write_text(
+        """\
+tests:
+  validations:
+    iam:
+      checks:
+        CoreCheck:
+          test_id: "N/A"
+          labels: ["iam"]
+          requires: []
+""",
+        encoding="utf-8",
+    )
+    (configs_root / "suites" / "kubernetes.yaml").write_text(
+        "tests:\n  platform: kubernetes\n  validations: {}\n",
+        encoding="utf-8",
+    )
+    _write_provider_config(configs_root, "aws", "iam.yaml", "iam.yaml", "iam")
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+
+    result = runner.invoke(
+        test_cli.app,
+        ["run", "--provider", "aws", "--suite", "iam", "--capability", "kubernetes", "--dry-run", "--no-upload"],
+    )
+
+    assert result.exit_code == 0, result.output
+    # print_warning goes to stderr; the dry-run body to stdout.
+    assert "No check in 'iam' requires kubernetes" in result.stderr
+    assert "[RUN]  CoreCheck" in result.stdout
+
+
 def test_suite_and_label_filters_compose(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

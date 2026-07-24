@@ -117,6 +117,27 @@ def _junitxml_for_discovered_config(junitxml: Path, match: ProviderConfigMatch, 
     return junitxml.with_name(f"{junitxml.stem}-{match.config_path.stem}{junitxml.suffix}")
 
 
+def _resolve_capability_context(config: RunConfig, capability: str | None, suite_label: str) -> str | None:
+    """Return the requirement context a run should execute under.
+
+    One rule for every entry path: a plain suite with no ``--capability`` runs
+    its core checks. "Unfiltered" corresponds to no real ISV situation - nobody
+    runs on vm and kubernetes at once - so a plain suite always has a context.
+    Platform suites declare no ``requires:``, so they are left alone.
+    """
+    if config.tests and config.tests.platform:
+        return capability
+
+    if capability is None:
+        print_progress(f"No capability selected; running {suite_label!r} core checks.")
+        return CORE_REQUIREMENT_CONTEXT
+
+    entries = parse_validations(config.tests.validations if config.tests else {})
+    if not any(capability in entry.requires for entry in entries):
+        print_warning(f"No check in {suite_label!r} requires {capability}; running core checks only.")
+    return capability
+
+
 def _human_readable_dry_run(
     config: RunConfig,
     capability: str | None,
@@ -189,17 +210,17 @@ def run(
         str | None,
         typer.Option(
             "--suite",
-            help=(
-                "Run one platform or plain suite from the selected provider. "
-                "Plain suites default to core checks unless --capability is set."
-            ),
+            help="Run one platform or plain suite from the selected provider.",
         ),
     ] = None,
     capability: Annotated[
         str | None,
         typer.Option(
             "--capability",
-            help="Single capability context (one of the platform suites) used to filter check requirements.",
+            help=(
+                "Capability context used to filter check requirements (one of the platform suites). "
+                "Omit it and a plain suite runs its core checks -- the same rule for --suite, -f and --label."
+            ),
         ),
     ] = None,
     set_values: Annotated[
@@ -333,6 +354,8 @@ def run(
         print_error(str(exc))
         raise typer.Exit(code=1)
 
+    suite_label: str | None = None
+
     if suite:
         if not provider:
             print_error("--suite requires --provider.")
@@ -346,9 +369,7 @@ def run(
             print_error(str(exc))
             raise typer.Exit(code=1)
         print_progress(f"Selected {selected_suite.name!r} suite for provider {provider!r}.")
-        if selected_suite.platform is None and capability_context is None:
-            capability_context = CORE_REQUIREMENT_CONTEXT
-            print_progress("No capability selected; running the plain suite's core checks.")
+        suite_label = selected_suite.name
         config_files = [selected_suite.config_path]
         provider = None
 
@@ -452,6 +473,16 @@ def run(
     except Exception as e:
         print_error(f"Configuration validation failed: {e}")
         raise typer.Exit(code=1)
+
+    # Resolve the requirement context here rather than per entry path, so the
+    # same config behaves identically whether it was reached via --suite, -f,
+    # or --label discovery. Platform suites carry no `requires:`, so they keep
+    # the unfiltered context (filtering there would be a no-op anyway).
+    capability_context = _resolve_capability_context(
+        config,
+        capability_context,
+        suite_label or config_files[0].stem,
+    )
 
     if dry_run:
         typer.echo(_human_readable_dry_run(config, capability_context, labels, exclude_labels))

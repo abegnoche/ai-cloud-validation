@@ -9,6 +9,38 @@ commands (steps + scripts) that produce JSON for the validations to check.
 - **New to the framework?** See the [External Validation Guide](../../../docs/guides/external-validation-guide.md).
 - **Try it without cloud credentials:** `make demo-test`.
 
+## What runs, and when
+
+A **platform suite** (`platform: <capability>` — `vm`, `bare_metal`, `k8s`,
+`slurm`) is the obligation attached to declaring that capability. Its checks
+declare no `requires:`; they all run.
+
+A **plain suite** (everything else — `storage`, `network`, ...) mixes checks
+that need no infrastructure with checks that do. Each declares what it
+presupposes:
+
+```yaml
+requires: []                # core - runs in every context
+requires: [kubernetes]      # runs only under --capability kubernetes
+requires: [vm, bare_metal]  # any-match: either context satisfies it
+```
+
+One rule decides what runs, and it does not depend on how you named the
+config — `--suite`, `-f`, and `--label` discovery all behave identically:
+
+> **A plain suite with no `--capability` runs its core checks.** Name a
+> capability to add the checks gated on it.
+
+```bash
+isvctl test run --provider aws --suite storage                        # core only
+isvctl test run --provider aws --suite storage --capability kubernetes  # core + k8s checks
+```
+
+There is no "run everything" context: no ISV runs on `vm` and `kubernetes`
+at once, so a run always carries exactly one context. Steps follow the same
+rule — give a step `requires:` when it builds or tears down a fixture only
+some contexts need, so a core run neither provisions nor leaks it.
+
 Suites:
 [`iam`](iam.yaml),
 [`network`](network.yaml),

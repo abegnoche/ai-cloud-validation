@@ -84,15 +84,23 @@ test: ## Run tests for all packages
 	@echo ""
 	@echo "✅ All tests passed!"
 
+# run_demo,<suite>[,<capability>] - a plain suite with no capability runs only
+# its core checks, so suites holding gated checks name one to exercise those
+# stubs. Unlisted suites are core-only or platform suites.
+DEMO_CAP_network       := vm
+DEMO_CAP_observability := vm
+DEMO_CAP_security      := vm
+DEMO_CAP_storage       := vm
+
 define run_demo
 	@echo ""
 	@echo "=========================================="
-	@echo "Demo test: $(1)"
+	@echo "Demo test: $(1)$(if $(2), --capability $(2),)"
 	@echo "=========================================="
-	@echo "Running cmd: ISVCTL_DEMO_MODE=1 uv run isvctl test run -f isvctl/configs/providers/my-isv/config/$(1).yaml$(if $(filter storage,$(1)), --capability vm,)"
+	@echo "Running cmd: ISVCTL_DEMO_MODE=1 uv run isvctl test run -f isvctl/configs/providers/my-isv/config/$(1).yaml$(if $(2), --capability $(2),)"
 	@ISVCTL_DEMO_MODE=1 uv run isvctl test run \
 		-f isvctl/configs/providers/my-isv/config/$(1).yaml \
-		$(if $(filter storage,$(1)),--capability vm,)
+		$(if $(2),--capability $(2),)
 endef
 
 demo-test: demo-all ## Alias for demo-all (backward compat)
@@ -107,7 +115,13 @@ demo-all: ## Run all my-isv living examples (or demo-<suite> for one, e.g. demo-
 	@echo "Suites: $(MY_ISV_SUITES)"
 
 $(DEMO_TARGETS): demo-%:
-	$(call run_demo,$*)
+	$(call run_demo,$*,$(DEMO_CAP_$*))
+
+# image-registry splits its gated checks between vm and bare_metal, so one run
+# cannot reach both. This explicit rule overrides the pattern rule above.
+demo-image-registry:
+	$(call run_demo,image-registry,vm)
+	$(call run_demo,image-registry,bare_metal)
 
 coverage: ## Run tests with coverage and generate combined report
 	@echo "Running tests with coverage..."
