@@ -61,3 +61,23 @@ def test_platform_suites_reject_requires_and_unknown_platforms() -> None:
         RunConfig.model_validate({"tests": {"platform": "kubernetes", "validations": validation}})
     with pytest.raises(ValidationError, match=r"tests\.platform must be one of"):
         RunConfig.model_validate({"tests": {"platform": "compute", "validations": {}}})
+
+
+def test_plain_suite_rejects_unknown_requires_vocabulary() -> None:
+    """`test validate` catches a bad `requires` value, not just a run does."""
+    validation = {"sample": {"checks": {"PlainCheck": {"requires": ["compute"]}}}}
+    with pytest.raises(ValidationError, match="requires must be a list containing only"):
+        RunConfig.model_validate({"tests": {"validations": validation}})
+
+
+def test_plain_suite_rejects_duplicate_requires() -> None:
+    """Duplicate requirements are rejected at schema-validation time."""
+    validation = {"sample": {"checks": {"PlainCheck": {"requires": ["vm", "vm"]}}}}
+    with pytest.raises(ValidationError, match="requires must not contain duplicates"):
+        RunConfig.model_validate({"tests": {"validations": validation}})
+
+
+def test_plain_suite_accepts_valid_requires() -> None:
+    """A well-formed requires list passes schema validation."""
+    validation = {"sample": {"checks": {"PlainCheck": {"requires": ["vm", "bare_metal"]}}}}
+    RunConfig.model_validate({"tests": {"validations": validation}})

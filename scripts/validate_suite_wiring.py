@@ -149,6 +149,21 @@ def wiring_errors(suites_dir: Path = SUITES_DIR) -> list[str]:
     occurrence: dict[tuple[Path, str, str], int] = defaultdict(int)
     wiring_locations: dict[str, str] = {}
 
+    # A `requires` value is only satisfiable if an ISV can declare that
+    # capability, which requires a platform suite to exist for it. Collect the
+    # platform capabilities that actually have a suite so unreachable (dead)
+    # requirements can be flagged below.
+    declared_platforms: set[str] = set()
+    for path in sorted(suites_dir.glob("*.yaml")):
+        try:
+            data = yaml.safe_load(path.read_text()) or {}
+        except (OSError, yaml.YAMLError):
+            continue
+        tests = data.get("tests") if isinstance(data, dict) else None
+        platform = tests.get("platform") if isinstance(tests, dict) else None
+        if isinstance(platform, str) and platform in DECLARABLE_CAPABILITIES:
+            declared_platforms.add(platform)
+
     for path in sorted(suites_dir.glob("*.yaml")):
         try:
             lines = path.read_text().splitlines()
@@ -214,6 +229,13 @@ def wiring_errors(suites_dir: Path = SUITES_DIR) -> list[str]:
                     )
                 elif len(requires) != len(set(requires)):
                     errors.append(f"{location}: requires must not contain duplicates")
+                else:
+                    dead = sorted(set(requires) - declared_platforms)
+                    if dead:
+                        errors.append(
+                            f"{location}: requires names {', '.join(dead)} which has no platform "
+                            "suite; no ISV can declare it, so the check is unreachable"
+                        )
     return errors
 
 

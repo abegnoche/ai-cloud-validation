@@ -158,6 +158,37 @@ tests:
     assert any("kubernetes" in error and "collides with a declarable capability" in error for error in errors)
 
 
+def test_wiring_errors_flags_requires_with_no_platform_suite(tmp_path: Path) -> None:
+    """A `requires` naming a capability that has no platform suite is unreachable."""
+    (tmp_path / "vm.yaml").write_text(
+        """\
+tests:
+  platform: vm
+  validations:
+    example:
+      checks:
+        VmCheck:
+          test_id: "N/A"
+          labels: ["vm"]
+"""
+    )
+    (tmp_path / "demo.yaml").write_text(
+        """\
+tests:
+  validations:
+    example:
+      checks:
+        DeadCheck:
+          test_id: "N/A"
+          labels: ["demo"]
+          requires: [slurm]
+"""
+    )
+
+    errors = validate_suite_wiring.wiring_errors(tmp_path)
+    assert any("DeadCheck" in error and "slurm" in error and "no platform suite" in error for error in errors)
+
+
 def test_wiring_errors_allows_platform_suite_named_after_capability(tmp_path: Path) -> None:
     """The kubernetes *platform* suite (declares tests.platform) is not a collision."""
     (tmp_path / "k8s.yaml").write_text(

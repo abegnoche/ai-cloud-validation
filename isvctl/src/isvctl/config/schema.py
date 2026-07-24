@@ -388,6 +388,19 @@ class ValidationConfig(BaseModel):
             raise ValueError("requires is not allowed in platform suites")
         if any("platforms" in entry.params_template for entry in entries):
             raise ValueError("per-check platforms is no longer supported; use requires in plain suites")
+        if not self.platform:
+            for entry in entries:
+                raw_requires = entry.params_template.get("requires")
+                if raw_requires is None:
+                    continue
+                if not isinstance(raw_requires, list) or any(
+                    not isinstance(value, str) or value not in DECLARABLE_CAPABILITIES for value in raw_requires
+                ):
+                    raise ValueError(
+                        f"requires must be a list containing only: {', '.join(sorted(DECLARABLE_CAPABILITIES))}"
+                    )
+                if len(raw_requires) != len(set(raw_requires)):
+                    raise ValueError("requires must not contain duplicates")
         return self
 
 
