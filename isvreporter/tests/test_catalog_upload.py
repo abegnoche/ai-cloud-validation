@@ -20,11 +20,23 @@ from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError, URLError
 
+import pytest
+
 from isvreporter.client import upload_test_catalog
 
 
 class TestUploadTestCatalog:
     """Tests for upload_test_catalog function."""
+
+    def test_requires_the_complete_catalog_envelope(self) -> None:
+        """Callers cannot silently upload a v2 catalog without its axes."""
+        with pytest.raises(TypeError):
+            upload_test_catalog(
+                endpoint="https://api.example.com",
+                jwt_token="test-token",
+                isv_test_version="1.2.3",
+                entries=[{"name": "TestA"}],
+            )
 
     @patch("isvreporter.client.urlopen")
     def test_successful_upload(self, mock_urlopen: MagicMock) -> None:
@@ -69,6 +81,9 @@ class TestUploadTestCatalog:
             jwt_token="test-token",
             isv_test_version="1.2.3",
             entries=entries,
+            schema_version=2,
+            platforms=["kubernetes", "vm"],
+            suites=["storage"],
         )
 
         assert result is True
@@ -82,8 +97,8 @@ class TestUploadTestCatalog:
         payload = json.loads(request.data.decode())
         assert payload["isvTestVersion"] == "1.2.3"
         assert payload["schemaVersion"] == 2
-        assert payload["platforms"] == []
-        assert payload["suites"] == []
+        assert payload["platforms"] == ["kubernetes", "vm"]
+        assert payload["suites"] == ["storage"]
         assert len(payload["entries"]) == 2
         assert payload["entries"][0]["name"] == "TestA"
         assert payload["entries"][0]["labels"] == ["k8s"]
@@ -106,6 +121,9 @@ class TestUploadTestCatalog:
             jwt_token="test-token",
             isv_test_version="1.2.3",
             entries=[{"name": "TestA"}],
+            schema_version=2,
+            platforms=["kubernetes"],
+            suites=["storage"],
         )
 
         assert result is True
@@ -127,6 +145,9 @@ class TestUploadTestCatalog:
             jwt_token="test-token",
             isv_test_version="1.2.3",
             entries=[{"name": "TestA"}],
+            schema_version=2,
+            platforms=["kubernetes"],
+            suites=["storage"],
         )
 
         assert result is True
@@ -147,6 +168,9 @@ class TestUploadTestCatalog:
             jwt_token="test-token",
             isv_test_version="1.2.3",
             entries=[{"name": "TestA"}],
+            schema_version=2,
+            platforms=["kubernetes"],
+            suites=["storage"],
         )
 
         assert result is False
@@ -161,6 +185,9 @@ class TestUploadTestCatalog:
             jwt_token="test-token",
             isv_test_version="1.2.3",
             entries=[{"name": "TestA"}],
+            schema_version=2,
+            platforms=["kubernetes"],
+            suites=["storage"],
         )
 
         assert result is False
@@ -181,6 +208,9 @@ class TestUploadTestCatalog:
             jwt_token="test-token",
             isv_test_version="1.0.0",
             entries=entries,
+            schema_version=2,
+            platforms=["kubernetes"],
+            suites=["storage"],
         )
 
         call_args = mock_urlopen.call_args
@@ -241,6 +271,9 @@ class TestUploadTestCatalog:
             jwt_token="test-token",
             isv_test_version="1.0.0",
             entries=[{"name": "TestA", "labels": ["gpu"], "markers": ["gpu"]}],
+            schema_version=2,
+            platforms=["kubernetes"],
+            suites=["storage"],
         )
 
         request = mock_urlopen.call_args[0][0]

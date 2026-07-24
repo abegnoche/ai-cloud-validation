@@ -127,6 +127,49 @@ def test_test_run_forwards_label_filters(monkeypatch: pytest.MonkeyPatch, tmp_pa
     assert _FakeOrchestrator.captured["include_labels"] == ["gpu", "slow"]
 
 
+def test_test_run_uploads_the_complete_catalog_document(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """The automatic result path forwards the same complete catalog it saves."""
+    config = _write_config(tmp_path)
+    output_dir = tmp_path / "_output"
+    output_dir.mkdir()
+    document = {
+        "schemaVersion": 2,
+        "isvTestVersion": "1.2.3",
+        "platforms": ["kubernetes", "vm"],
+        "suites": ["storage"],
+        "entries": [{"name": "TestA"}],
+    }
+    captured: dict[str, Any] = {}
+
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+    monkeypatch.setattr(test_cli, "get_output_dir", lambda: output_dir)
+    monkeypatch.setattr(test_cli, "check_upload_credentials", lambda: (True, "client-id", "client-secret"))
+    monkeypatch.setattr(
+        test_cli,
+        "get_environment_config",
+        lambda: ("https://api.example.com", "https://ssa.example.com"),
+    )
+    monkeypatch.setattr(test_cli, "create_test_run", lambda **_kwargs: "run-123")
+    monkeypatch.setattr(test_cli, "build_catalog", lambda: document["entries"])
+    monkeypatch.setattr(test_cli, "get_catalog_version", lambda: document["isvTestVersion"])
+    monkeypatch.setattr(test_cli, "catalog_document", lambda _entries, _version: document)
+
+    def capture_update(**kwargs: Any) -> bool:
+        captured.update(kwargs)
+        return True
+
+    monkeypatch.setattr(test_cli, "update_test_run", capture_update)
+
+    result = runner.invoke(test_cli.app, ["run", "-f", str(config), "--lab-id", "7"])
+
+    assert result.exit_code == 0, result.output
+    assert captured["catalog_document"] == document
+    assert json.loads((output_dir / "test_catalog.json").read_text()) == document
+
+
 def test_short_l_flag_binds_to_label_not_lab_id(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """`-l` is the short flag for `--label`, not the legacy `--lab-id`.
 

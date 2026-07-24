@@ -506,8 +506,7 @@ def run(
 
     # Build test catalog early so it runs inside the TeeWriter context
     # (avoids logging errors from stale stream references after the log file closes)
-    catalog_entries: list[dict] | None = None
-    catalog_version: str | None = None
+    test_catalog_document: dict[str, Any] | None = None
 
     # Always capture output to log file while still displaying (like `tee`)
     with open(log_file_path, "w") as log_file:
@@ -528,9 +527,10 @@ def run(
                 try:
                     catalog_entries = build_catalog()
                     catalog_version = get_catalog_version()
+                    test_catalog_document = catalog_document(catalog_entries, catalog_version)
                     print_progress(f"Built test catalog: {len(catalog_entries)} tests (version: {catalog_version})")
                     catalog_path = output_dir / "test_catalog.json"
-                    catalog_path.write_text(json.dumps(catalog_document(catalog_entries, catalog_version), indent=2))
+                    catalog_path.write_text(json.dumps(test_catalog_document, indent=2))
                     print_progress(f"  Saved test catalog to: {catalog_path}")
                 except Exception as e:
                     logger.warning("Failed to build test catalog: %s", e)
@@ -558,8 +558,7 @@ def run(
             junit_xml=junit_path if junit_path.exists() else None,
             log_file=log_file_path if log_file_path.exists() else None,
             isv_software_version=isv_software_version,
-            catalog_entries=catalog_entries,
-            catalog_version=catalog_version,
+            catalog_document=test_catalog_document,
         ):
             print_progress(typer.style("[OK]", fg=typer.colors.GREEN) + " Test results uploaded successfully")
         else:

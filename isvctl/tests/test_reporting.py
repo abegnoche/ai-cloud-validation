@@ -22,6 +22,7 @@ from isvctl.reporting import (
     check_upload_credentials,
     get_environment_config,
     get_isv_test_version,
+    update_test_run,
 )
 
 
@@ -124,3 +125,50 @@ class TestGetIsvTestVersion:
             result = get_isv_test_version()
             # Result depends on whether __version__ is available
             assert result is None or isinstance(result, str)
+
+
+class TestUpdateTestRun:
+    """Tests for result and catalog upload orchestration."""
+
+    @patch("isvreporter.client.update_test_run")
+    @patch("isvreporter.client.upload_test_catalog")
+    @patch("isvreporter.auth.get_jwt_token", return_value="jwt-token")
+    @patch(
+        "isvctl.reporting.get_environment_config", return_value=("https://api.example.com", "https://ssa.example.com")
+    )
+    @patch("isvctl.reporting.check_upload_credentials", return_value=(True, "client-id", "client-secret"))
+    def test_forwards_complete_catalog_document(
+        self,
+        _mock_credentials: MagicMock,
+        _mock_environment: MagicMock,
+        _mock_token: MagicMock,
+        mock_upload_catalog: MagicMock,
+        _mock_update_run: MagicMock,
+    ) -> None:
+        """Automatic result upload preserves all catalog envelope metadata."""
+        document = {
+            "schemaVersion": 2,
+            "isvTestVersion": "1.2.3",
+            "platforms": ["kubernetes", "vm"],
+            "suites": ["storage", "iam"],
+            "entries": [{"name": "TestA"}],
+        }
+
+        result = update_test_run(
+            lab_id=7,
+            test_run_id="run-123",
+            success=True,
+            start_time="2026-07-24T12:00:00Z",
+            catalog_document=document,
+        )
+
+        assert result is True
+        mock_upload_catalog.assert_called_once_with(
+            endpoint="https://api.example.com",
+            jwt_token="jwt-token",
+            isv_test_version="1.2.3",
+            entries=[{"name": "TestA"}],
+            schema_version=2,
+            platforms=["kubernetes", "vm"],
+            suites=["storage", "iam"],
+        )

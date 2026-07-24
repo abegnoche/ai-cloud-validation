@@ -282,9 +282,9 @@ def upload_test_catalog(
     isv_test_version: str,
     entries: list[dict[str, Any]],
     *,
-    schema_version: int = 2,
-    platforms: list[str] | None = None,
-    suites: list[str] | None = None,
+    schema_version: int,
+    platforms: list[str],
+    suites: list[str],
 ) -> bool:
     """Upload test catalog for a suite version (idempotent per version).
 
@@ -322,8 +322,8 @@ def upload_test_catalog(
     payload = {
         "schemaVersion": schema_version,
         "isvTestVersion": isv_test_version,
-        "platforms": platforms or [],
-        "suites": suites or [],
+        "platforms": platforms,
+        "suites": suites,
         "entries": [
             {
                 "name": e["name"],

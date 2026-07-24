@@ -300,6 +300,9 @@ def update(
                 jwt_token=jwt_token,
                 isv_test_version=catalog_version,
                 entries=catalog_entries,
+                schema_version=catalog_data.get("schemaVersion", 1),
+                platforms=catalog_data.get("platforms", []),
+                suites=catalog_data.get("suites", []),
             )
         except FileNotFoundError:
             typer.echo(f"Warning: Test catalog file not found: {test_catalog}", err=True)
