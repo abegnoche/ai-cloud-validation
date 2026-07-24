@@ -89,10 +89,10 @@ define run_demo
 	@echo "=========================================="
 	@echo "Demo test: $(1)"
 	@echo "=========================================="
-	@echo "Running cmd: ISVCTL_DEMO_MODE=1 uv run isvctl test run -f isvctl/configs/providers/my-isv/config/$(1).yaml$(if $(filter storage,$(1)), --capabilities vm,)"
+	@echo "Running cmd: ISVCTL_DEMO_MODE=1 uv run isvctl test run -f isvctl/configs/providers/my-isv/config/$(1).yaml$(if $(filter storage,$(1)), --capability vm,)"
 	@ISVCTL_DEMO_MODE=1 uv run isvctl test run \
 		-f isvctl/configs/providers/my-isv/config/$(1).yaml \
-		$(if $(filter storage,$(1)),--capabilities vm,)
+		$(if $(filter storage,$(1)),--capability vm,)
 endef
 
 demo-test: demo-all ## Alias for demo-all (backward compat)

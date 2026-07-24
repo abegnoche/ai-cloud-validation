@@ -48,7 +48,7 @@ from isvctl.config.label_discovery import (
 )
 from isvctl.config.merger import merge_yaml_files
 from isvctl.config.schema import RunConfig
-from isvctl.config.suite_resolution import SuiteResolutionError, parse_capabilities, resolve_suite
+from isvctl.config.suite_resolution import SuiteResolutionError, parse_capability, resolve_suite
 from isvctl.orchestrator.loop import Orchestrator, Phase
 from isvctl.reporting import check_upload_credentials, create_test_run, get_environment_config, update_test_run
 
@@ -116,25 +116,24 @@ def _junitxml_for_discovered_config(junitxml: Path, match: ProviderConfigMatch, 
     return junitxml.with_name(f"{junitxml.stem}-{match.config_path.stem}{junitxml.suffix}")
 
 
-def _human_readable_dry_run(config: RunConfig, capabilities: set[str] | None) -> str:
+def _human_readable_dry_run(config: RunConfig, capability: str | None) -> str:
     """Render the validation requirement plan without executing lifecycle steps."""
     platform = config.tests.platform if config.tests and config.tests.platform else None
     suite_type = f"platform ({platform})" if platform else "plain"
-    context = "not filtered" if capabilities is None else ", ".join(sorted(capabilities)) or "(none)"
+    context = "not filtered" if capability is None else capability
     validations = config.tests.validations if config.tests else {}
     entries = parse_validations(validations)
 
     lines = [
         "Dry-run plan",
         f"  Suite type: {suite_type}",
-        f"  Capabilities: {context}",
+        f"  Capability: {context}",
         f"  Checks: {len(entries)}",
     ]
     for entry in entries:
-        if capabilities is not None and not requirements_satisfied(entry.requires, capabilities):
+        if capability is not None and not requirements_satisfied(entry.requires, capability):
             requirement = ", ".join(entry.requires)
-            declared = ", ".join(sorted(capabilities or ())) or "(none)"
-            lines.append(f"  [SKIP] {entry.name}: requires {requirement} (context: {declared})")
+            lines.append(f"  [SKIP] {entry.name}: requires {requirement} (context: {capability})")
         elif entry.requires:
             lines.append(f"  [RUN]  {entry.name}: requires {', '.join(entry.requires)}")
         else:
@@ -176,11 +175,11 @@ def run(
             help="Run one platform or plain suite from the selected provider.",
         ),
     ] = None,
-    capabilities: Annotated[
+    capability: Annotated[
         str | None,
         typer.Option(
-            "--capabilities",
-            help="Comma-separated capability context used to filter check requirements.",
+            "--capability",
+            help="Single capability context (one of the platform suites) used to filter check requirements.",
         ),
     ] = None,
     set_values: Annotated[
@@ -308,7 +307,7 @@ def run(
     apply_user_config(no_user_config)
 
     try:
-        capability_context = parse_capabilities(capabilities, CONFIGS_ROOT)
+        capability_context = parse_capability(capability, CONFIGS_ROOT)
     except SuiteResolutionError as exc:
         print_error(str(exc))
         raise typer.Exit(code=1)
@@ -370,7 +369,7 @@ def run(
                 config_files=[match.config_path],
                 provider=None,
                 suite=None,
-                capabilities=capabilities,
+                capability=capability,
                 set_values=set_values,
                 phase=phase,
                 labels=labels,
@@ -514,7 +513,7 @@ def run(
                 extra_pytest_args=extra_pytest_args,
                 include_labels=labels,
                 exclude_labels=exclude_labels,
-                capabilities=capability_context,
+                capability=capability_context,
                 verbose=verbose,
                 junitxml=str(junitxml),
             )

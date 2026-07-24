@@ -11,7 +11,7 @@ from pydantic import ValidationError
 from isvctl.config.schema import RunConfig
 from isvctl.config.suite_resolution import (
     SuiteResolutionError,
-    parse_capabilities,
+    parse_capability,
     resolve_suite,
 )
 
@@ -41,14 +41,16 @@ def test_one_suite_flag_resolves_platform_and_plain_suites(tmp_path: Path) -> No
     assert plain.platform is None
 
 
-def test_capabilities_use_catalog_vocabulary(tmp_path: Path) -> None:
-    """Unknown capabilities are rejected while omitted context disables filtering."""
+def test_capability_uses_catalog_vocabulary(tmp_path: Path) -> None:
+    """An unknown capability is rejected while omitted context disables filtering."""
     _write_catalog(tmp_path)
 
-    assert parse_capabilities(None, tmp_path) is None
-    assert parse_capabilities("k8s", tmp_path) == {"kubernetes"}
-    with pytest.raises(SuiteResolutionError, match="non-declarable capabilities: compute"):
-        parse_capabilities("compute", tmp_path)
+    assert parse_capability(None, tmp_path) is None
+    assert parse_capability("k8s", tmp_path) == "kubernetes"
+    with pytest.raises(SuiteResolutionError, match="non-declarable capability: compute"):
+        parse_capability("compute", tmp_path)
+    with pytest.raises(SuiteResolutionError, match="single platform"):
+        parse_capability("kubernetes,vm", tmp_path)
 
 
 def test_platform_suites_reject_requires_and_unknown_platforms() -> None:

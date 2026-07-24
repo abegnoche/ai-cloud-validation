@@ -122,10 +122,15 @@ def _wiring_requires(params_template: Any) -> tuple[str, ...]:
     return tuple(item for item in value if isinstance(item, str))
 
 
-def requirements_satisfied(requires: Iterable[str], capabilities: AbstractSet[str]) -> bool:
-    """Return whether any required platform is present in the capability context."""
+def requirements_satisfied(requires: Iterable[str], capability: str) -> bool:
+    """Return whether the single capability context satisfies a check's requirements.
+
+    The four capabilities are mutually exclusive execution environments, so a run
+    carries exactly one. A core check (empty ``requires``) always runs; otherwise
+    the check runs when the context capability is among its any-match prerequisites.
+    """
     required = set(requires)
-    return not required or not required.isdisjoint(capabilities)
+    return not required or capability in required
 
 
 def parse_validations(raw_config: Mapping[str, Any]) -> list[ValidationEntry]:
@@ -189,7 +194,7 @@ def resolve_entries(
     exclude_tests: AbstractSet[str],
     released_tests: AbstractSet[str] | None,
     render_context: Mapping[str, Any],
-    capabilities: AbstractSet[str] | None = None,
+    capability: str | None = None,
 ) -> list[ResolvedEntry]:
     """Resolve validation entries into ready or terminal outcomes.
 
@@ -203,7 +208,7 @@ def resolve_entries(
         exclude_tests: Validation names excluded by config.
         released_tests: Released test manifest, or None when unreleased checks are included.
         render_context: Jinja context for validation parameter rendering.
-        capabilities: Declared capability context, or None to disable requirement filtering.
+        capability: Declared capability context (a single platform), or None to disable requirement filtering.
 
     Returns:
         A resolved entry for every input entry, in input order.
@@ -234,9 +239,9 @@ def resolve_entries(
             resolved.append(_skip(entry, SkipReason.EXCLUDED, f"validation '{entry.name}' is excluded by name"))
             continue
 
-        if capabilities is not None and not requirements_satisfied(entry.requires, capabilities):
+        if capability is not None and not requirements_satisfied(entry.requires, capability):
             requirement_list = ", ".join(entry.requires) or "(none)"
-            context_list = ", ".join(sorted(capabilities or ())) or "(none)"
+            context_list = capability
             resolved.append(
                 _skip(
                     entry,

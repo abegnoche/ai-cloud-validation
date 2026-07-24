@@ -338,15 +338,15 @@ def _apply_step_validation_gates(steps: list[Any], released_tests: set[str] | No
 def _apply_capability_step_gates(
     steps: list[Any],
     validation_entries: list[ValidationEntry],
-    capabilities: set[str] | None,
+    capability: str | None,
 ) -> list[Any]:
     """Skip a step when every validation bound to it is requirement-filtered."""
-    if capabilities is None:
+    if capability is None:
         return steps
     gated_steps: list[Any] = []
     for step in steps:
         bound_entries = [entry for entry in validation_entries if entry.step == step.name]
-        if bound_entries and all(not requirements_satisfied(entry.requires, capabilities) for entry in bound_entries):
+        if bound_entries and all(not requirements_satisfied(entry.requires, capability) for entry in bound_entries):
             logger.info("Skipping step '%s' because all bound validations are capability-filtered", step.name)
             gated_steps.append(step.model_copy(update={"skip": True}))
         else:
@@ -382,7 +382,7 @@ class Orchestrator:
         self._extra_pytest_args: list[str] | None = None
         self._include_labels: list[str] = []
         self._exclude_labels: list[str] = []
-        self._capabilities: set[str] | None = None
+        self._capability: str | None = None
         self._verbose: bool = False
         self._junitxml: str | None = None
 
@@ -393,7 +393,7 @@ class Orchestrator:
         extra_pytest_args: list[str] | None = None,
         include_labels: list[str] | None = None,
         exclude_labels: list[str] | None = None,
-        capabilities: set[str] | None = None,
+        capability: str | None = None,
         verbose: bool = False,
         junitxml: str | None = None,
     ) -> OrchestratorResult:
@@ -408,7 +408,7 @@ class Orchestrator:
                   (labels are mirrored as pytest marks)
             include_labels: Labels that selected validations must all contain.
             exclude_labels: Labels that selected validations must not contain.
-            capabilities: Capability context used to filter validation requirements.
+            capability: Single capability context used to filter validation requirements.
             verbose: Enable verbose output for validations
             junitxml: Path to write JUnit XML report for validations
 
@@ -422,7 +422,7 @@ class Orchestrator:
         self._extra_pytest_args = extra_pytest_args
         self._include_labels = include_labels or []
         self._exclude_labels = exclude_labels or []
-        self._capabilities = capabilities
+        self._capability = capability
         self._verbose = verbose
         self._junitxml = junitxml
 
@@ -504,7 +504,7 @@ class Orchestrator:
         if self.config.tests and self.config.tests.validations:
             all_validations = self.config.tests.validations
         validation_entries = parse_validations(all_validations)
-        steps = _apply_capability_step_gates(steps, validation_entries, self._capabilities)
+        steps = _apply_capability_step_gates(steps, validation_entries, self._capability)
 
         logger.info(f"Configured phases: {config_phases}")
 
@@ -823,7 +823,7 @@ class Orchestrator:
             exclude_tests=exclude_tests,
             released_tests=released_tests,
             render_context=self.context.get_accumulated_context(),
-            capabilities=self._capabilities,
+            capability=self._capability,
         )
 
     def _resolve_remaining_validation_entries(

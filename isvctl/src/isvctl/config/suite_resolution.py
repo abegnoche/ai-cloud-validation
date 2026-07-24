@@ -45,19 +45,28 @@ def platform_vocabulary(configs_root: Path) -> frozenset[str]:
     return frozenset(platforms)
 
 
-def parse_capabilities(value: str | None, configs_root: Path) -> set[str] | None:
-    """Parse a comma-separated capability context using platform suite names."""
+def parse_capability(value: str | None, configs_root: Path) -> str | None:
+    """Parse the single capability context (one platform suite name).
+
+    The four capabilities are mutually exclusive execution environments (you run
+    on kubernetes OR slurm OR vm OR bare_metal, never a combination), so this
+    takes exactly one value.
+    """
     if value is None:
         return None
-    capabilities = {_normalize_name(item) for item in value.split(",") if item.strip()}
-    allowed = platform_vocabulary(configs_root)
-    unknown = sorted(capabilities - allowed)
-    if unknown:
+    if "," in value:
         raise SuiteResolutionError(
-            f"Unknown or non-declarable capabilities: {', '.join(unknown)}. "
+            f"--capability takes a single platform (got {value!r}); the capabilities "
+            "are mutually exclusive execution environments, so only one runs at a time."
+        )
+    capability = _normalize_name(value)
+    allowed = platform_vocabulary(configs_root)
+    if capability not in allowed:
+        raise SuiteResolutionError(
+            f"Unknown or non-declarable capability: {value}. "
             f"Available capabilities: {', '.join(sorted(allowed)) or '(none)'}."
         )
-    return capabilities
+    return capability
 
 
 def _raw_imports(config_path: Path) -> list[str]:
