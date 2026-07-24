@@ -45,6 +45,13 @@ def platform_vocabulary(configs_root: Path) -> frozenset[str]:
     return frozenset(platforms)
 
 
+def suite_vocabulary(configs_root: Path) -> frozenset[str]:
+    """Return plain suite names declared by canonical suite YAML."""
+    declarable = platform_vocabulary(configs_root)
+    names = {_normalize_name(path.stem) for path in (configs_root / "suites").glob("*.yaml")}
+    return frozenset(names - declarable)
+
+
 def parse_capability(value: str | None, configs_root: Path) -> str | None:
     """Parse the single capability context (one platform suite name).
 
@@ -99,6 +106,31 @@ def _suite_name(config_path: Path, declarable: frozenset[str]) -> tuple[str, str
         )
     name = suite_imports[0] if suite_imports else config_path.stem
     return _normalize_name(name), None
+
+
+def resolve_suite_name(config_paths: list[Path], configs_root: Path) -> str | None:
+    """Return the suite name a set of ``-f`` configs resolves to.
+
+    A run's identity is (suite, capability), so the suite has to be recoverable
+    from every entry path -- including ``-f lab.yaml -f commands.yaml
+    -f suites/k8s.yaml``, where the first config is not the suite. Classify each
+    config in order and take the first that names a known platform or plain
+    suite; fall back to the first config's stem when nothing matches, which is
+    the best available label for an ad-hoc config.
+    """
+    if not config_paths:
+        return None
+
+    declarable = platform_vocabulary(configs_root)
+    known = declarable | suite_vocabulary(configs_root)
+    for path in config_paths:
+        try:
+            name, _ = _suite_name(path, declarable)
+        except SuiteResolutionError:
+            continue
+        if name in known:
+            return name
+    return _normalize_name(config_paths[0].stem)
 
 
 def resolve_suite(provider: str, suite: str, *, configs_root: Path) -> ResolvedSuite:

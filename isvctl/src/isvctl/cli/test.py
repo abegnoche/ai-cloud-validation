@@ -48,7 +48,12 @@ from isvctl.config.label_discovery import (
 )
 from isvctl.config.merger import merge_yaml_files
 from isvctl.config.schema import RunConfig
-from isvctl.config.suite_resolution import SuiteResolutionError, parse_capability, resolve_suite
+from isvctl.config.suite_resolution import (
+    SuiteResolutionError,
+    parse_capability,
+    resolve_suite,
+    resolve_suite_name,
+)
 from isvctl.orchestrator.loop import Orchestrator, Phase
 from isvctl.reporting import check_upload_credentials, create_test_run, get_environment_config, update_test_run
 
@@ -136,6 +141,22 @@ def _resolve_capability_context(config: RunConfig, capability: str | None, suite
     if not any(capability in entry.requires for entry in entries):
         print_warning(f"No check in {suite_label!r} requires {capability}; running core checks only.")
     return capability
+
+
+def _reported_capability(config: RunConfig, capability_context: str | None) -> str | None:
+    """Return the capability to record on the uploaded test run.
+
+    Two client-side spellings have to be translated before they leave the process.
+    ``CORE_REQUIREMENT_CONTEXT`` is this module's word for "no capability", which
+    the service records as NULL. A platform suite is left with no explicit context
+    because its own platform *is* the capability it runs under, so report that
+    rather than losing the axis for every platform-suite run.
+    """
+    if capability_context == CORE_REQUIREMENT_CONTEXT:
+        return None
+    if capability_context is None and config.tests and config.tests.platform:
+        return config.tests.platform
+    return capability_context
 
 
 def _human_readable_dry_run(
@@ -478,10 +499,11 @@ def run(
     # same config behaves identically whether it was reached via --suite, -f,
     # or --label discovery. Platform suites carry no `requires:`, so they keep
     # the unfiltered context (filtering there would be a no-op anyway).
+    suite_name = suite_label or resolve_suite_name(config_files, CONFIGS_ROOT)
     capability_context = _resolve_capability_context(
         config,
         capability_context,
-        suite_label or config_files[0].stem,
+        suite_name or config_files[0].stem,
     )
 
     if dry_run:
@@ -539,6 +561,8 @@ def run(
             tags=tags or ["validation-test", "isvctl"],
             start_time=start_time,
             isv_software_version=isv_software_version,
+            suite=suite_name,
+            capability=_reported_capability(config, capability_context),
         )
         if not test_run_id:
             print_warning("Failed to create test run, continuing without upload")

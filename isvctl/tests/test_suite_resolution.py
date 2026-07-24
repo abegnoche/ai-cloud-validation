@@ -15,6 +15,7 @@ from isvctl.config.suite_resolution import (
     SuiteResolutionError,
     parse_capability,
     resolve_suite,
+    resolve_suite_name,
 )
 
 CONFIGS_ROOT = Path(__file__).resolve().parents[1] / "configs"
@@ -127,3 +128,30 @@ def test_storage_cluster_fixture_uses_its_own_output_contract(provider: str) -> 
     steps = {step.name: step for step in config.get_steps("storage")}
 
     assert steps["setup_cluster"].output_schema == "generic"
+
+
+def test_suite_name_survives_every_entry_path(tmp_path: Path) -> None:
+    """A run's suite must be recoverable from the configs, not just from --suite.
+
+    `-f lab.yaml -f commands.yaml -f suites/k8s.yaml` is a documented entry
+    path, and there the first config is not the suite - taking its stem would
+    record the run against "lab".
+    """
+    _write_catalog(tmp_path)
+    configs = tmp_path / "providers" / "acme" / "config"
+    (configs / "lab.yaml").write_text("context: {}\n")
+
+    assert resolve_suite_name([configs / "eks.yaml"], tmp_path) == "kubernetes"
+    assert resolve_suite_name([configs / "storage.yaml"], tmp_path) == "storage"
+    assert resolve_suite_name([configs / "lab.yaml", configs / "eks.yaml"], tmp_path) == "kubernetes"
+    assert resolve_suite_name([tmp_path / "suites" / "k8s.yaml"], tmp_path) == "kubernetes"
+
+
+def test_ad_hoc_config_falls_back_to_its_own_stem(tmp_path: Path) -> None:
+    """An unrecognized config still labels its run rather than recording nothing."""
+    _write_catalog(tmp_path)
+    ad_hoc = tmp_path / "one-off.yaml"
+    ad_hoc.write_text("commands: {}\n")
+
+    assert resolve_suite_name([ad_hoc], tmp_path) == "one_off"
+    assert resolve_suite_name([], tmp_path) is None

@@ -135,6 +135,20 @@ def create(
             help="ISV test tool version (e.g., '1.12.3')",
         ),
     ] = None,
+    suite: Annotated[
+        str | None,
+        typer.Option(
+            "--suite",
+            help="Suite that was run (e.g. 'network', 'vm')",
+        ),
+    ] = None,
+    capability: Annotated[
+        str | None,
+        typer.Option(
+            "--capability",
+            help="Capability context the suite ran under (e.g. 'vm'). Omit for a core-only run.",
+        ),
+    ] = None,
 ) -> None:
     """Create a new test run in ISV Lab Service.
 
@@ -167,6 +181,8 @@ def create(
         start_time=start_time,
         isv_software_version=isv_software_version,
         isv_test_version=isv_test_version,
+        suite=suite,
+        capability=capability,
     )
 
 

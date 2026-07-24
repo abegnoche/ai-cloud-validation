@@ -80,6 +80,8 @@ def create_test_run(
     executed_by: str = "isvctl",
     ci_reference: str = "local-run",
     isv_software_version: str | None = None,
+    suite: str | None = None,
+    capability: str | None = None,
 ) -> str | None:
     """Create a test run in ISV Lab Service.
 
@@ -91,6 +93,9 @@ def create_test_run(
         executed_by: Tool that executed the test
         ci_reference: CI/CD reference identifier
         isv_software_version: ISV software stack version (opaque string from ISV)
+        suite: Suite that was run (e.g. "network", "vm")
+        capability: Capability context resolved from ``--capability``; None for
+            a core-only run
 
     Returns:
         Test run ID if successful, None otherwise
@@ -125,6 +130,8 @@ def create_test_run(
             start_time=start_time,
             isv_software_version=isv_software_version,
             isv_test_version=isv_test_version,
+            suite=suite,
+            capability=capability,
         )
         return result.get("data", {}).get("testRunId")
     except SystemExit:

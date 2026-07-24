@@ -39,6 +39,8 @@ def create_test_run(
     start_time: str,
     isv_software_version: str | None = None,
     isv_test_version: str | None = None,
+    suite: str | None = None,
+    capability: str | None = None,
 ) -> dict[str, Any]:
     """
     Create a new test run record.
@@ -54,6 +56,10 @@ def create_test_run(
         start_time: Test run start time (ISO 8601 format)
         isv_software_version: ISV software stack version (opaque string from ISV)
         isv_test_version: ISV test tool version (e.g., "1.12.3")
+        suite: Suite that was run (e.g. "network", "vm")
+        capability: Capability context the suite ran under (e.g. "vm"); None
+            means the run was core-only, which is a different signal than the
+            same suite run under a capability
 
     Returns:
         API response dictionary containing test run ID
@@ -75,6 +81,12 @@ def create_test_run(
         payload["isvSoftwareVersion"] = isv_software_version
     if isv_test_version:
         payload["isvTestVersion"] = isv_test_version
+    if suite:
+        payload["suite"] = suite
+    # Sent only when set: a core-only run carries no capability, and null is
+    # the signal for that rather than a sentinel value.
+    if capability:
+        payload["capability"] = capability
 
     headers = {
         "Content-Type": "application/json",
@@ -88,6 +100,8 @@ def create_test_run(
             test_run_id = result["data"]["testRunId"]
             print("Test run created successfully")
             print(f"  Test Run ID: {test_run_id}")
+            if suite:
+                print(f"  Suite: {suite} ({capability or 'core only'})")
             print(f"  URL: {endpoint}/v1/labs/{lab_id}/test-runs/{test_run_id}")
 
             # Save test run ID to file for later use in after_script

@@ -18,6 +18,8 @@
 import os
 from unittest.mock import MagicMock, patch
 
+from isvctl.cli.test import CORE_REQUIREMENT_CONTEXT, _reported_capability
+from isvctl.config.schema import RunConfig
 from isvctl.reporting import (
     check_upload_credentials,
     get_environment_config,
@@ -172,3 +174,38 @@ class TestUpdateTestRun:
             platforms=["kubernetes", "vm"],
             suites=["storage", "iam"],
         )
+
+
+class TestReportedCapability:
+    """The capability recorded on a test run, translated out of client spellings.
+
+    A run's signal is the (suite, capability) pair: `network` and
+    `network --capability vm` execute different checks, so the capability has to
+    survive the trip to the service in a form the service understands.
+    """
+
+    @staticmethod
+    def _config(platform: str | None) -> RunConfig:
+        raw: dict = {"commands": {}, "tests": {"validations": {}}}
+        if platform:
+            raw["tests"]["platform"] = platform
+        return RunConfig.model_validate(raw)
+
+    def test_core_context_is_reported_as_no_capability(self) -> None:
+        """`core` is this client's word for "no capability", not a fifth one."""
+        config = self._config(None)
+        assert _reported_capability(config, CORE_REQUIREMENT_CONTEXT) is None
+
+    def test_platform_suite_reports_its_own_platform(self) -> None:
+        """A platform suite gets no explicit context because its platform is one.
+
+        Passing the resolved context straight through would record NULL for
+        every platform-suite run and lose the axis entirely.
+        """
+        config = self._config("vm")
+        assert _reported_capability(config, None) == "vm"
+
+    def test_explicit_capability_wins(self) -> None:
+        config = self._config(None)
+        assert _reported_capability(config, "vm") == "vm"
+        assert _reported_capability(self._config("vm"), "kubernetes") == "kubernetes"

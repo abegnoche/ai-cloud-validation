@@ -32,6 +32,8 @@ from isvreporter.platform import get_platform_from_config
 
 from isvctl.cli import setup_logging
 from isvctl.cli.common import get_output_dir, print_error, print_progress, print_step, print_warning
+from isvctl.cli.test import CONFIGS_ROOT
+from isvctl.config.suite_resolution import resolve_suite_name
 from isvctl.orchestrator.loop import Phase
 from isvctl.remote import SCPTransfer, SSHClient, TarArchive
 from isvctl.remote.archive import DEFAULT_EXCLUDES as DEFAULT_ARCHIVE_EXCLUDES
@@ -396,6 +398,9 @@ def run(
                 executed_by="isvctl deploy",
                 ci_reference="local-deployment",
                 isv_software_version=isv_software_version,
+                # deploy has no --capability of its own; the remote `test run`
+                # it invokes is core-only unless the config is a platform suite.
+                suite=resolve_suite_name(list(config_files), CONFIGS_ROOT),
             )
             if not test_run_id:
                 print_warning("Failed to create test run, continuing without upload")
