@@ -117,11 +117,18 @@ def _junitxml_for_discovered_config(junitxml: Path, match: ProviderConfigMatch, 
     return junitxml.with_name(f"{junitxml.stem}-{match.config_path.stem}{junitxml.suffix}")
 
 
-def _human_readable_dry_run(config: RunConfig, capability: str | None) -> str:
+def _human_readable_dry_run(
+    config: RunConfig,
+    capability: str | None,
+    include_labels: list[str] | None = None,
+    exclude_labels: list[str] | None = None,
+) -> str:
     """Render the validation requirement plan without executing lifecycle steps."""
     platform = config.tests.platform if config.tests and config.tests.platform else None
     suite_type = f"platform ({platform})" if platform else "plain"
     context = "not filtered" if capability is None else capability
+    selected_labels = set(include_labels or [])
+    rejected_labels = set(exclude_labels or [])
     validations = config.tests.validations if config.tests else {}
     entries = parse_validations(validations)
 
@@ -131,10 +138,19 @@ def _human_readable_dry_run(config: RunConfig, capability: str | None) -> str:
         f"  Capability: {context}",
         f"  Checks: {len(entries)}",
     ]
+    if selected_labels:
+        lines.append(f"  Labels: {', '.join(sorted(selected_labels))} (all required)")
+    if rejected_labels:
+        lines.append(f"  Excluded labels: {', '.join(sorted(rejected_labels))}")
+
     for entry in entries:
         if capability is not None and not requirements_satisfied(entry.requires, capability):
             requirement = ", ".join(entry.requires)
             lines.append(f"  [SKIP] {entry.name}: requires {requirement} (context: {capability})")
+        elif missing_labels := sorted(selected_labels.difference(entry.labels)):
+            lines.append(f"  [SKIP] {entry.name}: does not match all selected labels: {', '.join(missing_labels)}")
+        elif matched_labels := sorted(rejected_labels.intersection(entry.labels)):
+            lines.append(f"  [SKIP] {entry.name}: excluded by label: {', '.join(matched_labels)}")
         elif entry.requires:
             lines.append(f"  [RUN]  {entry.name}: requires {', '.join(entry.requires)}")
         else:
@@ -300,6 +316,7 @@ def run(
 
     Examples:
         isvctl test run --provider aws --suite k8s
+        isvctl test run --provider aws --suite storage --label min_req
         isvctl test run --provider aws --label network
         isvctl test run -f lab.yaml -f commands.yaml -f suites/k8s.yaml
         isvctl test run -f config.yaml --set context.node_count=8
@@ -322,9 +339,6 @@ def run(
             raise typer.Exit(code=1)
         if config_files:
             print_error("--suite cannot be combined with --config/-f.")
-            raise typer.Exit(code=1)
-        if labels:
-            print_error("--suite cannot be combined with --label/-l; use labels after -- with pytest selection.")
             raise typer.Exit(code=1)
         try:
             selected_suite = resolve_suite(provider, suite, configs_root=CONFIGS_ROOT)
@@ -440,7 +454,7 @@ def run(
         raise typer.Exit(code=1)
 
     if dry_run:
-        typer.echo(_human_readable_dry_run(config, capability_context))
+        typer.echo(_human_readable_dry_run(config, capability_context, labels, exclude_labels))
         if extra_pytest_args:
             print_progress(f"\n--- Extra pytest args ---\n{extra_pytest_args}")
         return

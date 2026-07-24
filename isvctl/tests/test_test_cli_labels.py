@@ -377,6 +377,64 @@ tests:
     assert "[RUN]  VmCheck" in vm_result.stdout
 
 
+def test_suite_and_label_filters_compose(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """A suite selects one lifecycle while labels narrow its checks."""
+    configs_root = tmp_path / "configs"
+    suite_path = configs_root / "suites" / "storage.yaml"
+    suite_path.parent.mkdir(parents=True)
+    suite_path.write_text(
+        """\
+tests:
+  validations:
+    storage:
+      checks:
+        FastCheck:
+          test_id: "N/A"
+          labels: ["storage"]
+        SlowCheck:
+          test_id: "N/A"
+          labels: ["storage", "slow"]
+        DestructiveSlowCheck:
+          test_id: "N/A"
+          labels: ["storage", "slow", "destructive"]
+""",
+        encoding="utf-8",
+    )
+    _write_provider_config(configs_root, "aws", "storage.yaml", "storage.yaml", "storage")
+    _FakeOrchestrator.captured = {}
+    _FakeOrchestrator.calls = []
+    monkeypatch.setattr(test_cli, "CONFIGS_ROOT", configs_root)
+    monkeypatch.setattr(test_cli, "Orchestrator", _FakeOrchestrator)
+
+    command = [
+        "run",
+        "--provider",
+        "aws",
+        "--suite",
+        "storage",
+        "--label",
+        "slow",
+        "--exclude-label",
+        "destructive",
+        "--no-upload",
+    ]
+    run_result = runner.invoke(test_cli.app, command)
+    dry_run_result = runner.invoke(test_cli.app, [*command, "--dry-run"])
+
+    assert run_result.exit_code == 0, run_result.output
+    assert _FakeOrchestrator.captured["include_labels"] == ["slow"]
+    assert _FakeOrchestrator.captured["exclude_labels"] == ["destructive"]
+    assert dry_run_result.exit_code == 0, dry_run_result.output
+    assert "Labels: slow (all required)" in dry_run_result.stdout
+    assert "Excluded labels: destructive" in dry_run_result.stdout
+    assert "[SKIP] FastCheck: does not match all selected labels: slow" in dry_run_result.stdout
+    assert "[RUN]  SlowCheck" in dry_run_result.stdout
+    assert "[SKIP] DestructiveSlowCheck: excluded by label: destructive" in dry_run_result.stdout
+
+
 def test_unknown_option_before_separator_is_rejected(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """Stale flags like `--platform` fail before they can be forwarded to pytest."""
     config = _write_config(tmp_path)
