@@ -6,6 +6,7 @@
 from pathlib import Path
 
 import pytest
+from isvtest.core.resolution import DECLARABLE_CAPABILITIES
 from pydantic import ValidationError
 
 from isvctl.config.merger import merge_yaml_files
@@ -88,13 +89,41 @@ def test_plain_suite_accepts_valid_requires() -> None:
 
 @pytest.mark.parametrize("provider", ["aws", "my-isv"])
 def test_storage_cleanup_steps_have_explicit_capability_gates(provider: str) -> None:
-    """Destructive storage cleanup runs only in the context that owns its resources."""
+    """Destructive storage cleanup runs only in the context that owns its resources.
+
+    Both providers carry the same gates: my-isv is the scaffold ISVs copy, so a
+    reference-only guarantee would teach the wrong lifecycle.
+    """
     config_path = CONFIGS_ROOT / "providers" / provider / "config" / "storage.yaml"
     config = RunConfig.model_validate(merge_yaml_files([str(config_path)]))
     steps = {step.name: step for step in config.get_steps("storage")}
 
     assert steps["teardown_volume"].requires == ["vm", "bare_metal"]
     assert steps["teardown"].requires == ["vm", "bare_metal"]
-    if provider == "aws":
-        assert steps["setup_cluster"].requires == ["kubernetes"]
-        assert steps["teardown_cluster"].requires == ["kubernetes"]
+    assert steps["setup_cluster"].requires == ["kubernetes"]
+    assert steps["teardown_cluster"].requires == ["kubernetes"]
+
+
+@pytest.mark.parametrize("capability", sorted(DECLARABLE_CAPABILITIES))
+def test_my_isv_scaffold_covers_every_declarable_capability(capability: str) -> None:
+    """Every capability an ISV can declare has a my-isv platform suite to copy.
+
+    The UI emits `--suite <capability>` against the default provider, so a
+    missing scaffold config turns a documented command into an error.
+    """
+    resolved = resolve_suite("my-isv", capability, configs_root=CONFIGS_ROOT)
+    assert resolved.platform == capability
+
+
+@pytest.mark.parametrize("provider", ["aws", "my-isv"])
+def test_storage_cluster_fixture_uses_its_own_output_contract(provider: str) -> None:
+    """The storage cluster fixture is not held to the platform `cluster` schema.
+
+    `setup_cluster` auto-detects that schema by name, and it demands
+    cluster_name/node_count - inventory no storage check reads.
+    """
+    config_path = CONFIGS_ROOT / "providers" / provider / "config" / "storage.yaml"
+    config = RunConfig.model_validate(merge_yaml_files([str(config_path)]))
+    steps = {step.name: step for step in config.get_steps("storage")}
+
+    assert steps["setup_cluster"].output_schema == "generic"

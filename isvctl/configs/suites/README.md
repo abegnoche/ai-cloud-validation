@@ -141,13 +141,15 @@ volume. The three test-phase steps all reuse that fixture.
 
 | Step | Phase | Script | Key JSON Fields |
 |------|-------|--------|-----------------|
-| `launch_instance` | setup | `providers/my-isv/scripts/vm/launch_instance.py` | `instance_id`, `state`, `public_ip`, `key_file` (reuses VM script) |
+| `setup_cluster` | setup | `providers/my-isv/scripts/storage/setup_cluster.py` | `kubeconfig_path`, `csi.{block,shared_fs,nfs}_storage_class` (only under `kubernetes`) |
+| `launch_instance` | setup | `providers/my-isv/scripts/vm/launch_instance.py` | `instance_id`, `state`, `public_ip`, `key_file` (reuses VM script; only under `vm`/`bare_metal`) |
 | `create_volume` | setup | `providers/my-isv/scripts/storage/create_volume.py` | `volume_id`, `mount_point`, `sentinel_content`, `operations.{create,attach,format,mount,write_sentinel}` |
 | `snapshot_lifecycle` | test | `providers/my-isv/scripts/storage/snapshot_lifecycle.py` | `volume_id`, `snapshot_id`, `operations.{create_snapshot,restore_volume,verify_data}` (verify_data includes `content_matches`) |
 | `volume_resize` | test | `providers/my-isv/scripts/storage/volume_resize.py` | `volume_id`, `operations.{modify_volume,grow_partition,resize_filesystem,verify_size}` |
 | `volume_persistence` | test | `providers/my-isv/scripts/storage/volume_persistence.py` | `volume_id`, `operations.{stop,start,verify_attached,verify_data}` (verify_data includes `content_matches`) |
 | `teardown_volume` | teardown | `providers/my-isv/scripts/storage/teardown_volume.py` | `resources_deleted`, `message` |
 | `teardown` | teardown | `providers/my-isv/scripts/vm/teardown.py` | `resources_deleted`, `message` (reuses VM script) |
+| `teardown_cluster` | teardown | `providers/my-isv/scripts/storage/teardown_cluster.py` | `resources_deleted`, `message` (only under `kubernetes`; may be a no-op if you reuse a cluster) |
 
 ### Kubernetes (`k8s.yaml`)
 

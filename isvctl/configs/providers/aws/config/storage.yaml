@@ -63,6 +63,11 @@ commands:
         phase: setup
         command: "../scripts/eks/setup.sh"
         requires: [kubernetes]
+        # Same contract as my-isv's stub: kubeconfig + StorageClass names. The
+        # EKS script happens to emit full cluster inventory too, but storage
+        # must not require that of an ISV, so both providers validate the
+        # fixture against its own contract, not the platform `cluster` schema.
+        output_schema: generic
         timeout: 5400
         env:
           TF_AUTO_APPROVE: "true"
