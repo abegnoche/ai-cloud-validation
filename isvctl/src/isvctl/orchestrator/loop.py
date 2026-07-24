@@ -340,11 +340,20 @@ def _apply_capability_step_gates(
     validation_entries: list[ValidationEntry],
     capability: str | None,
 ) -> list[Any]:
-    """Skip a step when every validation bound to it is requirement-filtered."""
+    """Skip a step when its explicit or validation-derived requirements do not match."""
     if capability is None:
         return steps
     gated_steps: list[Any] = []
     for step in steps:
+        explicit_requires = getattr(step, "requires", [])
+        if explicit_requires and not requirements_satisfied(explicit_requires, capability):
+            logger.info(
+                "Skipping step '%s' because it requires capability: %s",
+                step.name,
+                ", ".join(explicit_requires),
+            )
+            gated_steps.append(step.model_copy(update={"skip": True}))
+            continue
         bound_entries = [entry for entry in validation_entries if entry.step == step.name]
         if bound_entries and all(not requirements_satisfied(entry.requires, capability) for entry in bound_entries):
             logger.info("Skipping step '%s' because all bound validations are capability-filtered", step.name)

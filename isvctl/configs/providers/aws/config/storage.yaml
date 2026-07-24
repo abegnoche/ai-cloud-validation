@@ -62,6 +62,7 @@ commands:
       - name: setup_cluster
         phase: setup
         command: "../scripts/eks/setup.sh"
+        requires: [kubernetes]
         timeout: 5400
         env:
           TF_AUTO_APPROVE: "true"
@@ -234,6 +235,7 @@ commands:
       - name: teardown_cluster
         phase: teardown
         command: "../scripts/eks/teardown.sh"
+        requires: [kubernetes]
         timeout: 1800
         env:
           TF_AUTO_APPROVE: "true"

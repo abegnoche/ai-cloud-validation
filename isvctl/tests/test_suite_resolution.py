@@ -8,12 +8,15 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
+from isvctl.config.merger import merge_yaml_files
 from isvctl.config.schema import RunConfig
 from isvctl.config.suite_resolution import (
     SuiteResolutionError,
     parse_capability,
     resolve_suite,
 )
+
+CONFIGS_ROOT = Path(__file__).resolve().parents[1] / "configs"
 
 
 def _write_catalog(root: Path) -> None:
@@ -81,3 +84,13 @@ def test_plain_suite_accepts_valid_requires() -> None:
     """A well-formed requires list passes schema validation."""
     validation = {"sample": {"checks": {"PlainCheck": {"requires": ["vm", "bare_metal"]}}}}
     RunConfig.model_validate({"tests": {"validations": validation}})
+
+
+def test_aws_storage_eks_lifecycle_requires_kubernetes() -> None:
+    """Both sides of the destructive EKS lifecycle carry the same capability gate."""
+    config_path = CONFIGS_ROOT / "providers" / "aws" / "config" / "storage.yaml"
+    config = RunConfig.model_validate(merge_yaml_files([str(config_path)]))
+    steps = {step.name: step for step in config.get_steps("storage")}
+
+    assert steps["setup_cluster"].requires == ["kubernetes"]
+    assert steps["teardown_cluster"].requires == ["kubernetes"]

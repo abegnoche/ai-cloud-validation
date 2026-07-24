@@ -32,6 +32,7 @@ from isvctl.orchestrator.context import Context
 from isvctl.orchestrator.loop import (
     Orchestrator,
     Phase,
+    _apply_capability_step_gates,
     _entries_missing_from_junit,
     _merge_junit_xmls,
     _write_terminal_junit_xml,
@@ -60,6 +61,20 @@ done
 echo "AWS_SECRET_ACCESS_KEY=super-secret" >&2
 exit 7
 """
+
+
+def test_explicit_step_requires_gate_unbound_lifecycle_steps() -> None:
+    """An unbound teardown step is skipped when its explicit capability does not match."""
+    steps = [
+        StepConfig(name="setup_cluster", command="setup", phase="setup", requires=["kubernetes"]),
+        StepConfig(name="teardown_cluster", command="teardown", phase="teardown", requires=["kubernetes"]),
+    ]
+
+    vm_steps = _apply_capability_step_gates(steps, [], "vm")
+    kubernetes_steps = _apply_capability_step_gates(steps, [], "kubernetes")
+
+    assert all(step.skip for step in vm_steps)
+    assert all(not step.skip for step in kubernetes_steps)
 
 
 def test_python_script_path_falls_back_to_current_working_directory(

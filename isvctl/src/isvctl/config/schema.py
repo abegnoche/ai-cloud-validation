@@ -25,7 +25,7 @@ JSON that matches these schemas, which then become the inventory for tests.
 from typing import Any
 
 from isvtest.core.resolution import DECLARABLE_CAPABILITIES, parse_validations
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class LabConfig(BaseModel):
@@ -87,6 +87,12 @@ class StepConfig(BaseModel):
     env: dict[str, str] = Field(default_factory=dict, description="Additional environment variables")
     working_dir: str | None = Field(default=None, description="Working directory for command execution")
     skip: bool = Field(default=False, description="Skip this step")
+    requires: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Capability contexts allowed to run this step. Empty delegates capability gating to bound validations."
+        ),
+    )
     requires_available_validations: list[str] = Field(
         default_factory=list,
         description=(
@@ -107,6 +113,16 @@ class StepConfig(BaseModel):
         default_factory=list,
         description="Additional argument patterns to mask in logs (e.g., ['--my-secret'])",
     )
+
+    @field_validator("requires")
+    @classmethod
+    def validate_requires(cls, requires: list[str]) -> list[str]:
+        """Keep step requirements in the same vocabulary as validation requirements."""
+        if any(requirement not in DECLARABLE_CAPABILITIES for requirement in requires):
+            raise ValueError(f"requires must contain only: {', '.join(sorted(DECLARABLE_CAPABILITIES))}")
+        if len(requires) != len(set(requires)):
+            raise ValueError("requires must not contain duplicates")
+        return requires
 
 
 class PlatformCommands(BaseModel):
