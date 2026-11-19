@@ -2160,7 +2160,7 @@ domains:
                 test_id: SDN29-05
                 actor: operator
                 status: pending
-                notes: "Ethernet and InfiniBand variants share this test ID"
+                notes: "Ethernet and InfiniBand variants share this test ID. Complements K8S43-08, which checks the GPU Operator side of GPUDirect RDMA over DMA-BUF without a bandwidth threshold."
       - name: Metadata Service
         capabilities:
           - description: shared service source of truth for resource metadata such as nodes, GPUs, topology, and ownership. Enables scheduling, automation, and lifecycle management.
@@ -3927,7 +3927,7 @@ domains:
                 actor: operator
                 status: pending
                 notes: GPUOP-05, test set TS1005
-              - summary: Verify GPUDirect RDMA bandwidth between GPU nodes
+              - summary: Verify the GPU Operator enables GPUDirect RDMA (nvidia_peermem) between two GPU nodes
                 labels:
                   - gpu
                   - gpu_operator_certification
@@ -3945,7 +3945,7 @@ domains:
                 actor: operator
                 status: pending
                 notes: GPUOP-06, test set TS1006
-              - summary: Verify GPUDirect RDMA bandwidth over DMA-BUF between GPU nodes
+              - summary: Verify the GPU Operator enables GPUDirect RDMA over DMA-BUF between two GPU nodes
                 labels:
                   - gpu
                   - gpu_operator_certification
@@ -3962,7 +3962,7 @@ domains:
                 test_id: K8S43-08
                 actor: operator
                 status: pending
-                notes: GPUOP-07, test set TS1007
+                notes: "GPUOP-07, test set TS1007. Complements SDN29-05: passes when an ib_write_bw DMA-BUF transfer between two GPU nodes completes over host networking, with no bandwidth threshold."
               - summary: Verify GDRCopy through the GPU Operator
                 labels:
                   - gpu

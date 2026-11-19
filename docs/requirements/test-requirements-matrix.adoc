@@ -2913,7 +2913,7 @@ docs/requirements/test-requirements-matrix.yaml. Run `make plan` to regenerate.
 | [[K8S43-07]]K8S43-07
 | Workload Orchestration
 | Managed Kubernetes Control Plane
-| Verify GPUDirect RDMA bandwidth between GPU nodes
+| Verify the GPU Operator enables GPUDirect RDMA (nvidia_peermem) between two GPU nodes
 | K8S43
 | reference
 | full
@@ -2922,7 +2922,7 @@ docs/requirements/test-requirements-matrix.yaml. Run `make plan` to regenerate.
 | K8S43-07
 | Workload Orchestration
 | Managed Kubernetes Control Plane
-| Verify GPUDirect RDMA bandwidth between GPU nodes
+| Verify the GPU Operator enables GPUDirect RDMA (nvidia_peermem) between two GPU nodes
 | ENT-REQ-101
 | gpu-operator-prd
 | partial
@@ -2931,7 +2931,7 @@ docs/requirements/test-requirements-matrix.yaml. Run `make plan` to regenerate.
 | K8S43-07
 | Workload Orchestration
 | Managed Kubernetes Control Plane
-| Verify GPUDirect RDMA bandwidth between GPU nodes
+| Verify the GPU Operator enables GPUDirect RDMA (nvidia_peermem) between two GPU nodes
 | ENT-REQ-105
 | gpu-operator-prd
 | partial
@@ -2940,7 +2940,7 @@ docs/requirements/test-requirements-matrix.yaml. Run `make plan` to regenerate.
 | [[K8S43-08]]K8S43-08
 | Workload Orchestration
 | Managed Kubernetes Control Plane
-| Verify GPUDirect RDMA bandwidth over DMA-BUF between GPU nodes
+| Verify the GPU Operator enables GPUDirect RDMA over DMA-BUF between two GPU nodes
 | K8S43
 | reference
 | full
@@ -2949,7 +2949,7 @@ docs/requirements/test-requirements-matrix.yaml. Run `make plan` to regenerate.
 | K8S43-08
 | Workload Orchestration
 | Managed Kubernetes Control Plane
-| Verify GPUDirect RDMA bandwidth over DMA-BUF between GPU nodes
+| Verify the GPU Operator enables GPUDirect RDMA over DMA-BUF between two GPU nodes
 | ENT-REQ-101
 | gpu-operator-prd
 | partial
@@ -2958,7 +2958,7 @@ docs/requirements/test-requirements-matrix.yaml. Run `make plan` to regenerate.
 | K8S43-08
 | Workload Orchestration
 | Managed Kubernetes Control Plane
-| Verify GPUDirect RDMA bandwidth over DMA-BUF between GPU nodes
+| Verify the GPU Operator enables GPUDirect RDMA over DMA-BUF between two GPU nodes
 | ENT-REQ-105
 | gpu-operator-prd
 | partial

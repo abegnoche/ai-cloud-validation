@@ -2074,7 +2074,7 @@ mappings:
       - req_id: ENT-REQ-105
         source: gpu-operator-prd
         coverage: partial
-    annotations: 'ENT-REQ-105: the binary restores the settings after the test set; a Job stopped at job_timeout may not be restored.'
+    annotations: 'ENT-REQ-105: the binary restores the settings after the test set; a Job stopped at job_timeout may not be restored. Complements SDN29-05: this checks that the GPU Operator stack can do GPUDirect RDMA over DMA-BUF (the transfer completes over host networking, no bandwidth threshold); SDN29-05 checks DMA-BUF bandwidth against the Launch Kit reference minimum on the Network Operator fabric.'
     notes: ''
   - test_id: K8S43-09
     requirements:
@@ -2837,7 +2837,7 @@ mappings:
       - req_id: ENT-REQ-008
         source: network-operator-prd
         coverage: partial
-    annotations: 'The requirement asks for peer-to-peer connectivity; this test reports bandwidth.'
+    annotations: 'The requirement asks for peer-to-peer connectivity; this test reports bandwidth. Complements K8S43-08, which checks the GPU Operator side of GPUDirect RDMA over DMA-BUF without a bandwidth threshold.'
     notes: ''
   - test_id: K8S29-01
     requirements:

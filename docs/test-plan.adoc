@@ -2297,7 +2297,7 @@ a|
 |
 | gpu, kubernetes, network, network_operator, slow
 | operator
-| Ethernet and InfiniBand variants share this test ID
+| Ethernet and InfiniBand variants share this test ID. Complements K8S43-08, which checks the GPU Operator side of GPUDirect RDMA over DMA-BUF without a bandwidth threshold.
 | P0
 a|
 | LimitedEnv
@@ -4288,7 +4288,7 @@ a| https://github.com/dsx-ai-factory/ai-cloud-validation/issues/758[#758]
 | LimitedEnv
 |
 |
-| Verify GPUDirect RDMA bandwidth between GPU nodes
+| Verify the GPU Operator enables GPUDirect RDMA (nvidia_peermem) between two GPU nodes
 | pending
 |
 
@@ -4297,13 +4297,13 @@ a| https://github.com/dsx-ai-factory/ai-cloud-validation/issues/758[#758]
 | https://github.com/dsx-ai-factory/ai-cloud-validation/issues/758[#758]
 | gpu, gpu_operator_certification, kubernetes, network, slow
 | operator
-| GPUOP-07, test set TS1007
+| GPUOP-07, test set TS1007. Complements SDN29-05: passes when an ib_write_bw DMA-BUF transfer between two GPU nodes completes over host networking, with no bandwidth threshold.
 | P0
 a| https://github.com/dsx-ai-factory/ai-cloud-validation/issues/758[#758]
 | LimitedEnv
 |
 |
-| Verify GPUDirect RDMA bandwidth over DMA-BUF between GPU nodes
+| Verify the GPU Operator enables GPUDirect RDMA over DMA-BUF between two GPU nodes
 | pending
 |
 

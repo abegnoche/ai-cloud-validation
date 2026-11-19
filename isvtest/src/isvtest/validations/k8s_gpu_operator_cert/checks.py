@@ -153,9 +153,12 @@ class K8sGpuOperatorMigMixed(_CertificationTestSet):
 
 
 class K8sGpuOperatorGpuDirectRdma(_CertificationTestSet):
-    """TS1006: GPUDirect RDMA between two GPU nodes; skips without RDMA hardware."""
+    """TS1006: GPUDirect RDMA through nvidia_peermem between two GPU nodes; skips without RDMA hardware."""
 
-    description: ClassVar[str] = "Verify GPUDirect RDMA bandwidth between GPU nodes (self-certification TS1006)"
+    description: ClassVar[str] = (
+        "Verify the GPU Operator enables GPUDirect RDMA (nvidia_peermem) between two GPU nodes "
+        "(self-certification TS1006)"
+    )
     test_set: ClassVar[str] = "TS1006"
 
 
@@ -163,7 +166,7 @@ class K8sGpuOperatorGpuDirectRdmaDmaBuf(_CertificationTestSet):
     """TS1007: GPUDirect RDMA over DMA-BUF between two GPU nodes; skips without RDMA hardware."""
 
     description: ClassVar[str] = (
-        "Verify GPUDirect RDMA bandwidth over DMA-BUF between GPU nodes (self-certification TS1007)"
+        "Verify the GPU Operator enables GPUDirect RDMA over DMA-BUF between two GPU nodes (self-certification TS1007)"
     )
     test_set: ClassVar[str] = "TS1007"
 
