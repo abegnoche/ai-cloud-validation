@@ -20,7 +20,11 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import cast
 
-from isvtest.testing.subtests import SubTestReport, _inject_subtests_into_junit
+from isvtest.testing.subtests import (
+    SubTestReport,
+    _inject_pass_messages_into_junit,
+    _inject_subtests_into_junit,
+)
 
 
 def _parent_junit(tmp_path: Path, parent_name: str, *, reported_tests: int = 1) -> Path:
@@ -43,6 +47,7 @@ def _stub_report(
     failed: bool = False,
     longrepr: object | None = None,
     duration: float = 0.0,
+    message: str | None = None,
 ) -> SimpleNamespace:
     """Build the minimum surface that ``_inject_subtests_into_junit`` reads.
 
@@ -55,7 +60,7 @@ def _stub_report(
         failed=failed,
         skipped=skipped,
         longrepr=longrepr,
-        context=SimpleNamespace(msg=subtest_msg),
+        context=SimpleNamespace(msg=subtest_msg, message=message),
     )
 
 
@@ -110,3 +115,102 @@ def test_injected_subtests_reconcile_precounted_junit_totals(tmp_path: Path) -> 
     assert suite.get("failures") == "1"
     assert suite.get("errors") == "0"
     assert suite.get("skipped") == "0"
+
+
+def _case(junit: Path, name: str) -> ET.Element:
+    """The testcase named *name* in *junit*."""
+    return next(c for c in ET.parse(junit).iter("testcase") if c.get("name") == name)
+
+
+def test_passed_subtest_message_goes_to_system_out(tmp_path: Path) -> None:
+    """A passed subtest's message (e.g. its measured numbers) is kept as <system-out>."""
+    junit = _parent_junit(tmp_path, "ParentCheck")
+    report = _stub_report("::ParentCheck", "bandwidth", message="190.8 MB/s >= floor 100.0 MB/s")
+
+    _inject_subtests_into_junit(junit, cast(list[SubTestReport], [report]))
+
+    case = _case(junit, "ParentCheck::bandwidth")
+    system_out = case.find("system-out")
+    assert system_out is not None and system_out.text == "190.8 MB/s >= floor 100.0 MB/s"
+    assert ET.parse(junit).getroot().get("tests") == "2"
+
+
+def test_passed_subtest_without_message_has_no_system_out(tmp_path: Path) -> None:
+    """No message, no element: the passed subtest stays an empty testcase."""
+    junit = _parent_junit(tmp_path, "ParentCheck")
+
+    _inject_subtests_into_junit(junit, cast(list[SubTestReport], [_stub_report("::ParentCheck", "probe")]))
+
+    assert list(_case(junit, "ParentCheck::probe")) == []
+
+
+def test_failed_and_skipped_subtests_do_not_get_system_out(tmp_path: Path) -> None:
+    """A failed or skipped subtest reports as before: its message is in <failure>/<skipped> only."""
+    junit = _parent_junit(tmp_path, "ParentCheck")
+    reports = [
+        _stub_report("::ParentCheck", "broken", failed=True, longrepr="probe failed", message="probe failed"),
+        _stub_report("::ParentCheck", "off", skipped=True, longrepr=("f", 0, "no floor"), message="no floor"),
+    ]
+
+    _inject_subtests_into_junit(junit, cast(list[SubTestReport], reports))
+
+    assert [child.tag for child in _case(junit, "ParentCheck::broken")] == ["failure"]
+    assert [child.tag for child in _case(junit, "ParentCheck::off")] == ["skipped"]
+
+
+def test_parent_pass_message_goes_to_system_out(tmp_path: Path) -> None:
+    """A passing check's message reaches its (normalized) testcase as <system-out>."""
+    junit = _parent_junit(tmp_path, "StoragePerfSweepCheck")
+
+    _inject_pass_messages_into_junit(
+        junit, {"tests/test_validations.py::test_validation[StoragePerfSweepCheck]": "Sweep completed"}
+    )
+
+    system_out = _case(junit, "StoragePerfSweepCheck").find("system-out")
+    assert system_out is not None and system_out.text == "Sweep completed"
+
+
+def test_parent_pass_message_skips_a_testcase_that_did_not_pass(tmp_path: Path) -> None:
+    """A testcase that failed or was skipped keeps only its own outcome element."""
+    junit = _parent_junit(tmp_path, "ParentCheck")
+    tree = ET.parse(junit)
+    ET.SubElement(next(tree.iter("testcase")), "skipped", attrib={"message": "skipped"})
+    tree.write(junit, encoding="utf-8", xml_declaration=True)
+
+    _inject_pass_messages_into_junit(junit, {"::test_validation[ParentCheck]": "should not appear"})
+
+    assert [child.tag for child in _case(junit, "ParentCheck")] == ["skipped"]
+
+
+def test_system_out_drops_characters_xml_does_not_allow(tmp_path: Path) -> None:
+    """An ANSI-coloured message is written without its control characters, so the file still parses."""
+    junit = _parent_junit(tmp_path, "ParentCheck")
+    report = _stub_report("::ParentCheck", "probe", message="\x1b[32mOK\x1b[0m caf\u00e9")
+
+    _inject_subtests_into_junit(junit, cast(list[SubTestReport], [report]))
+    _inject_pass_messages_into_junit(junit, {"::test_validation[ParentCheck]": "\x1b[1mdone\x1b[0m"})
+
+    assert _case(junit, "ParentCheck::probe").findtext("system-out") == "[32mOK[0m caf\u00e9"
+    assert _case(junit, "ParentCheck").findtext("system-out") == "[1mdone[0m"
+
+
+def test_parent_pass_message_keeps_a_parameter_id_with_double_colons(tmp_path: Path) -> None:
+    """A variant name containing "::" still matches its normalized testcase."""
+    junit = _parent_junit(tmp_path, "K8sNodeCountCheck-rw::4k")
+
+    _inject_pass_messages_into_junit(
+        junit, {"tests/test_validations.py::test_validation[K8sNodeCountCheck-rw::4k]": "4 nodes"}
+    )
+
+    assert _case(junit, "K8sNodeCountCheck-rw::4k").findtext("system-out") == "4 nodes"
+
+
+def test_parent_pass_message_ignores_brackets_in_the_file_path(tmp_path: Path) -> None:
+    """A "[" in a directory name is not the parameter id: the message still finds its testcase."""
+    junit = _parent_junit(tmp_path, "StoragePerfSweepCheck")
+
+    _inject_pass_messages_into_junit(
+        junit, {"tests/[gpu]/test_validations.py::test_validation[StoragePerfSweepCheck]": "Sweep completed"}
+    )
+
+    assert _case(junit, "StoragePerfSweepCheck").findtext("system-out") == "Sweep completed"

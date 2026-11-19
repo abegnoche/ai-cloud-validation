@@ -1587,6 +1587,15 @@ docs/requirements/test-requirements-matrix.yaml. Run `make plan` to regenerate.
 | full
 |
 
+| [[HSS02-02]]HSS02-02
+| Data Services
+| Storage Performance
+| Verify a storage-scale-test IO sweep completes with complete write and read results that meet the configured floors
+| HSS02
+| offtake
+| partial
+|
+
 | [[HSS03-01]]HSS03-01
 | Data Services
 | SDS Controller

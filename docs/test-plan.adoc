@@ -2687,7 +2687,7 @@ a| https://github.com/dsx-ai-factory/ai-cloud-validation/issues/215[#215]
 | pending
 |
 
-.57+| Data Services
+.58+| Data Services
 .34+| SDS Controller
 .19+| Manages software-defined storage services and policies. Orchestrates provisioning, tiers, and resiliency.
 .19+| AWS: EBS + FSx backend control planes
@@ -3441,6 +3441,24 @@ a| https://github.com/dsx-ai-factory/ai-cloud-validation/issues/504[#504]
 |
 | Verify required vendor/DKMS kernel modules are installed on all GPU and CPU nodes
 | published
+|
+
+| Storage Performance
+| IO benchmark sweep (storage-scale-test) against an existing provider claim, reporting real bandwidth, IOPS and latency
+| storage-scale-test elbencho sweep on Kubernetes
+| [[HSS02-02]]HSS02-02
+| HSS02
+|
+| kubernetes, offtake, performance, storage
+| tenant
+| Partial HSS02 coverage: one test with a subtest per stage - the sweep across the selected nodes completed, complete measured write and read bandwidth and IOPS (latency is reported, not checked), and bandwidth and IOPS against configured floors (a floor of 0 only reports the measured numbers).
+| P1
+a|
+|
+|
+|
+| Verify a storage-scale-test IO sweep completes with complete write and read results that meet the configured floors
+| pending
 |
 
 | Object Storage Service

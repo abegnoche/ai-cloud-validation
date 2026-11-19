@@ -23,8 +23,9 @@
 # right fields, the validations pass regardless of which cloud you use.
 #
 # Scope: persistent block storage (EBS-style volumes), home-directory
-# NFS storage, and high-speed storage (SDS controller + parallel file
-# system). Object storage and other checks can land here later.
+# NFS storage, high-speed storage (SDS controller + parallel file
+# system), and storage performance (opt-in; see the Performance group).
+# Object storage and other checks can land here later.
 # High-speed check classes / test_ids keep the HSS* / HSS## naming from
 # the offtake High-Speed Storage requirement family
 # (docs/requirements/offtake-requirements.md).
@@ -547,6 +548,46 @@ tests:
           # tests_subdir: ""  # optional: scope to a single tests/ subdir (e.g. "chmod")
           namespace_prefix: "isvtest-fs-posix"
           timeout: 3600
+
+    # ─── Performance (storage-scale-test sweep) ──────────────────────
+    # Bound to steps that only an opt-in command overlay supplies (my-isv:
+    # config/overlays/storage-perf.yaml), so a plain storage run skips them as
+    # step_not_configured and needs no performance inputs. Load the overlay after
+    # the provider's storage.yaml and select --label performance. The sweep runs
+    # storage-scale-test (vendored by `make vendor-storage-scale-test`) through the
+    # shared scripts in ../shared/storage/perf/ on an existing claim the provider
+    # names. A pass means the sweep completed, reported real numbers and met the
+    # floors; a floor of 0 (the default) is no floor, so its subtest only reports
+    # the measured numbers.
+    # HSS02-02 maps to the High-Speed Storage requirement HSS02 (performance) in
+    # docs/references/requirements-for-ai-clouds-v2.4.md.
+    # One sweep, one test: a class (validations/storage_perf.py) that reports each stage as
+    # a subtest - sweep_completed (from the run step's result), results_present,
+    # bandwidth_meets_min and iops_meets_min - with the measured numbers in each.
+    perf_sweep:
+      step: evaluate_storage_test
+      checks:
+        StoragePerfSweepCheck:
+          test_id: "HSS02-02"
+          labels: ["kubernetes", "offtake", "performance", "storage"]
+          requires: [kubernetes]
+
+    # Teardown, not a requirement (test_id N/A, like VolumeDeletedCheck): bound to the
+    # teardown step (a later phase than the sweep test), it reports whether the sweep was
+    # released whoever released it, including when run_storage_test was killed and
+    # printed no output.
+    perf_release:
+      step: release_storage_test
+      checks:
+        StoragePerfSweepReleasedCheck:
+          test_id: "N/A"
+          labels: ["kubernetes", "performance", "storage"]
+          requires: [kubernetes]
+          description: "Check the sweep released its Lease, coordinator Job and worker DaemonSet"
+          compose:
+            - FieldValueCheck:
+                field: "released"
+                expected: true
 
     # ─── Teardown tests ──────────────────────────────────────────────
     teardown_checks:
