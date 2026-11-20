@@ -30,6 +30,44 @@ Workflow:
 > attached to a milestone. The file you are reading now is the canonical
 > per-tag changelog.
 
+## [1.1.0] - 2026-11-20
+
+### Added
+
+- **GPU Operator self-certification** ([#759](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/759))
+  Enable `tests.settings.gpu_operator_certification.enabled` to run nine Kubernetes checks (K8S43-01 through K8S43-09) and see individual test results for features including driver updates, MIG, and GPUDirect RDMA.
+- **Configurable concurrency for Kubernetes conformance tests** ([#773](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/773))
+  Set `e2e_concurrency` to a positive integer to run CNCF conformance tests in parallel at a level that fits the cluster's pod capacity.
+- **Storage performance checks for shared Kubernetes volumes** ([#772](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/772))
+  Opt-in check HSS02-02 benchmarks an existing ReadWriteMany claim, reports peak bandwidth, peak IOPS, and lowest average latency, and can enforce minimum bandwidth and IOPS.
+- **vCluster provider** ([#414](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/414))
+  The registry now includes the vCluster Labs provider for the Kubernetes and control-plane suites on tenants with dedicated GPU nodes, available through `isvctl provider fetch vcluster`.
+- **Network isolation and allow-rule approval checks** ([#755](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/755), [#753](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/753))
+  SEC30-02 verifies that segments within one tenant block unauthorized traffic while an allowed connection succeeds, and SEC30-03 checks that a sampled allow rule has an owner and a current approval covering its exact traffic scope.
+- **Read-only lab access check** ([#770](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/770))
+  Run `isvctl doctor --lab-id N` before uploading results to verify that your credentials can obtain a token with upload scopes and read the selected lab.
+
+### Changed
+
+- **ISV Lab Service authentication** ([#770](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/770))
+  Token requests now require an HTTPS issuer except on loopback hosts, reject redirects to protect credentials, and report authentication failures with a concise error.
+- **Shorter doctor reports** ([#770](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/770))
+  `isvctl doctor` now hides skipped checks in terminal output by default, and `-v` shows them.
+- **Offtake requirements updated to v2.4** ([#751](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/751))
+  The catalog adds operational requirements and assigns K8S32 to Kubernetes API Priority and Fairness, moving the NIM Helm check to K8S42-01 and retaining K8S32-01 as its legacy ID.
+
+### Fixed
+
+- **Baseline subnet validation for single-zone deployments** ([#752](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/752))
+  Single-zone deployments can use `--exclude-label multi_az` to skip the separate zone-distribution check while still verifying subnet creation, availability, routing, and count.
+- **Certificate trust after the eMudhra compromise** ([#754](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/754))
+  The workspace now requires uv 0.13.5 or later and certifi 2026.10.23 or later to remove affected certificate authorities from their trust stores.
+
+### Internal
+
+- Update documentation links, schema identifiers, and code-owner review assignments after the move to `dsx-ai-factory` ([#762](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/762), [#765](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/765), [#768](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/768)).
+- Pin the CI checkout action by commit, scan the full reachable history for secrets, and publish Pulse and CodeQL findings to GitHub's Security tab ([#766](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/766), [#767](https://github.com/dsx-ai-factory/ai-cloud-validation/pull/767)).
+
 ## [1.0.0] - 2026-10-15
 
 ### Added
