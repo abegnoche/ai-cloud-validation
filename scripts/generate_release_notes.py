@@ -88,8 +88,9 @@ ISSUE_CLOSER_FIELDS = """
 """
 
 # Release mechanics carry no user-visible change, matching the CHANGELOG prompt's
-# instruction to skip the bump commit.
-BUMP_TITLE_PREFIX = "chore: update package versions"
+# instruction to skip the bump commit. Release PRs are titled either
+# "chore: update package versions to X.Y.Z" or "chore: X.Y.Z release".
+BUMP_TITLE = re.compile(r"^chore: (?:update package versions\b|v?\d+\.\d+\.\d+\S* release\b)")
 
 # Conventional-commit prefix, e.g. "fix(breakfix): ..." or "docs: ...".
 CONVENTIONAL_TITLE = re.compile(r"^(?P<type>[a-z]+)(?:\((?P<scope>[^)]+)\))?!?:")
@@ -463,7 +464,7 @@ def generate_markdown(
         lines.append(milestone.description)
         lines.append("")
 
-    filtered_issues = [i for i in issues if not i.title.startswith(BUMP_TITLE_PREFIX)]
+    filtered_issues = [i for i in issues if not BUMP_TITLE.match(i.title)]
     if exclude_draft:
         filtered_issues = [i for i in filtered_issues if not i.draft]
 
